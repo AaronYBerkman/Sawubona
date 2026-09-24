@@ -20,6 +20,7 @@
 // embeddings through this very code, not a copy of it.
 
 import { toTensor } from './keypoints.js';
+import { wantsExtraViews } from './device.js';
 import { normaliseClip, resample, FRAME_DIM } from './holistic.js';
 
 const ORT_URL = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.mjs';
@@ -58,22 +59,28 @@ export function loadEncoders(onProgress = () => {}) {
     ort.env.wasm.numThreads = 1;
     const options = { executionProviders: ['wasm'], graphOptimizationLevel: 'all' };
 
-    const names = Object.keys(SIGNCLIP);
-    const total = OPENHANDS.length + names.length;
+    // The first SignCLIP is required; the others are extra views that load
+    // after the app is ready and join the ranking when they arrive, and phones
+    // skip them (src/device.js).
+    const [first, ...extra] = Object.keys(SIGNCLIP);
+    const total = OPENHANDS.length + 1;
     const openhands = [];
     for (let i = 0; i < OPENHANDS.length; i++) {
       onProgress(`Loading the sign models (${i + 1} of ${total})`);
       openhands.push(await ort.InferenceSession.create(OPENHANDS[i], options));
     }
-    const signclip = {};
-    for (let i = 0; i < names.length; i++) {
-      onProgress(`Loading the sign models (${OPENHANDS.length + i + 1} of ${total}, 87 MB)`);
-      try {
-        signclip[names[i]] = await ort.InferenceSession.create(SIGNCLIP[names[i]], options);
-      } catch (err) {
-        if (i === 0) throw err;          // an extra view that fails to load is left out
-        console.warn(`SignCLIP ${names[i]} not loaded:`, err);
-      }
+    onProgress(`Loading the sign models (${total} of ${total}, 87 MB)`);
+    const signclip = { [first]: await ort.InferenceSession.create(SIGNCLIP[first], options) };
+    if (wantsExtraViews()) {
+      (async () => {
+        for (const name of extra) {
+          try {
+            signclip[name] = await ort.InferenceSession.create(SIGNCLIP[name], options);
+          } catch (err) {
+            console.warn(`SignCLIP ${name} not loaded:`, err);   // an extra view that fails is left out
+          }
+        }
+      })();
     }
     return { ort, openhands, signclip };
   })();

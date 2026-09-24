@@ -4,8 +4,29 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sawubona — SASL practice</title>
-<meta name="description" content="Practise South African Sign Language with your webcam: signs, fingerspelling and a dictionary. Everything runs on this computer." />
+<meta name="description" content="Practise South African Sign Language with your camera: signs, fingerspelling, sentences and a dictionary. Everything runs on your device." />
 <meta name="color-scheme" content="light dark" />
+<!-- Installable (Add to Home Screen) and a card when the link is shared -->
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="assets/brand/icon.svg" type="image/svg+xml" />
+<link rel="icon" href="assets/brand/icon-192.png" type="image/png" sizes="192x192" />
+<link rel="apple-touch-icon" href="assets/brand/icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Sawubona" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="theme-color" content="#f4efe3" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1b231d" media="(prefers-color-scheme: dark)" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Sawubona" />
+<meta property="og:title" content="Sawubona — practise South African Sign Language" />
+<meta property="og:description" content="Sign to your camera and it tells you whether you got it: 1,858 SASL signs, fingerspelling and sentences. Free, in the browser, and nothing leaves your device." />
+<meta property="og:url" content="https://aaronyberkman.github.io/Sawubona/" />
+<meta property="og:image" content="https://aaronyberkman.github.io/Sawubona/assets/brand/card.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Sawubona: an ink protea beside the words Practise South African Sign Language with your camera." />
+<meta name="twitter:card" content="summary_large_image" />
 <script>
   // ?theme=dark|light wins; otherwise the choice made with the footer switch; otherwise the system.
   (function () {
@@ -484,8 +505,8 @@
               <li><b>U, V, R</b> — two fingers up: together, apart, or crossed.</li>
               <li><b>G and H</b> — pointing sideways with one finger, or with two.</li>
               <li><b>P and Q</b> — the K hand and the G hand, turned to point down.</li>
-              <li><b>J and Z</b> are drawn in the air. They are movements, not shapes, so the camera cannot read
-                them; in <em>Spell a word</em> they are skipped for you.</li>
+              <li><b>J and Z</b> are drawn in the air: the I hand draws a J, the index finger a Z. The camera
+                reads them from the fingertip's path, not a held shape, so draw them clearly and not too fast.</li>
             </ul>
           </div>
         </div>

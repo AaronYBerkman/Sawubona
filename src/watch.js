@@ -26,22 +26,40 @@ export function replayPack() {
   return loadReplay();
 }
 
-/** { frames, fps } for a sign's first reference clip, or null when there is no drawing. */
+let review = null;
+
+/**
+ * The drawings checked by eye in review.html, as committed in
+ * data/clip-review.json: the set of clip files flagged as badly tracked.
+ */
+export function flaggedClips() {
+  review ??= fetch(new URL('../data/clip-review.json', import.meta.url))
+    .then((r) => (r.ok ? r.json() : {}))
+    .catch(() => ({}))
+    .then((j) => new Set(j.flagged ?? []));
+  return review;
+}
+
+const sourceOf = (file) => (/\[nid\d+\]/i.test(file || '') ? 'NID' : 'Real SASL');
+
+/**
+ * { frames, fps, source, url, variants } for one of a sign's reference clips,
+ * or null when there is no drawing. Variants flagged in review.html are left
+ * out, so a sign whose first clip tracked badly shows its next one, and a sign
+ * with no good clip shows none (the page links the video instead).
+ */
 export async function referenceClip(label, variant = 0) {
-  const replay = await loadReplay();
-  if (!(await replay.ready(label, variant))) return null;
-  const frames = replay.clipFrames(label, variant);
-  const index = replay.indexOf(label, variant);
-  const info = replay.clips[index];
-  const nid = /\[nid\d+\]/i.test(info?.file || '');
-  const id = /\[(\d+)\]/.exec(info?.file || '')?.[1];
+  const [replay, flagged] = await Promise.all([loadReplay(), flaggedClips()]);
+  const usable = replay.variants(label).filter((i) => !flagged.has(replay.clips[i].file));
+  if (!usable.length) return null;
+  const info = replay.clips[usable[Math.min(variant, usable.length - 1)]];
+  if (!(await replay.ready(info.file))) return null;
+  const frames = replay.clipFrames(info.file);
+  const id = /\[(\d+)\]/.exec(info.file)?.[1];
   return frames && frames.length > 1 ? {
-    frames, fps: replay.fps, source: nid ? 'NID' : 'Real SASL',
+    frames, fps: replay.fps, source: sourceOf(info.file),
     url: id ? `https://www.realsasl.com/?vid=${id}` : null,
-    variants: replay.variants(label).map((i) => ({
-      file: replay.clips[i].file,
-      source: /\[nid\d+\]/i.test(replay.clips[i].file) ? 'NID' : 'Real SASL',
-    })),
+    variants: usable.map((i) => ({ file: replay.clips[i].file, source: sourceOf(replay.clips[i].file) })),
   } : null;
 }
 

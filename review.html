@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Clip review · Sawubona</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="assets/brand/icon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..800,0..100;1,9..144,400..600,0..100&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..600&display=swap" />
+<link rel="stylesheet" href="assets/art/paper.css" />
+<style>
+  body { margin: 0; min-height: 100vh; background: var(--j-desk, #e9e3d3); color: var(--j-ink); font-family: 'Source Serif 4', Georgia, serif; }
+  .page { max-width: 1200px; margin: 0 auto; padding: 32px 16px 60px; }
+  .sheet { padding: 28px clamp(16px, 3vw, 40px) 32px; }
+  h1 { font-family: Fraunces, Georgia, serif; font-size: clamp(28px, 5vw, 40px); margin: 0 0 6px; }
+  .lede { max-width: 70ch; margin: 0 0 18px; line-height: 1.5; }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin: 0 0 18px; }
+  .bar label { font-family: 'Courier Prime', monospace; font-size: 14px; display: inline-flex; gap: 6px; align-items: center; }
+  select, input[type=search], button { font: inherit; font-size: 15px; color: var(--j-ink); background: var(--j-cream-rim, #fff);
+    border: 1px solid color-mix(in srgb, var(--j-ink) 35%, transparent); border-radius: 6px; padding: 6px 10px; }
+  button { cursor: pointer; }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--j-forest); outline-offset: 2px; }
+  .progress { font-family: 'Courier Prime', monospace; font-size: 14px; margin-left: auto; }
+  .sign { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; margin: 8px 0 14px; }
+  .sign h2 { font-family: Fraunces, Georgia, serif; font-size: clamp(26px, 5vw, 36px); margin: 0; }
+  .sign .count { font-family: 'Courier Prime', monospace; font-size: 14px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 16px; }
+  .card { border: 2px solid color-mix(in srgb, var(--j-ink) 20%, transparent); border-radius: 8px; padding: 10px; background: var(--j-cream-rim, #fdfaf2); }
+  .card.flag { border-color: #a8472f; background: color-mix(in srgb, #a8472f 10%, var(--j-cream-rim, #fdfaf2)); }
+  .card.keep { border-color: var(--j-forest); }
+  .card canvas { display: block; width: 100%; aspect-ratio: 1 / 1.02; }
+  .card .meta { font-family: 'Courier Prime', monospace; font-size: 13px; margin: 6px 0 8px; display: flex; justify-content: space-between; gap: 8px; }
+  .card .choose { display: flex; gap: 8px; }
+  .card .choose button { flex: 1; }
+  .card .choose button[aria-pressed=true].k { background: var(--j-forest); color: #fff; border-color: var(--j-forest); }
+  .card .choose button[aria-pressed=true].f { background: #a8472f; color: #fff; border-color: #a8472f; }
+  .nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 0; }
+  .keys { font-family: 'Courier Prime', monospace; font-size: 13px; margin: 14px 0 0; line-height: 1.6; }
+  kbd { border: 1px solid color-mix(in srgb, var(--j-ink) 35%, transparent); border-radius: 4px; padding: 0 5px; }
+  .export { margin: 26px 0 0; padding: 16px; border: 1px dashed color-mix(in srgb, var(--j-ink) 35%, transparent); border-radius: 8px; }
+  .export h2 { font-family: Fraunces, Georgia, serif; font-size: 22px; margin: 0 0 6px; }
+  .export p { margin: 0 0 10px; max-width: 70ch; line-height: 1.5; }
+  .status { min-height: 1.4em; font-family: 'Courier Prime', monospace; font-size: 14px; }
+  a { color: var(--j-forest); }
+  @media (prefers-color-scheme: dark) { a { color: #b3c4a0; } }
+</style>
+</head>
+<body class="j-grid">
+<main class="page"><div class="sheet j-sheet">
+  <h1>Clip review</h1>
+  <p class="lede">Every sign's drawn signer, clip by clip. <b>Flag</b> a drawing whose tracking is broken
+    (hands in the wrong place, a limb that jumps, a face that slides off) and the app will show that
+    sign's next clip instead, or no drawing at all if every clip is flagged. <b>Keep</b> the ones that look
+    right. Your choices are saved in this browser as you go; download them at the bottom and commit
+    the file as <code>data/clip-review.json</code> to put them in the app.</p>
+
+  <div class="bar">
+    <label>Show <select id="filter">
+      <option value="multi">Signs with 2 or more clips</option>
+      <option value="todo">Signs not yet reviewed</option>
+      <option value="flagged">Signs with a flagged clip</option>
+      <option value="all">Every sign</option>
+    </select></label>
+    <label>Find <input id="find" type="search" placeholder="e.g. DOG" list="labels" autocomplete="off" /></label>
+    <datalist id="labels"></datalist>
+    <span class="progress" id="progress" aria-live="polite">Loading…</span>
+  </div>
+
+  <section aria-labelledby="sign-label">
+    <div class="sign"><h2 id="sign-label">…</h2><span class="count" id="sign-count"></span></div>
+    <div class="cards" id="cards"></div>
+    <div class="nav">
+      <button id="prev" type="button">← Previous sign</button>
+      <button id="keep-rest" type="button">Keep the rest and go on</button>
+      <button id="next" type="button">Next sign →</button>
+      <button id="next-todo" type="button">Next unreviewed</button>
+    </div>
+    <p class="keys"><kbd>1</kbd>–<kbd>9</kbd> flag or unflag that clip · <kbd>K</kbd> keep the rest and go on ·
+      <kbd>←</kbd> <kbd>→</kbd> previous and next sign · <kbd>U</kbd> next unreviewed</p>
+  </section>
+
+  <section class="export" aria-labelledby="export-title">
+    <h2 id="export-title">Put it in the app</h2>
+    <p>Download the file, replace <code>data/clip-review.json</code> in the repository with it, and push:
+      the site is rebuilt with your choices. It holds file names only.</p>
+    <div class="nav">
+      <button id="download" type="button">Download clip-review.json</button>
+      <button id="copy" type="button">Copy it</button>
+      <button id="forget" type="button">Forget my unsaved choices</button>
+    </div>
+    <p class="status" id="status" aria-live="polite"></p>
+  </section>
+</div></main>
+
+<script type="module">
+  import { loadReplay } from './src/replay-data.js';
+  import { createReplay } from './src/figure.js';
+
+  const KEY = 'sawubona-clip-review';
+  const $ = (id) => document.getElementById(id);
+  const replay = await loadReplay();
+  const committed = await fetch('data/clip-review.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+
+  // file -> 'keep' | 'flag': the committed file, then this browser's choices on top
+  const decisions = new Map([
+    ...(committed.kept ?? []).map((f) => [f, 'keep']),
+    ...(committed.flagged ?? []).map((f) => [f, 'flag']),
+  ]);
+  // null: a committed choice undone here
+  try { for (const [f, d] of Object.entries(JSON.parse(localStorage.getItem(KEY) || '{}'))) { if (d) decisions.set(f, d); else decisions.delete(f); } } catch { /* private window */ }
+  const save = () => {
+    const mine = {};
+    for (const [f, d] of decisions) {
+      const was = (committed.flagged ?? []).includes(f) ? 'flag' : (committed.kept ?? []).includes(f) ? 'keep' : null;
+      if (d !== was) mine[f] = d;
+    }
+    for (const f of [...(committed.flagged ?? []), ...(committed.kept ?? [])]) if (!decisions.has(f)) mine[f] = null;
+    try { localStorage.setItem(KEY, JSON.stringify(mine)); } catch { /* not kept: still exportable */ }
+  };
+
+  const labels = [...new Set(replay.clips.map((c) => c.label))].sort((a, b) => a.localeCompare(b));
+  $('labels').innerHTML = labels.map((l) => `<option value="${l.replace(/"/g, '&quot;')}">`).join('');
+  const clipsOf = (label) => replay.variants(label).map((i) => replay.clips[i]);
+  const reviewed = (label) => clipsOf(label).every((c) => decisions.has(c.file));
+  const FILTERS = {
+    multi: (l) => clipsOf(l).length > 1,
+    todo: (l) => !reviewed(l),
+    flagged: (l) => clipsOf(l).some((c) => decisions.get(c.file) === 'flag'),
+    all: () => true,
+  };
+  let list = labels.filter(FILTERS.multi);
+  let at = 0;
+  let players = [];
+  let token = 0;
+
+  function progress() {
+    const done = labels.filter(reviewed).length;
+    const flagged = [...decisions.values()].filter((d) => d === 'flag').length;
+    $('progress').textContent = `${done} of ${labels.length} signs reviewed · ${flagged} clips flagged`;
+  }
+
+  function mark(file, d) {
+    if (decisions.get(file) === d) decisions.delete(file); else decisions.set(file, d);
+    save();
+    paintChoices();
+    progress();
+  }
+
+  function paintChoices() {
+    for (const card of $('cards').children) {
+      const d = decisions.get(card.dataset.file);
+      card.classList.toggle('flag', d === 'flag');
+      card.classList.toggle('keep', d === 'keep');
+      card.querySelector('.k').setAttribute('aria-pressed', String(d === 'keep'));
+      card.querySelector('.f').setAttribute('aria-pressed', String(d === 'flag'));
+    }
+  }
+
+  async function show() {
+    const mine = ++token;
+    for (const p of players) p.destroy?.();
+    players = [];
+    const label = list[at];
+    $('cards').innerHTML = '';
+    if (!label) {
+      $('sign-label').textContent = 'Nothing to show';
+      $('sign-count').textContent = 'Try another filter.';
+      return;
+    }
+    const clips = clipsOf(label);
+    $('sign-label').textContent = label;
+    $('sign-count').textContent = `${at + 1} of ${list.length} · ${clips.length} clip${clips.length > 1 ? 's' : ''}`;
+    $('cards').innerHTML = clips.map((c, n) => {
+      const id = /\[(\d+)\]/.exec(c.file)?.[1];
+      const nid = /\[nid\d+\]/i.test(c.file);
+      const src = nid ? 'NID' : 'Real SASL';
+      const link = !nid && id ? `<a href="https://www.realsasl.com/?vid=${id}" target="_blank" rel="noopener">video ↗</a>` : '';
+      return `<figure class="card" data-file="${c.file.replace(/"/g, '&quot;')}" style="margin:0">
+        <canvas role="img" aria-label="Clip ${n + 1} of ${label}, drawn from the ${src} clip"></canvas>
+        <figcaption class="meta"><span>${n + 1} · ${src}</span>${link}</figcaption>
+        <div class="choose"><button type="button" class="k">Keep</button><button type="button" class="f">Flag (${n + 1})</button></div>
+      </figure>`;
+    }).join('');
+    paintChoices();
+    await replay.ready(clips.map((c) => c.file));
+    if (mine !== token) return;
+    [...$('cards').children].forEach((card, n) => {
+      const frames = replay.clipFrames(clips[n].file);
+      if (!frames || frames.length < 2) return;
+      const p = createReplay(card.querySelector('canvas'), frames, { fps: replay.fps, loop: true });
+      p.play();
+      players.push(p);
+    });
+  }
+
+  $('cards').addEventListener('click', (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    if (e.target.closest('.k')) mark(card.dataset.file, 'keep');
+    if (e.target.closest('.f')) mark(card.dataset.file, 'flag');
+  });
+  const go = (n) => { at = Math.max(0, Math.min(list.length - 1, n)); show(); };
+  const nextTodo = () => {
+    const i = list.findIndex((l, k) => k > at && !reviewed(l));
+    if (i >= 0) go(i); else $('status').textContent = 'No unreviewed signs after this one in this list.';
+  };
+  const keepRest = () => {
+    for (const c of clipsOf(list[at] ?? '')) if (!decisions.has(c.file)) decisions.set(c.file, 'keep');
+    save(); progress(); go(at + 1);
+  };
+  $('prev').onclick = () => go(at - 1);
+  $('next').onclick = () => go(at + 1);
+  $('next-todo').onclick = nextTodo;
+  $('keep-rest').onclick = keepRest;
+  $('filter').onchange = () => { list = labels.filter(FILTERS[$('filter').value]); go(0); };
+  $('find').onchange = () => {
+    const want = $('find').value.trim().toUpperCase();
+    if (!want) return;
+    if (!list.includes(want)) { $('filter').value = 'all'; list = labels; }
+    const i = list.findIndex((l) => l.toUpperCase() === want);
+    if (i >= 0) go(i); else $('status').textContent = `No sign called ${want}.`;
+  };
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('input, select, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+    const card = $('cards').children[Number(e.key) - 1];
+    if (/^[1-9]$/.test(e.key) && card) mark(card.dataset.file, 'flag');
+    else if (e.key === 'ArrowRight') go(at + 1);
+    else if (e.key === 'ArrowLeft') go(at - 1);
+    else if (e.key.toLowerCase() === 'k') keepRest();
+    else if (e.key.toLowerCase() === 'u') nextTodo();
+  });
+
+  function exported() {
+    const pick = (d) => [...decisions].filter(([, v]) => v === d).map(([f]) => f).sort();
+    return JSON.stringify({
+      about: committed.about ?? 'Drawn-signer clips checked by eye in review.html.',
+      reviewed: new Date().toISOString().slice(0, 10),
+      flagged: pick('flag'),
+      kept: pick('keep'),
+    }, null, 2) + '\n';
+  }
+  $('download').onclick = () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([exported()], { type: 'application/json' }));
+    a.download = 'clip-review.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  $('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(exported()); $('status').textContent = 'Copied.'; }
+    catch { $('status').textContent = 'Could not copy here: use Download instead.'; }
+  };
+  $('forget').onclick = () => {
+    if (!confirm('Forget every choice made in this browser that is not in data/clip-review.json yet?')) return;
+    try { localStorage.removeItem(KEY); } catch { /* nothing kept */ }
+    location.reload();
+  };
+
+  progress();
+  // review.html?sign=DOG opens at that sign
+  const start = new URLSearchParams(location.search).get('sign')?.toUpperCase();
+  go(start ? Math.max(0, list.indexOf(start)) : 0);
+</script>
+</body>
+</html>

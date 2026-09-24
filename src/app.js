@@ -34,6 +34,7 @@ import {
 import { referenceClip, attemptClip, createStage } from './watch.js';
 import { alignAttempt, planKey, planNote, recordingMs, signText } from './sentence-practice.js';
 import { decode, toEnglish } from './interpret.js';
+import { createMotionReader } from './motion-letters.js';
 
 const MAX_SIGN_MS = 6000;
 const MAX_PHRASE_MS = 15000;
@@ -128,8 +129,8 @@ const state = {
   recording: null,
   busy: false,
   spell: {
-    mode: 'word', reader: createLetterReader(), candidate: null, since: 0, armed: true,
-    committed: [], target: '', index: 0, wrongSince: 0, shown: null, cue: null,
+    mode: 'word', reader: createLetterReader(), motion: createMotionReader(), candidate: null, since: 0, armed: true,
+    committed: [], committedAt: [], target: '', index: 0, wrongSince: 0, shown: null, cue: null,
   },
   // The drawn signer. speed and mirror are the learner's, kept on this computer;
   // quiz and viewer are the stages (src/watch.js) currently on the page.
@@ -317,7 +318,12 @@ el.startCamera.addEventListener('click', async () => {
     // The sign models are the big download; fetch them while the learner is
     // still getting into frame, not on the first attempt.
     loadEncoders((m) => setBadge(`${m}…`))
-      .then(() => { setBadge('Ready'); el.record.disabled = false; })
+      .then(() => {
+        setBadge('Ready');
+        el.record.disabled = false;
+        // ask the browser not to clear the cached models when space runs low
+        navigator.storage?.persist?.().catch(() => {});
+      })
       .catch((err) => { setBadge('Sign models failed to load'); el.framing.textContent = err.message; });
   } catch (err) {
     el.startCamera.disabled = false;
@@ -1220,6 +1226,7 @@ const LETTER_TIPS = {
   G: 'Point sideways with your index finger. Turn the same hand to point down and it becomes Q.',
   H: 'Point sideways with the index and middle fingers together. One finger is G.',
   I: 'Little finger up, the other fingers closed.',
+  J: 'Make I (little finger up), then draw a J in the air with the little finger: down, then hook to the side. It is read from the movement, so make it clear and not too fast.',
   K: 'Index and middle finger up, the thumb between them. Turn it to point down and it becomes P.',
   L: 'Thumb and index finger out at a right angle, like the letter L.',
   M: 'Fold three fingers over the thumb. With two it is N: the two differ by a single finger, so keep them distinct.',
@@ -1235,18 +1242,20 @@ const LETTER_TIPS = {
   W: 'Three fingers up and apart.',
   X: 'Raise the index finger and hook it; the other fingers stay closed.',
   Y: 'Thumb and little finger out, the middle three fingers closed — the same as the American Y.',
+  Z: 'Point with the index finger, the other fingers closed, and draw a Z in the air as you would write it: across, back down the diagonal, across again.',
 };
 // Captions for Plate I: one line on what each drawn hand is doing.
 const PLATE_NOTES = {
   A: 'Fist, thumb up the side', B: 'Flat hand, fingers together', C: 'Curved like the letter',
   D: 'Index up, others touch the thumb', E: 'Fingertips folded down', F: 'Thumb and index touch',
   G: 'Index points sideways', H: 'Two fingers point sideways', I: 'Little finger up',
+  J: 'I hand, draws a J',
   K: 'Index and middle, thumb between', L: 'Thumb and index at a right angle',
   M: 'Three fingers over the thumb', N: 'Two fingers over the thumb', O: 'Fingertips meet the thumb',
   P: 'Like K, pointing down', Q: 'Like G, pointing down', R: 'Middle crossed over index',
   S: 'Fist, thumb across the front', T: 'Index folded over the thumb tip',
   U: 'Index and middle up, together', V: 'Index and middle up, apart', W: 'Three fingers up, apart',
-  X: 'Index hooked', Y: 'Thumb and little finger out',
+  X: 'Index hooked', Y: 'Thumb and little finger out', Z: 'Index finger draws a Z',
 };
 const handSrc = (c) => `assets/hands/ink/${c}.svg`;
 
@@ -1336,6 +1345,7 @@ function updateSpelling(handResult, ts) {
   const hand = spellingHand(handResult);
   if (!hand) {
     sp.reader.clear();
+    sp.motion.clear();
     sp.candidate = null;
     sp.armed = true;
     showReading(null);
@@ -1345,6 +1355,9 @@ function updateSpelling(handResult, ts) {
   sp.reader.push(letterLogProbs(letterFeatures(hand.img, hand.world, aspect)));
   const read = sp.reader.read();
   showReading(read);
+  // J and Z are drawn, not held: read from the fingertip's path (src/motion-letters.js)
+  const drawn = sp.motion.push({ t: ts, img: hand.img, world: hand.world, aspect });
+  if (drawn) { motionLetter(drawn, ts); return; }
   const { letter, p } = read.best;
   const sure = p >= LETTER_SURE;
 
@@ -1364,6 +1377,7 @@ function updateSpelling(handResult, ts) {
   if (sp.mode === 'free') {
     if (held) {
       sp.committed.push(reading);
+      sp.committedAt.push(ts);
       sp.armed = false;
       sp.since = ts;
       el.spellBuffer.textContent = sp.committed.join('');
@@ -1378,9 +1392,8 @@ function updateSpelling(handResult, ts) {
     sp.armed = false;
     sp.since = ts;
     sp.wrongSince = 0;
-    skipMotionLetters();
     renderSpellWord();
-  } else if (reading && reading !== want) {
+  } else if (reading && reading !== want && !MOTION_LETTERS.has(want)) {
     if (!sp.wrongSince) sp.wrongSince = ts;
     if (ts - sp.wrongSince > 1400) {
       el.spellHint.textContent = `That reads as ${reading}, not ${want}. ${LETTER_TIPS[want] ?? ''}`;
@@ -1390,9 +1403,40 @@ function updateSpelling(handResult, ts) {
   }
 }
 
-function skipMotionLetters() {
+/** A J or Z has been drawn. Held letters read on the way (the I that starts a J) give way to it. */
+function motionLetter({ letter, start }, ts) {
   const sp = state.spell;
-  while (MOTION_LETTERS.has(sp.target[sp.index])) sp.index += 1;
+  sp.armed = false;
+  sp.since = ts;
+  sp.candidate = null;
+  flashMotion(letter);
+  if (sp.mode === 'free') {
+    while (sp.committedAt.length && sp.committedAt[sp.committedAt.length - 1] >= start - 100) {
+      sp.committed.pop();
+      sp.committedAt.pop();
+    }
+    sp.committed.push(letter);
+    sp.committedAt.push(ts);
+    el.spellBuffer.textContent = sp.committed.join('');
+    return;
+  }
+  const want = sp.target[sp.index];
+  if (letter === want) {
+    sp.index += 1;
+    sp.wrongSince = 0;
+    renderSpellWord();
+  } else if (want) {
+    el.spellHint.textContent = `That was ${letter}, drawn — the next letter is ${want}. ${LETTER_TIPS[want] ?? ''}`;
+  }
+}
+
+/** Show a drawn letter in the readout for a moment, as a held one would be. */
+function flashMotion(letter) {
+  el.spellLetter.textContent = letter;
+  el.spellConfidence.textContent = `${letter} — drawn`;
+  el.spellAlts.textContent = '';
+  setDial(1, false);
+  if (state.spell.mode === 'free') showGuide(letter);
 }
 
 function newSpellWord(word) {
@@ -1402,22 +1446,20 @@ function newSpellWord(word) {
   sp.target = (word ?? pool[Math.floor(Math.random() * pool.length)]).toUpperCase().replace(/[^A-Z]/g, '');
   sp.index = 0;
   sp.wrongSince = 0;
-  skipMotionLetters();
   renderSpellWord();
 }
 
 function renderSpellWord() {
   const sp = state.spell;
   el.spellWord.innerHTML = [...sp.target].map((c, i) => {
-    const cls = MOTION_LETTERS.has(c) ? 'skip' : i < sp.index ? 'done' : i === sp.index ? 'current' : 'todo';
-    const said = { skip: ', a movement, not read', done: ', done', current: ', next', todo: '' }[cls];
+    const cls = i < sp.index ? 'done' : i === sp.index ? 'current' : 'todo';
+    const said = { done: ', done', current: ', next', todo: '' }[cls];
     return `<span class="${cls}"><span aria-hidden="true">${c}</span><span class="visually-hidden">${c}${said}</span></span>`;
   }).join('');
   const want = sp.target[sp.index];
-  const skipped = [...sp.target].filter((c) => MOTION_LETTERS.has(c));
-  el.spellHint.textContent = want
-    ? `Hold ${want} steady.${skipped.length ? ` ${[...new Set(skipped)].join(' and ')} ${skipped.length > 1 ? 'are movements' : 'is a movement'} — sign it, but it is not read.` : ''}`
-    : 'Spelled. Well done — try another.';
+  el.spellHint.textContent = !want ? 'Spelled. Well done — try another.'
+    : MOTION_LETTERS.has(want) ? `Draw ${want}: ${LETTER_TIPS[want]}`
+      : `Hold ${want} steady.`;
   el.spellWord.classList.toggle('spelled', !want);
   if (sp.mode === 'word') {
     showCue(want ?? null);
@@ -1450,6 +1492,7 @@ for (const btn of document.querySelectorAll('[data-spellmode]')) {
 
 el.spellClear.addEventListener('click', () => {
   state.spell.committed = [];
+  state.spell.committedAt = [];
   el.spellBuffer.textContent = '';
 });
 
@@ -1488,10 +1531,11 @@ async function openLoupe(letter) {
   if (!el.loupe.open) el.loupe.showModal();
   const info = await loadHandInfo();
   if (state.spell.loupe !== letter) return;
-  const src = info?.letters?.[letter];
-  el.loupeSrc.textContent = src
-    ? `Traced from a hand-checked hold of ${letter} in ${HAND_SOURCES[src.video] ?? `“${src.presenter}”`}.`
-    : '';
+  const base = { J: 'I', Z: 'D' }[letter];
+  const src = info?.letters?.[base ?? letter];
+  el.loupeSrc.textContent = !src ? ''
+    : base ? `The hand is traced from a hand-checked hold of ${base} in ${HAND_SOURCES[src.video] ?? `“${src.presenter}”`}; the arrow shows the movement.`
+      : `Traced from a hand-checked hold of ${letter} in ${HAND_SOURCES[src.video] ?? `“${src.presenter}”`}.`;
 }
 
 for (const btn of [el.loupePrev, el.loupeNext]) {
@@ -1838,3 +1882,9 @@ const demoApi = {
 };
 
 boot();
+
+// The offline cache (sw.js): models are downloaded once, and the app opens with
+// no connection. Not in development, where it would serve yesterday's code.
+if ('serviceWorker' in navigator && !['localhost', '127.0.0.1'].includes(location.hostname)) {
+  navigator.serviceWorker.register('sw.js').catch((err) => console.warn('Offline cache unavailable:', err));
+}

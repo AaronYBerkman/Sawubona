@@ -16,6 +16,8 @@
 // taking the better of plain and mirrored for SignCLIP, then added. The asl3
 // view is optional: without its files or its model, ranking uses the others.
 
+import { wantsExtraViews } from './device.js';
+
 const FILES = {
   index: 'data/signs.json',
   openhands: 'data/signs.bin',
@@ -43,7 +45,8 @@ export async function loadReference() {
     if (!r.ok) throw new Error(`reference index: ${r.status}`);
     return r.json();
   });
-  const optional = (url) => floats(url, index.count, 768).catch(() => null);
+  // the asl3 view is left out where its model is (phones, src/device.js)
+  const optional = (url) => (wantsExtraViews() ? floats(url, index.count, 768).catch(() => null) : Promise.resolve(null));
   const [openhands, signclip, mirror, asl3, asl3Mirror] = await Promise.all([
     floats(FILES.openhands, index.count, index.dim),
     floats(FILES.signclip, index.count, 768),

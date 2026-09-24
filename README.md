@@ -24,6 +24,21 @@ npm test
 Every push to `main` is tested, built (`npm run build`) and published to the
 `gh-pages` branch by `.github/workflows/pages.yml`.
 
+**On a phone.** Add it to the home screen (Share → Add to Home Screen on an
+iPhone; the install prompt or ⋮ → Install app on Android) and it opens full
+screen with its own icon. The models are downloaded the first time sign checking
+starts and then kept (`sw.js`), so later visits load at once and the app opens
+without a connection. Phones and machines with little memory skip the second
+SignCLIP view — 108 MB less to download and hold, for 2–3 points of accuracy
+(`src/device.js`); add `?full` to the address to load it anyway, or `?light` to
+skip it on a computer.
+
+**Checking the drawings.** [`review.html`](https://aaronyberkman.github.io/Sawubona/review.html)
+shows every clip of each sign as the drawn signer, starting with the 999 signs
+that have more than one. Flag the badly tracked ones, download the result and
+commit it as `data/clip-review.json`: the app then skips flagged clips (a sign
+whose every clip is flagged shows no drawing, only the link to its video).
+
 Needs [Node.js](https://nodejs.org/) 18 or later and a webcam. The first run needs
 an internet connection to fetch the tracking and model runtimes (MediaPipe and
 onnxruntime-web, from public CDNs); the sign models themselves ship in `models/`.
@@ -45,8 +60,11 @@ Every quiz word links to its video on [Real SASL](https://www.realsasl.com/).
 
 **Fingerspelling.** Letters are read live from one hand. *Spell a word* lights up
 each letter as you hold it — names, places, words from your lesson, or anything
-you type. J and Z are drawn in the air, so they are movements rather than shapes;
-they are skipped, and the app says so.
+you type. J and Z are drawn in the air, so they are read from the path of the
+fingertip rather than a held shape (`src/motion-letters.js`): the I hand drawing
+down and hooking is J, the index finger drawing across, down the diagonal and
+across again is Z, either way round. This is new and so far tested on synthetic
+hands only (`test/motion.test.mjs`), not measured on real signers.
 
 **Dictionary.** Search all 1,858 signs, open the Real SASL video where there is one, add it to a lesson.
 
@@ -196,6 +214,8 @@ python tools/holistic.py extract && python tools/holistic.py pack   # 203-point 
 python tools/export-signclip.py                       # -> models/onnx/signclip.onnx (int8)
 python tools/pack-signclip.py                         # test fixtures
 python tools/export-signclip.py asl3                  # -> models/onnx/signclip-asl3.onnx (int8)
+python scripts/openhands-fp16.py models/onnx          # OpenHands weights stored as float16 (half the size)
+python scripts/make-brand.py                          # app icons and the link preview card
 python tools/build-gallery.py [--extract]             # every clip in holistic-v3 -> signs.json,
                                                       # all embeddings + replay (incremental)
 python tools/bench-gallery.py                         # -> data/bench-gallery.txt

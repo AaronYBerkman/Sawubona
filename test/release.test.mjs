@@ -14,7 +14,7 @@ for (const file of files) {
     assert.ok(files.has(target), `${file} imports an unpackaged file: ${target}`);
   }
 }
-for (const page of ['index.html', 'sentences.html']) {
+for (const page of ['index.html', 'sentences.html', 'review.html']) {
   const html = readFileSync(join(ROOT, page), 'utf8');
   for (const match of html.matchAll(/(?:src|href)=["']([^"']+)["']/g)) {
     const url = match[1];
