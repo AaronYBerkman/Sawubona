@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field Journal Board</title>
+<meta name="description" content="Review board for the Sawubona field-journal artwork: every piece from assets/art composed on one page.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Fraunces:opsz,wght,SOFT@9..144,400..800,0..100&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="paper.css">
+<style>
+/* Board-only layout. Everything reusable lives in paper.css. */
+* { box-sizing: border-box; }
+html { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--j-ink);
+  font: 17px/1.55 var(--j-font-body);
+  overflow-x: hidden;
+}
+a { color: inherit; }
+.board { position: relative; max-width: 1440px; margin: 0 auto; padding: 96px 180px 80px; }
+.j-sheet { max-width: 1080px; margin: 0 auto; padding: 44px 64px 40px; }
+
+/* header */
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.brand img { width: 44px; height: 44px; }
+.wordmark { font: 700 40px/1 var(--j-font-display); font-variation-settings: "opsz" 72, "SOFT" 60; letter-spacing: -.01em; color: var(--j-ink); }
+.tagline { margin: 6px 0 0; font-size: 10.5px; letter-spacing: .26em; color: var(--j-ink-soft); }
+nav ul { display: flex; gap: 26px; list-style: none; margin: 0 0 4px; padding: 0; }
+nav a { font: 500 18px/1.2 var(--j-font-body); text-decoration: none; padding-bottom: 5px; border-bottom: 3px solid transparent; }
+nav a[aria-current="page"] { border-bottom-color: var(--j-mustard); }
+nav a:hover { border-bottom-color: color-mix(in srgb, var(--j-mustard) 60%, transparent); }
+nav a:focus-visible { outline: 3px solid var(--j-focus); outline-offset: 4px; border-radius: 2px; }
+
+.hero { text-align: center; margin: 44px auto 34px; max-width: 760px; }
+.hero h1 { margin: 0; font: 800 64px/1.02 var(--j-font-display); font-variation-settings: "opsz" 144, "SOFT" 100; letter-spacing: -.02em; }
+.hero p { margin: 14px 0 0; font-size: 21px; color: var(--j-ink-soft); }
+
+/* notebook */
+.label { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font: 700 14px/1 var(--j-font-type); letter-spacing: .14em; text-transform: uppercase; }
+.frame { aspect-ratio: 4 / 3; display: grid; place-items: center; background:
+  radial-gradient(ellipse at 50% 45%, #eceee4, #d9ddcf 70%); color: #3b4637; }
+:root[data-theme="dark"] .frame { background: radial-gradient(ellipse at 50% 45%, #2c362e, #1e261f 70%); color: #cfc8b4; }
+.frame svg { width: 62%; height: auto; }
+.cam-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 26px; flex-wrap: wrap; }
+.j-page.lined { padding-top: 34px; }
+.word { margin: 4px 0 0; font: 700 54px/1 var(--j-font-display); font-variation-settings: "opsz" 144, "SOFT" 50; }
+.steps { margin: 16px 0 0; padding-left: 1.3em; }
+.steps li { font-size: 17px; }
+.results { margin: 12px 0 0; padding: 0; list-style: none; font: 15px/30px var(--j-font-type); }
+.watch { display: inline-flex; align-items: center; gap: 8px; font: 600 16px/30px var(--j-font-body); }
+.stamps { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 18px; padding: 8px 0; }
+
+/* the three cards */
+.how { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 54px 0 20px; flex-wrap: wrap; }
+.how .j-scrap { width: 190px; text-align: center; padding: 22px 18px 18px; }
+.how .j-icon { width: 30px; height: 30px; }
+.how h3 { margin: 6px 0 2px; font: 700 21px/1.2 var(--j-font-display); }
+.how p { margin: 0; font-size: 14.5px; line-height: 1.4; }
+.how .arrow { width: 78px; height: 30px; color: var(--j-pencil); }
+
+/* plate */
+.plate-wrap { margin-top: 54px; }
+.j-plate h2 { margin: 0; text-align: center; font: 600 26px/1.2 var(--j-font-display); font-variation-settings: "opsz" 60; }
+.j-plate .sub { text-align: center; margin: 6px 0 22px; }
+.plate-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px 8px; }
+.plate-grid img { width: 100%; aspect-ratio: 1; }
+.plate-grid b { font: 700 16px/1 var(--j-font-type); margin-right: .35em; }
+
+/* dictionary */
+.dict { margin-top: 48px; display: grid; grid-template-columns: 1fr; gap: 12px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+.j-index-card h4 { margin: 0 0 2px; font: 700 20px/1.1 var(--j-font-display); position: absolute; top: 6px; left: 18px; }
+.j-index-card p { margin: 0; font: 14px/24px var(--j-font-type); }
+.j-index-card .row { display: flex; justify-content: space-between; align-items: center; }
+.mini { display: inline-flex; align-items: center; gap: 4px; font: 700 12px/24px var(--j-font-type); letter-spacing: .06em; }
+.mini .j-icon { width: 16px; height: 16px; vertical-align: -3px; }
+
+footer { margin-top: 44px; }
+footer .caps-row { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 14px; }
+
+/* the collage, in the margins only */
+.c { position: absolute; z-index: 2; }
+.c-protea { left: 8px; top: 250px; width: 236px; }
+.c-table { right: 14px; top: 0; width: 430px; }
+.c-koppies { left: -4px; bottom: 150px; width: 250px; }
+.c-king { right: 4px; bottom: 170px; width: 300px; }
+.c-green { left: 22px; top: 104px; width: 156px; --tilt: -3deg; padding: 16px 14px; font-size: 10.5px; line-height: 1.7; letter-spacing: .2em; text-transform: uppercase; font-weight: 600; }
+.c-kraft { left: 22px; top: 1010px; width: 154px; --tilt: 2.5deg; font: 13.5px/1.45 var(--j-font-type); }
+.c-sticky { right: 20px; top: 650px; width: 150px; font: 14px/1.4 var(--j-font-type); }
+.c-sticky .j-tape { position: absolute; top: -12px; left: 50%; margin-left: -46px; --tape-w: 92px; --tape-h: 24px; --tilt: -5deg; }
+.c-kraft2 { right: 30px; top: 1180px; width: 140px; --tilt: -2deg; font: 13px/1.45 var(--j-font-type); }
+.c-swatch { right: 38px; top: 330px; width: 126px; --tilt: 3deg; padding: 14px 14px 12px; }
+.swatches { display: flex; gap: 6px; margin-bottom: 6px; }
+.swatches span { width: 22px; height: 22px; border-radius: 40% 55% 45% 50%; }
+
+.theme-toggle { position: fixed; top: 14px; left: 14px; z-index: 10; }
+
+@media (max-width: 1100px) {
+  .board { padding: 56px 24px 60px; }
+}
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  .board { padding: 16px 8px 40px; }
+  .j-sheet { padding: 28px 16px 28px; }
+  .wordmark { font-size: 32px; }
+  nav ul { gap: 16px; flex-wrap: wrap; }
+  nav a { font-size: 16px; }
+  .hero { margin: 28px auto 24px; }
+  .hero h1 { font-size: 40px; }
+  .hero p { font-size: 18px; }
+  .word { font-size: 42px; }
+  .how { flex-direction: column; }
+  .how .arrow { transform: rotate(90deg); }
+  .plate-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .j-plate-cell figcaption { font-size: 12px; }
+  nav ul { gap: 14px; }
+  .cards { grid-template-columns: 1fr; }
+  .j-plate { padding: 30px 18px 24px; }
+  .theme-toggle { position: static; margin: 0 0 12px 8px; }
+}
+</style>
+</head>
+<body class="j-grid">
+<button class="j-btn theme-toggle" type="button" aria-pressed="false" id="theme">Night journal</button>
+<div class="board">
+
+  <!-- collage: margins only, never over content -->
+  <div class="j-collage" aria-hidden="true">
+    <img class="c c-table j-art--ink" src="table-mountain.svg" alt="">
+    <img class="c c-protea j-art--wash" src="protea-pincushion.svg" alt="">
+    <img class="c c-koppies j-art--ink" src="koppies.svg" alt="">
+    <img class="c c-king j-art--ink" src="protea-king.svg" alt="">
+  </div>
+  <div class="c c-green j-scrap j-green j-collage">SASL became South Africa’s 12th official language in 2023</div>
+  <div class="c c-kraft j-scrap j-kraft j-collage">Signs vary by region — trust your teacher.</div>
+  <div class="c c-sticky j-sticky j-collage"><span class="j-tape"></span>Nothing you record leaves this computer.</div>
+  <div class="c c-kraft2 j-scrap j-cream j-collage">J and Z move. Practise them slowly.</div>
+  <div class="c c-swatch j-scrap j-kraft j-collage" aria-hidden="true"><div class="swatches"><span style="background:#f0bd2b"></span><span style="background:#e06a1d"></span><span style="background:#8a9a78"></span><span style="background:#8b6048"></span></div><span class="j-caps" style="font-size:9px;letter-spacing:.18em">Leucospermum</span></div>
+
+  <div class="j-sheet">
+    <header class="top">
+      <a class="brand" href="#">
+        <img src="sprig.svg" alt="">
+        <div>
+          <div class="wordmark">sawubona</div>
+          <p class="tagline j-caps">We see you · South African Sign Language practice</p>
+        </div>
+      </a>
+      <nav aria-label="Main">
+        <ul>
+          <li><a href="#" aria-current="page">Practise</a></li>
+          <li><a href="#plate">Fingerspelling</a></li>
+          <li><a href="#dict">Dictionary</a></li>
+          <li><a href="#">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h1>A little closer, sign by sign.</h1>
+      <p>Practise South African Sign Language with your webcam.</p>
+    </section>
+
+    <section class="j-notebook" aria-label="Practice">
+      <div class="j-page">
+        <p class="label"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#camera"/></svg>Your camera</p>
+        <div class="j-photo j-corners">
+          <div class="frame" role="img" aria-label="Camera off. A framing guide for head, shoulders and hands.">
+            <svg viewBox="0 0 200 150" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 4" stroke-linecap="round" aria-hidden="true">
+              <ellipse cx="100" cy="52" rx="20" ry="25"/>
+              <path d="M44 150c4-30 26-48 56-48s52 18 56 48"/>
+              <path d="M34 112c-8-12-6-28 4-34M166 112c8-12 6-28-4-34" stroke-dasharray="2 4" opacity=".7"/>
+            </svg>
+          </div>
+        </div>
+        <div class="cam-row">
+          <button class="j-btn" type="button"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#camera"/></svg>Start camera</button>
+          <p class="j-hint" style="margin:0;max-width:24ch"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#info"/></svg>Keep your face, shoulders and hands in frame.</p>
+        </div>
+      </div>
+      <div class="j-page j-lined lined">
+        <p class="label"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#page"/></svg>Sign this word</p>
+        <p class="word">Thank you</p>
+        <a class="watch" href="#"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#play"/></svg>Watch it on Real SASL</a>
+        <ol class="steps">
+          <li>Watch the sign once or twice.</li>
+          <li>Press Record, or hold Space.</li>
+          <li>Sign it once, then rest your hands.</li>
+        </ol>
+        <ul class="results" aria-live="polite">
+          <li>Try 1 — close to “thank you”.</li>
+          <li>Try 2 — matched.</li>
+        </ul>
+        <div class="stamps">
+          <span class="j-stamp j-stamp--match" style="--tilt:-6deg"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#check"/></svg>Matched</span>
+          <span class="j-stamp j-stamp--close" style="--tilt:3deg"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#approx"/></svg>Close</span>
+          <span class="j-stamp j-stamp--not" style="--tilt:-2deg"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#close"/></svg>Not yet</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="how" aria-label="How it works">
+      <div class="j-scrap j-cream" style="--tilt:-1.5deg"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#eye"/></svg><h3>Watch</h3><p>See a Deaf signer sign it on Real SASL.</p></div>
+      <svg class="arrow" aria-hidden="true"><use href="icons.svg#arrow-curve"/></svg>
+      <div class="j-scrap j-kraft" style="--tilt:1deg"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#hands"/></svg><h3>Sign</h3><p>Sign it to your camera, once.</p></div>
+      <svg class="arrow" aria-hidden="true"><use href="icons.svg#arrow-loop"/></svg>
+      <div class="j-scrap j-cream" style="--tilt:-.5deg"><svg class="j-icon" aria-hidden="true"><use href="icons.svg#check"/></svg><h3>See how you did</h3><p>Matched, close or not yet.</p></div>
+    </section>
+
+    <section class="plate-wrap" id="plate">
+      <div class="j-plate">
+        <h2>Plate I — the SASL manual alphabet</h2>
+        <p class="sub j-caps">Right hand, as you see it facing the signer · J and Z move</p>
+        <div class="plate-grid" id="plate-grid"></div>
+      </div>
+    </section>
+
+    <section class="dict" id="dict">
+      <div class="j-drawer">
+        <span class="j-label-holder">Dictionary · A–Z</span>
+        <div class="cards">
+          <div class="j-index-card"><h4>Sawubona</h4><p>Hello (we see you)</p><div class="row"><span class="mini"><svg class="j-icon"><use href="icons.svg#play"/></svg>Watch</span><span class="mini"><svg class="j-icon"><use href="icons.svg#plus"/></svg>Lesson</span></div></div>
+          <div class="j-index-card"><h4>Thank you</h4><p>Everyday words</p><div class="row"><span class="mini"><svg class="j-icon"><use href="icons.svg#play"/></svg>Watch</span><span class="mini"><svg class="j-icon"><use href="icons.svg#plus"/></svg>Lesson</span></div></div>
+          <div class="j-index-card"><h4>Water</h4><p>Food and drink</p><div class="row"><span class="mini"><svg class="j-icon"><use href="icons.svg#play"/></svg>Watch</span><span class="mini"><svg class="j-icon"><use href="icons.svg#plus"/></svg>Lesson</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span class="j-rule" role="presentation"></span>
+      <div class="caps-row j-caps"><span>Sawubona — we see you</span><span>Signs: Real SASL · Letters checked by hand</span></div>
+    </footer>
+  </div>
+</div>
+<script>
+const NOTES = {A:'Fist, thumb up the side',B:'Flat hand, fingers together',C:'Curved like the letter',D:'Index up, others touch the thumb',E:'Fingertips folded down',F:'Thumb and index touch',G:'Index points sideways',H:'Two fingers point sideways',I:'Little finger up',K:'Index and middle, thumb between',L:'Thumb and index at a right angle',M:'Three fingers over the thumb',N:'Two fingers over the thumb',O:'Fingertips meet the thumb',P:'Like K, pointing down',Q:'Like G, pointing down',R:'Middle crossed over index',S:'Fist, thumb across the front',T:'Index folded over the thumb tip',U:'Index and middle up, together',V:'Index and middle up, apart',W:'Three fingers up, apart',X:'Index hooked',Y:'Thumb and little finger out'};
+const grid = document.getElementById('plate-grid');
+for (const [c, note] of Object.entries(NOTES)) {
+  grid.insertAdjacentHTML('beforeend', `<figure class="j-plate-cell"><img class="j-art--ink" src="../hands/ink/${c}.svg" alt="SASL letter ${c}: ${note}"><figcaption><b>${c}</b>${note}</figcaption></figure>`);
+}
+const q = new URLSearchParams(location.search);
+const btn = document.getElementById('theme');
+const set = (dark) => {
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  btn.textContent = dark ? 'Day journal' : 'Night journal';
+  btn.setAttribute('aria-pressed', String(dark));
+};
+if (q.get('theme')) set(q.get('theme') === 'dark');
+btn.addEventListener('click', () => set(document.documentElement.dataset.theme !== 'dark'));
+</script>
+</body>
+</html>

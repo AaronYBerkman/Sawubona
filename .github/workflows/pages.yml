@@ -1,0 +1,28 @@
+name: Publish Sawubona
+# Every push to main is tested, built into dist/site and published to the
+# gh-pages branch, which GitHub Pages serves at https://aaronyberkman.github.io/Sawubona/
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+      - run: npm run test:corpus
+      - run: npm run build
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/site
+          force_orphan: true

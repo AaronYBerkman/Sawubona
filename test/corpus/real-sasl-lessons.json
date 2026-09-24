@@ -1,0 +1,22 @@
+[
+  { "en": "I am going to the shop.", "gloss": "SHOP ME GO", "kind": "statement", "roles": ["place", "subject", "verb"], "why": "Real SASL, time lesson: place early, then who, then the action" },
+  { "en": "Yesterday I went to the shop.", "gloss": "YESTERDAY SHOP ME GO", "rules": ["time"], "why": "Real SASL, time lesson" },
+  { "en": "Tomorrow I will go to the shop.", "gloss": "TOMORROW SHOP ME GO", "rules": ["time"], "why": "Real SASL, time lesson" },
+  { "en": "Tomorrow Alex will go home.", "gloss": "TOMORROW HOME A-L-E-X GO", "rules": ["time", "spell"], "why": "Real SASL, indexing lesson" },
+  { "en": "I have two big white houses.", "gloss": "ME HOUSE WHITE BIG TWO HAVE", "rules": ["adj"], "why": "Real SASL, adjective lesson: thing, colour, size, how many" },
+  { "en": "My brother has a white car.", "gloss": "MY BROTHER CAR WHITE HAVE", "drops": { "a": "articles" } },
+  { "en": "I like animals because they are beautiful.", "gloss": "ME ANIMAL LIKE WHY THEY BEAUTIFUL", "rules": ["because"], "why": "Real SASL, three types of questions" },
+  { "en": "Did you go to school?", "gloss": "PAST SCHOOL YOU GO", "kind": "yn", "why": "yes/no: statement order, eyebrows up" },
+  { "en": "What is your name?", "gloss": "YOUR NAME WHAT", "kind": "wh", "why": "WH at the end" },
+  { "en": "I will help you.", "gloss": "FUTURE HELP", "rules": ["directional"], "why": "Real SASL, directional verbs" },
+  { "en": "I don't like fish.", "gloss": "ME FISH DON'T LIKE", "rules": ["negSign"] },
+  { "en": "She is not happy.", "gloss": "SHE HAPPY NOT", "rules": ["neg"] },
+  { "en": "We have no money.", "gloss": "WE MONEY DON'T HAVE" },
+  { "en": "Yesterday I ate an apple.", "gloss": "YESTERDAY ME APPLE EAT", "alt": "YESTERDAY ME EAT APPLE", "drops": { "an": "articles" } },
+  { "en": "The big dog chased the small cat.", "gloss": "PAST DOG BIG CAT SMALL CHASE" },
+  { "en": "If it rains, I will stay home.", "gloss": "FUTURE RAIN HOME ME STAY", "rules": ["condition"] },
+  { "en": "It is cold today.", "gloss": "TODAY COLD" },
+  { "en": "Where is the nearest bus stop?", "gloss": "BUS STOP NEAR WHERE", "kind": "wh" },
+  { "en": "My friend and I played soccer on Saturday.", "gloss": "SATURDAY MY FRIEND AND ME SOCCER PLAY" },
+  { "en": "Yesterday I went to the shop. I bought bread.", "para": true, "gloss": ["YESTERDAY SHOP ME GO", "ME BREAD BUY"], "rules": ["timeKept"] }
+]
