@@ -40,7 +40,18 @@ acting out their opening picture go last. For 454 signs that changed which
 drawing is shown — DOG's first Real SASL clip, tracked in under 60% of its
 frames, gave way to NID's. [`review.html`](https://aaronyberkman.github.io/Sawubona/review.html)
 shows every clip of each sign as the drawn signer, most suspect first, with
-the audit's reasons beside each. Flag the badly tracked ones, download the result and
+the audit's reasons beside each.
+
+Every drawing is cut to where the sign is made (`src/watch.js` `signedPart`):
+the tracker finds a hand only once it is raised, so frames with no hand at
+either end are the presenter at rest, and resting hands clasped at the waist
+can only be drawn as one tangle. The sentence builder plays the same clip as
+Watch, with long holds shortened, so *I don't like fish* takes 5.9 s instead
+of 12.2. `scripts/audit-hands.mjs` adds one more flag to the audit:
+**hand-dropped**, a two-handed sign drawn with one hand for 35% or more of it
+(206 clips; FISH [170], which looked like merged hands, is one). About half of
+those checked by eye were poor, so it weighs lightly: it orders clips and
+sorts review.html, and does not replace a clip on its own. Flag the badly tracked ones, download the result and
 commit it as `data/clip-review.json`: the app then skips flagged clips (a sign
 whose every clip is flagged shows no drawing, only the link to its video).
 
@@ -270,6 +281,8 @@ python tools/pack-signclip.py                         # test fixtures
 python tools/export-signclip.py asl3                  # -> models/onnx/signclip-asl3.onnx (int8)
 python scripts/openhands-fp16.py models/onnx          # OpenHands weights stored as float16 (half the size)
 python scripts/make-brand.py                          # app icons and the link preview card
+python scripts/export-clip-audit.py <research-root>  # the clip audit, cut down for the page
+node scripts/audit-hands.mjs                          # then flag two-handed signs that lose a hand
 python tools/build-gallery.py [--extract]             # every clip in holistic-v3 -> signs.json,
                                                       # all embeddings + replay (incremental)
 python tools/bench-gallery.py                         # -> data/bench-gallery.txt

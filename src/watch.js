@@ -71,6 +71,53 @@ export function flaggedClips() {
 
 const sourceOf = (file) => (/\[nid\d+\]/i.test(file || '') ? 'NID' : 'Real SASL');
 
+const HANDS = [161, 182];                 // the left and right hands' first points in a frame
+const TIPS = [0, 4, 8, 12, 16, 20];       // wrist and fingertips, for how far a hand moved
+// summed movement of the wrists and fingertips between frames, in shoulder
+// widths, below which a hand is holding still (a presenter's hold: 0.02-0.06)
+const STILL_MOVE = 0.08;
+const seenAt = (f, i) => f[i * 3] !== 0 || f[i * 3 + 1] !== 0 || f[i * 3 + 2] !== 0;
+
+/**
+ * The part of a reference clip where the sign is made. The tracker finds a
+ * hand only once it is raised, so the frames with no hand at either end are
+ * the signer standing at rest - and a resting presenter's hands, clasped at
+ * the waist, can only be drawn as one tangle. Those ends are cut, keeping a
+ * short margin for the arm coming up and going down.
+ *
+ * `maxHold` (seconds) also shortens a long hold in the middle, for signs
+ * played one after another: a presenter holding ME for two seconds reads as
+ * a pause, not a sentence.
+ */
+export function signedPart(frames, fps = DISPLAY_FPS, { margin = 0.15, maxHold = Infinity } = {}) {
+  if (!frames?.length) return frames;
+  const tracked = frames.map((f) => HANDS.some((h) => seenAt(f, h)));
+  const first = tracked.indexOf(true);
+  if (first < 0) return frames;                               // never tracked: leave it be
+  const last = tracked.lastIndexOf(true);
+  const m = Math.round(margin * fps);
+  let out = frames.slice(Math.max(0, first - m), Math.min(frames.length, last + m + 1));
+  if (Number.isFinite(maxHold)) {
+    const move = out.map((f, t) => {
+      if (!t) return Infinity;
+      let d = 0;
+      let compared = 0;
+      for (const h of HANDS) for (const k of TIPS) {
+        const i = h + k;
+        if (seenAt(f, i) && seenAt(out[t - 1], i)) { d += Math.hypot(f[i * 3] - out[t - 1][i * 3], f[i * 3 + 1] - out[t - 1][i * 3 + 1]); compared++; }
+      }
+      return compared ? d : Infinity;          // no hand to compare: the arm coming up or going down, not a hold
+    });
+    const keep = Math.max(1, Math.round(maxHold * fps));
+    let still = 0;
+    out = out.filter((_, t) => {
+      still = move[t] < STILL_MOVE ? still + 1 : 0;
+      return still <= keep;
+    });
+  }
+  return out.length > 1 ? out : frames;
+}
+
 /**
  * { frames, fps, source, url, variants } for one of a sign's reference clips,
  * or null when there is no drawing. Variants flagged in review.html are left
@@ -84,13 +131,23 @@ export async function referenceClip(label, variant = 0) {
   if (!usable.length) return null;
   const info = replay.clips[usable[Math.min(variant, usable.length - 1)]];
   if (!(await replay.ready(info.file))) return null;
-  const frames = replay.clipFrames(info.file);
+  const frames = signedPart(replay.clipFrames(info.file), replay.fps);
   const id = /\[(\d+)\]/.exec(info.file)?.[1];
   return frames && frames.length > 1 ? {
     frames, fps: replay.fps, source: sourceOf(info.file),
     url: id ? `https://www.realsasl.com/?vid=${id}` : null,
     variants: usable.map((i) => ({ file: replay.clips[i].file, source: sourceOf(replay.clips[i].file) })),
   } : null;
+}
+
+/**
+ * A sign as one step of a sentence: its reference clip (the same one Watch
+ * shows), cut to the sign with long holds shortened, so signs follow on.
+ */
+export async function sequenceClip(label) {
+  const clip = await referenceClip(label);
+  if (!clip) return null;
+  return { ...clip, frames: signedPart(clip.frames, clip.fps, { maxHold: 0.5 }) };
 }
 
 /**

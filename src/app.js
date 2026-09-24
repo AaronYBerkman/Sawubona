@@ -32,7 +32,7 @@ import { loadReference, rankSigns, realSaslUrl } from './reference.js';
 import {
   loadLetterModel, letterFeatures, letterLogProbs, spellingHand, createLetterReader, letterNames,
 } from './letters.js';
-import { referenceClip, attemptClip, createStage } from './watch.js';
+import { referenceClip, sequenceClip, attemptClip, createStage } from './watch.js';
 import { alignAttempt, planKey, planNote, recordingMs, signText } from './sentence-practice.js';
 import { decode, toEnglish } from './interpret.js';
 import { createMotionReader } from './motion-letters.js';
@@ -225,7 +225,7 @@ function mountSentences() {
     const ref = state.reference ?? await loadReference();
     state.sentence.view = mountSentenceBuilder($('#sentences'), {
       labels: ref.clips.map((c) => c.label),
-      replay: { load: loadReplay, create: createReplay },
+      replay: { load: loadReplay, create: createReplay, clip: sequenceClip },
       onPractise: practiseSentence,
       heading: false,
     });

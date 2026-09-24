@@ -116,6 +116,7 @@
     'out-of-frame': 'the hand leaves the picture', 'ends-raised': 'ends with a hand still raised',
     'no-match': "unlike the sign's other clips", 'ocr-mismatch': 'the caption names another word',
     'ocr-fuzzy': 'the caption only roughly matches', 'ocr-none': 'no caption could be read',
+    'hand-dropped': 'one hand drops out of a two-handed sign, so the hands look merged',
   };
   const scoreOf = (file) => audit.clips[file]?.[0] ?? 0;
 

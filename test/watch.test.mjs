@@ -64,7 +64,7 @@ assert.ok(Math.abs(made[1].p.at - 3.2) < 1e-9, '…with the try');
 stage.destroy();
 assert.ok(made.every((m) => m.p.destroyed));
 
-console.log('watch: ok');
+
 
 // Frame stepping uses the reference's native sample rate and stops animation.
 stage.seek(0.5);
@@ -77,3 +77,29 @@ stage.seek(0); stage.step(-1);
 assert.equal(stage.progress, 0);
 stage.seek(1); stage.step(1);
 assert.equal(stage.progress, 1);
+
+// --- the part of a reference where the sign is made -----------------------------
+{
+  const { signedPart } = await import('../src/watch.js');
+  const blank = () => new Float32Array(203 * 3);
+  // 30 frames: hands tracked in frames 8-21 only (a presenter at rest before and after);
+  // the right hand moves in 8-11, holds still in 12-21
+  const frames = Array.from({ length: 30 }, (_, t) => {
+    const f = blank();
+    f[11 * 3] = 0.5; f[11 * 3 + 1] = 0.1;                 // a shoulder, so the frame is a body
+    if (t >= 8 && t <= 21) {
+      const x = t <= 11 ? 0.1 * t : 1.1;
+      for (let k = 0; k < 21; k++) { f[(182 + k) * 3] = x + k * 0.01; f[(182 + k) * 3 + 1] = 0.3; }
+    }
+    return f;
+  });
+  const cut = signedPart(frames, 15);                     // margin 0.15 s = 2 frames
+  assert.equal(cut.length, 18, 'from 2 frames before the first tracked hand to 2 after the last');
+  assert.equal(cut[0], frames[6]);
+  const flowing = signedPart(frames, 15, { maxHold: 0.2 }); // a 3-frame hold at most
+  assert.ok(flowing.length < cut.length, 'a long hold is shortened for sequences');
+  assert.equal(flowing.length, cut.length - (10 - 3), 'the 10-frame hold keeps 3 frames');
+  const never = Array.from({ length: 10 }, blank);
+  assert.equal(signedPart(never, 15), never, 'a clip with no tracked hand is left as it is');
+}
+console.log('watch: ok');
