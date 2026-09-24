@@ -24,12 +24,13 @@
   import { mountSentenceBuilder } from './src/sentence-view.js';
   import { loadReplay } from './src/replay-data.js';
   import { createReplay } from './src/figure.js';
+  import { sequenceClip } from './src/watch.js';
   const params = new URLSearchParams(location.search);
   if (params.get('theme')) document.documentElement.dataset.theme = params.get('theme');
   const index = await fetch('data/signs.json').then((r) => r.json());
   const view = mountSentenceBuilder(document.getElementById('sentences'), {
     labels: index.entries.map((e) => e.label),
-    replay: { load: loadReplay, create: createReplay },
+    replay: { load: loadReplay, create: createReplay, clip: sequenceClip },
     onPractise: () => alert('In the app this opens the camera.'),
     ...(params.get('text') ? { initial: params.get('text') } : {}),
   });

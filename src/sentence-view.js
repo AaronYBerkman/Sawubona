@@ -330,13 +330,11 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
     if (!replay || !first) return;
     const token = playToken;
     try {
-      const R = await replay.load();
-      await R.ready?.(first.entry);
+      const { frames, fps } = await stepClip(first.entry);
       if (token !== playToken || sentences[current] !== s) return;
-      const frames = R.clipFrames(first.entry);
       if (!frames?.length) return;
-      if (!player) player = replay.create(canvas, frames, { fps: R.fps, loop: false });
-      else player.load(frames, { fps: R.fps });
+      if (!player) player = replay.create(canvas, frames, { fps, loop: false });
+      else player.load(frames, { fps });
       player.seek(0);
       caption.textContent = `Press Watch: ${s.signs.length} sign${s.signs.length === 1 ? '' : 's'}`;
     } catch { /* the figure is optional */ }
@@ -395,21 +393,28 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
 
   const wait = (ms, token) => new Promise((res) => setTimeout(() => res(token === playToken), ms));
 
+  // A sign's frames for the sequence: replay.clip (watch.js sequenceClip) gives
+  // the clip Watch shows, cut to the sign; without it, the dictionary's first clip.
+  async function stepClip(entry) {
+    if (replay.clip) return (await replay.clip(entry)) ?? { frames: null, fps: 15 };
+    const R = await replay.load();
+    await R.ready?.(entry);
+    return { frames: R.clipFrames(entry), fps: R.fps };
+  }
+
   async function playSign(x, token) {
     if (x.entry && replay) {
-      const R = await replay.load();
-      await R.ready?.(x.entry);
-      const frames = R.clipFrames(x.entry);
+      const { frames, fps } = await stepClip(x.entry);
       if (frames?.length) {
         caption.textContent = x.gloss;
         spellShow.hidden = true;
-        if (!player) player = replay.create(canvas, frames, { fps: R.fps, loop: false, speed: slow ? 0.6 : 1 });
-        else player.load(frames, { fps: R.fps });
+        if (!player) player = replay.create(canvas, frames, { fps, loop: false, speed: slow ? 0.6 : 1 });
+        else player.load(frames, { fps });
         player.setLoop(false);
         player.setSpeed(slow ? 0.6 : 1);
         player.seek(0);
         await new Promise((res) => {
-          const secs = frames.length / R.fps / (slow ? 0.6 : 1);
+          const secs = frames.length / fps / (slow ? 0.6 : 1);
           player.play();
           setTimeout(res, secs * 1000 + 250);
         });
