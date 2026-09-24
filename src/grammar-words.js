@@ -189,7 +189,7 @@ export const NOT_ADVERBS = new Set(words(`family only early ugly friendly lovely
 
 // a verb and its particle are one sign: WAKE UP, LOOK AFTER, FALL ASLEEP. The dictionary's own
 // "VERB PARTICLE" labels count too; these hold even where the dictionary has no clip yet.
-export const PHRASAL = new Set(`wake up|get up|stand up|sit down|lie down|calm down|slow down|look after|look for|
+export const PHRASAL = new Set(`look at|wake up|get up|stand up|sit down|lie down|calm down|slow down|look after|look for|
   look up|fall asleep|give up|grow up|pick up|put on|take off|turn on|turn off|go out|come back|go back|come in|
   get in|get out|find out|break up|catch up|dress up|move in|move out|pass away|show off|clean up|hurry up|
   shut up|throw away|run away|set up|fill in|sign up|make up|try on|give back|write down|hang up|carry on|

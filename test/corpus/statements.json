@@ -286,5 +286,18 @@
   { "en": "Yesterday I went to the shop. I will cook.", "para": true, "gloss": ["YESTERDAY SHOP ME GO", "FUTURE ME COOK"], "rules": ["tense"], "why": "the tense changes to future with no time word, so FUTURE is added" },
   { "en": "I went to school. I saw my friend.", "para": true, "gloss": ["PAST SCHOOL ME GO", "ME MY FRIEND SEE"], "rules": ["timeKept"], "why": "the added PAST holds for the next sentence" },
   { "en": "My name is Thandi. I am deaf.", "para": true, "gloss": ["MY NAME T-H-A-N-D-I", "ME DEAF"], "why": "two present statements, no time signs" },
-  { "en": "Kelly is my friend. She is deaf.", "para": true, "gloss": ["K-E-L-L-Y MY FRIEND", "SHE DEAF"], "rules": ["spell", "point"], "why": "Real SASL indexing lesson: introduce Kelly by name, then point" }
+  { "en": "Kelly is my friend. She is deaf.", "para": true, "gloss": ["K-E-L-L-Y MY FRIEND", "SHE DEAF"], "rules": ["spell", "point"], "why": "Real SASL indexing lesson: introduce Kelly by name, then point" },
+  {"en": "I have already eaten.", "gloss": "FINISH ME EAT", "kind": "statement", "why": "'already' is the time sign FINISH, first; 'have' is not signed, and the participle is the verb (a time word between have and eaten no longer hides it)"},
+  {"en": "I have finished my homework.", "gloss": "ME MY HOMEWORK FINISH", "kind": "statement", "why": "FINISH itself says the work is done, so no PAST is added before it"},
+  {"en": "I have been to Soweto.", "gloss": {"now": "PAST S-O-W-E-T-O ME GO", "full": "PAST SOWETO ME GO"}, "kind": "statement", "why": "'been to' a place is having gone there: GO, not a dropped 'to be'"},
+  {"en": "Have you been to Durban?", "gloss": "PAST DURBAN YOU GO", "kind": "yn", "why": "the same GO as a yes/no question, eyebrows up"},
+  {"en": "I have never had a dog.", "gloss": "PAST ME DOG HAVE NEVER", "kind": "statement", "why": "'have had' is the perfect of have: one HAVE, NEVER after the verb"},
+  {"en": "Have you had lunch?", "gloss": "PAST YOU LUNCH HAVE", "kind": "yn", "why": "the perfect of have in a question: one HAVE"},
+  {"en": "Have you got a pen?", "gloss": "YOU PEN HAVE", "kind": "yn", "why": "'have got' is possession, with the subject between the two words"},
+  {"en": "I used to live in Soweto.", "gloss": {"now": "PAST S-O-W-E-T-O ME LIVE", "full": "PAST SOWETO ME LIVE"}, "kind": "statement", "why": "'used to' is a past habit: the time sign carries it, and USE (utilise) is not signed"},
+  {"en": "I wake up at six o'clock.", "gloss": "TIME SIX O'CLOCK ME WAKE UP", "kind": "statement", "why": "a clock time in words opens the sentence like one in digits"},
+  {"en": "My birthday is in May.", "gloss": "MY BIRTHDAY MAY", "kind": "statement", "why": "May after 'in' is the month; after 'to be' with nothing else said, the time is the comment and stays last (topic-comment)"},
+  {"en": "The meeting is on Monday.", "gloss": "MEETING MONDAY", "kind": "statement", "why": "the day is what is said about the meeting: topic, then comment"},
+  {"en": "Look at me.", "gloss": "LOOK AT ME", "kind": "command", "why": "LOOK AT ME is one dictionary sign"},
+  {"en": "Look at her.", "gloss": "SHE LOOK", "kind": "command", "why": "'at' is part of LOOK, not a sign; the person looked at comes before the verb"}
 ]
