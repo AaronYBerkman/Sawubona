@@ -1,5 +1,10 @@
 # Sawubona
 
+## 👉 [Open Sawubona: aaronyberkman.github.io/Sawubona](https://aaronyberkman.github.io/Sawubona/)
+
+Runs in the browser on a phone, tablet or computer with a camera (Chrome, Edge,
+Safari or Firefox). Nothing to install, and nothing you sign leaves your device.
+
 *Sawubona* is the Zulu greeting, literally "we see you" — which is what a camera
 pointed at someone signing is for.
 
@@ -9,11 +14,7 @@ your fingerspelling letter by letter, and looks up any of 1,858 SASL signs.
 Everything runs on your own machine; nothing is uploaded, and there is nothing to
 set up or train. It was built to work for a signer it has never seen.
 
-**Try it:** <https://aaronyberkman.github.io/Sawubona/> works in Chrome, Edge,
-Safari or Firefox on a phone, tablet or computer with a camera. The first visit
-downloads the tracking runtimes and each sign model as it is needed.
-
-To run it locally:
+To run it on your own machine instead:
 
 ```bash
 npm start      # then open http://localhost:5173 in Chrome, Edge, Safari or Firefox
