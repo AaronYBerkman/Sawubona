@@ -320,3 +320,28 @@ against 25 signs; twelve feature variants all landed between 22% and 31%. The
 three OpenHands encoders replaced them, and SignCLIP joined them. The full
 research log, including everything that did not help, is in
 `archive/README-research-log.md`; retired code is in `archive/`.
+
+## Recognition and learning limits
+
+Automatic recognition is on by default after you start the camera: raise your
+hands, sign, then rest them to receive a guess. Record/Space remain optional.
+A held hand does not trigger repeated captures; lower your hands before the next
+attempt. Results arrive after each captured sign or phrase, not as a live translation.
+
+Live OpenHands input now follows the same anatomical hand-slot convention as the
+reference gallery. Capped recordings retain their full duration, and phrase
+splitting uses elapsed time rather than assuming a desktop frame rate. Regression
+fixtures check these properties; they do not establish accuracy on a new signer
+or phone. Recognition remains experimental, especially outside a short lesson.
+
+The larger sign viewer includes a stable hand close-up, quarter-speed playback,
+and previous/next frame controls. These enlarge existing tracked detail; they
+cannot restore missed or incorrectly tracked fingers. Compare the source video
+when a drawing is unclear.
+
+Sentence output is a **draft learning guide**, not a verified SASL translation.
+The 535 sentence cases check software regressions against expected text; they do
+not certify linguistic accuracy. Unsupported constructions and unmapped words
+are flagged and cannot be played or automatically checked as correct sentences.
+Full meaning, facial grammar, spatial reference and regional variation need
+review by a fluent Deaf SASL teacher. Sources are linked in the sentence builder.

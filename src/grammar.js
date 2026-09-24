@@ -48,7 +48,7 @@ export const RULES = {
   },
   order: {
     title: 'Who, what, then the action',
-    text: 'Real SASL teaches subject, object, verb: ME APPLE EAT. Signers also use the English-like order ME EAT APPLE, and both are understood.',
+    text: 'Real SASL teaches subject, object, verb: ME APPLE EAT. Signers also use the English-like order ME EAT APPLE, but the appropriate order depends on context; this app cannot validate that context.',
     source: `${RS_GRAMMAR}; Wehrmeyer 2025 (SVO in natural signing)`, strength: 'flexible',
   },
   wh: {
@@ -1371,13 +1371,18 @@ export function buildSentence(text, lex, state = {}) {
     if (rules.includes(id) && !out.some((w) => w.drop === id)) rules.splice(rules.indexOf(id), 1);
   }
   const words2 = out.map((w) => (w.sign === -1 ? { ...w, sign: undefined, drop: 'kept' } : w));
-  const rough = built.some((b) => b.rough) || words.filter((w) => !w.punct).length > 16;
+  const coverageReasons = [];
+  if (built.some((b) => b.rough)) coverageReasons.push('This construction is outside the simple sentence rules.');
+  if (words.filter((w) => !w.punct).length > 16) coverageReasons.push('This sentence is too complex for a reliable automatic order.');
+  if (words2.some((w) => w.drop === 'kept') || signs.some((s) => s.rule === 'kept')) coverageReasons.push('Some English words could not be mapped to a supported rule.');
+  const rough = coverageReasons.length > 0;
   const alt = hasObject ? altSigns.map((s) => signs.indexOf(s)).filter((i) => i >= 0) : null;
   return {
     text, kind, signs, words: words2, marks,
     rules: rules.filter((r) => RULES[r]),
     alt: alt && alt.join() !== signs.map((_, i) => i).join() ? alt : null,
     rough,
+    coverage: { status: rough ? 'unsupported' : 'draft', reasons: coverageReasons },
     tense: tense || state.tense || null,
     timeSet: !!(allTime.length || added),
   };

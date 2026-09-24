@@ -94,3 +94,9 @@ assert.equal(a.extra, 0);   // the unmatched piece sits where SHOP (no clip) was
 const swapped = alignAttempt(plan.filter((p) => p.entry), [ranked('EAT', ...filler), ranked('APPLE', ...filler), ranked('ME', ...filler), ranked('YESTERDAY', ...filler)]);
 assert.ok(swapped.seen < 4);
 console.log('sentence practice: ok');
+
+// Passing text regressions is never a claim of verified SASL translation.
+assert.equal(buildSentence('I eat fish.', lex).coverage.status, 'draft');
+const unsupported = buildSentence('The man who lives here eats fish.', lex);
+assert.equal(unsupported.coverage.status, 'unsupported');
+assert.ok(unsupported.coverage.reasons.length);

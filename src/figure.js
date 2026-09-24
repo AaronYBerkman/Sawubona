@@ -1637,6 +1637,23 @@ export function prepareClip(frames, { zScale, fps = 15, trim = false, fadeFrames
   return { frames: out, alpha, zScale: z, handSize, sides, view };
 }
 
+/** Stable close-up of the tracked signing space; never changes the hand geometry. */
+export function handView(frames) {
+  const points = [];
+  for (const f of frames) for (const h0 of HAND0) {
+    if (!seen(f, h0) || f[h0 * 3 + 1] > 1.1) continue;
+    for (let j = 0; j < 21; j++) if (seen(f, h0 + j)) {
+      points.push([f[(h0 + j) * 3], f[(h0 + j) * 3 + 1]]);
+    }
+  }
+  if (!points.length) return VIEW;
+  const xs = points.map((p) => p[0]); const ys = points.map((p) => p[1]);
+  const left = Math.min(...xs); const right = Math.max(...xs);
+  const top = Math.min(...ys); const bottom = Math.max(...ys);
+  const size = Math.max(1.1, right - left + 0.3, bottom - top + 0.3);
+  return { cx: (left + right) / 2, cy: (top + bottom) / 2, w: size, h: size };
+}
+
 /**
  * A player for one sign on a canvas: createReplay(canvas, frames, opts).
  *
@@ -1666,6 +1683,8 @@ export function createReplay(canvas, frames, opts = {}) {
   const trim = opts.trim ?? true;
   let clip = prepareClip(frames, { zScale: opts.zScale, fps, trim });
   let T = clip.frames.length;
+  let closeView = handView(clip.frames);
+  let closeUp = false;
   let t = 0;
   let playing = false;
   let raf = 0;
@@ -1710,7 +1729,7 @@ export function createReplay(canvas, frames, opts = {}) {
     const sd = sample(t);
     drawFigure(ctx, scratch, {
       mirror, colors, alpha, sides: sd, zScale: clip.zScale, handSize: clip.handSize,
-      view: opts.view ?? clip.view, backdrop: opts.backdrop, debug: opts.debug,
+      view: closeUp ? closeView : opts.view ?? clip.view, backdrop: opts.backdrop, debug: opts.debug,
     });
     opts.onTime?.(t, duration());
   }
@@ -1774,12 +1793,14 @@ export function createReplay(canvas, frames, opts = {}) {
     seek(seconds) { t = clamp(Number(seconds) || 0, 0, duration()); resting = 0; draw(); },
     setSpeed(x) { speed = clamp(Number(x) || 1, 0.1, 4); },
     setMirror(m) { mirror = !!m; draw(); },
+    setCloseUp(on) { closeUp = !!on; draw(); },
     setLoop(l) { loop = !!l; },
     /** Swap in another sign (or attempt) without a new player. */
     load(next, o = {}) {
       if (o.fps) fps = o.fps;
       clip = prepareClip(next, { zScale: o.zScale, fps, trim: o.trim ?? trim });
       T = clip.frames.length;
+      closeView = handView(clip.frames);
       t = 0; resting = 0;
       draw();
     },

@@ -162,7 +162,7 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
   root.innerHTML = `
     <header class="sb-head"${heading ? '' : ' hidden'}>
       <h2 class="sb-title">Find the shape of your <span class="sb-underline">sentence.</span></h2>
-      <p class="sb-lede">Paste a sentence or a paragraph. See the order SASL puts it in, and why. Then practise it one sentence at a time.</p>
+      <p class="sb-lede">Paste a sentence or a paragraph. Explore a suggested word order based on SASL lessons. Then practise it one sentence at a time.</p>
     </header>
 
     <div class="sb-top">
@@ -190,8 +190,9 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
       <div class="sb-order-head">
         <h3 class="sb-h" id="sb-h2"><span class="sb-num">2.</span> Suggested sign order</h3>
         <span class="sb-pill sb-kind"></span>
-        <span class="sb-pill sb-rough" hidden>rough guide: a long or complex sentence</span>
+        <span class="sb-pill sb-rough" hidden>Outside the supported rules — ask your SASL teacher</span>
       </div>
+      <p class="sb-coverage j-hint" role="status"></p>
       <div class="sb-strip-wrap">
         <div class="sb-marks"></div>
         <ol class="sb-strip" aria-label="Signs in order"></ol>
@@ -202,7 +203,7 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
         <p class="sb-english"></p>
         <div class="sb-dropped-wrap"></div>
       </div>
-      <p class="sb-foot j-hint">${icon('info')}<span>English labels for signs, in SASL order: a guide to the order, not a full translation. SASL also uses space, the face and the movement itself.</span></p>
+      <p class="sb-foot j-hint">${icon('info')}<span>English labels for signs in a suggested order: a guide to the order, not a full translation. SASL also uses space, the face and the movement itself. <a href="https://www.realsasl.com/learn-south-african-sign-language/143-sign-language-grammar" target="_blank" rel="noopener noreferrer">Real SASL basics</a> · <a href="https://allqs.saqa.org.za/showUnitStandard.php?id=115802" target="_blank" rel="noopener noreferrer">SASL structure and variation (SAQA)</a></span></p>
     </section>
 
     <div class="sb-bottom">
@@ -277,6 +278,10 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
     $('.sb-attempt').hidden = true;
     if (!s) {
       strip.innerHTML = '';
+      $('.sb-coverage').textContent = '';
+      $('.sb-rough').hidden = true;
+      $('.sb-watch').disabled = true;
+      $('.sb-mine').disabled = true;
       $('.sb-marks').innerHTML = '';
       $('.sb-english').textContent = '';
       $('.sb-sequence').textContent = '';
@@ -292,10 +297,13 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
     const kinds = { wh: 'Question: what, where, who…', yn: 'Yes / no question', command: 'Asking someone to do something', statement: 'Statement' };
     $('.sb-kind').textContent = kinds[s.kind] || 'Statement';
     $('.sb-rough').hidden = !s.rough;
+    $('.sb-coverage').textContent = s.rough
+      ? s.coverage.reasons.join(' ') + ' The draft below is not a verified SASL sentence; automatic playback and checking are unavailable.'
+      : 'Draft learning guide, not a verified translation. Check meaning, facial grammar and spatial reference with a Deaf SASL teacher.';
     const alt = $('.sb-alt');
     if (s.alt) {
       alt.hidden = false;
-      alt.innerHTML = `<span class="j-caps">Also common</span> ${s.alt.map((i) => esc(s.signs[i].gloss)).join(' ')} <span class="sb-alt-why">English-like order, also understood</span>`;
+      alt.innerHTML = `<span class="j-caps">Possible alternative</span> ${s.alt.map((i) => esc(s.signs[i].gloss)).join(' ')} <span class="sb-alt-why">Choice of order depends on context</span>`;
     } else alt.hidden = true;
     $('.sb-english').innerHTML = englishHtml(s);
     $('.sb-dropped-wrap').innerHTML = droppedHtml(s);
@@ -308,8 +316,8 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
     if (spelled.length) bits.push(`${spelled.join(', ')}: fingerspell, or use the person's sign name.`);
     if (!bits.length) bits.push('Every sign here has a clip in the dictionary. Watch, then sign it yourself with a small pause between signs.');
     $('.sb-practise-note span').textContent = bits.join(' ');
-    $('.sb-mine').disabled = !onPractise || !s.signs.some((x) => x.entry);
-    $('.sb-watch').disabled = !replay;
+    $('.sb-mine').disabled = s.rough || !onPractise || !s.signs.some((x) => x.entry);
+    $('.sb-watch').disabled = s.rough || !replay;
     $('.sb-rules-wrap').innerHTML = rulesHtml(s) || '<p class="sb-empty">No reordering needed here.</p>';
     showAttempt();   // the learner's last try at this sentence, if there is one
     renderList();

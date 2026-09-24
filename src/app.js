@@ -24,7 +24,8 @@
 import { createTrackers, startCamera, stopCamera, drawOverlay, createClock } from './vision.js';
 import { bodyFrame, frameVector, hasHands } from './features.js';
 import { findSegments } from './segment.js';
-import { framePoints } from './keypoints.js';
+import { createAutoCapture } from './auto-capture.js';
+import { pointsFromHolistic } from './keypoints.js';
 import { holisticFrame } from './holistic.js';
 import { loadEncoders, embedOpenHands, embedSignCLIP } from './encoder.js';
 import { loadReference, rankSigns, realSaslUrl } from './reference.js';
@@ -47,7 +48,6 @@ const REST_BELOW = 1.3;   // shoulder widths below the shoulders counts as resti
 // "Understand me" listens: it starts when a hand has been up this long, and a
 // sentence ends when the hands have rested this long (longer than the pause
 // between two signs).
-const LISTEN_RAISED_MS = 250;
 const SENTENCE_DOWN_MS = 1300;
 
 // Quiz verdicts. A lesson-only ranking would pass a completely different sign
@@ -127,6 +127,8 @@ const state = {
   signMode: 'quiz',
   quiz: { word: null, tried: 0, right: 0, misses: new Map(), log: [] },
   recording: null,
+  automatic: createAutoCapture(),
+  autoFrames: [],
   busy: false,
   spell: {
     mode: 'word', reader: createLetterReader(), motion: createMotionReader(), candidate: null, since: 0, armed: true,
@@ -144,7 +146,7 @@ const state = {
   // sentence the builder's sentence it came from (a try is shown against it).
   sentence: { view: null, mounting: null, plan: null, sentence: null, gloss: '' },
   // "Understand me": what was signed and read, newest first (kept in memory only)
-  understand: { entries: [], raisedSince: null },
+  understand: { entries: [] },
 };
 
 // --- Startup ---------------------------------------------------------------
@@ -190,6 +192,8 @@ async function boot() {
 
 function setTab(name) {
   state.tab = name;
+  state.automatic.reset();
+  state.autoFrames = [];
   for (const t of document.querySelectorAll('.tab')) {
     t.setAttribute('aria-selected', String(t.dataset.tab === name));
   }
@@ -338,6 +342,8 @@ el.stopCamera.addEventListener('click', () => {
   stopCamera(el.video, state.stream);
   state.stream = null;
   state.lastFrame = null;
+  state.automatic.reset();
+  state.autoFrames = [];
   state.ctx.clearRect(0, 0, el.overlay.width, el.overlay.height);
   document.body.classList.remove('live');
   el.stopCamera.hidden = true;
@@ -351,12 +357,14 @@ el.stopCamera.addEventListener('click', () => {
 });
 
 let lastTs = -1;
+let lastVideoTime = -1;
 function loop() {
   const video = el.video;
   if (state.stream && video.readyState >= 2) {
     const ts = state.clock();
-    if (ts > lastTs) {
+    if (ts > lastTs && video.currentTime !== lastVideoTime) {
       lastTs = ts;
+      lastVideoTime = video.currentTime;
       const handResult = state.trackers.hands.detectForVideo(video, ts);
       const poseResult = state.trackers.pose.detectForVideo(video, ts);
       const frame = bodyFrame(poseResult) ?? state.lastFrame;
@@ -368,9 +376,10 @@ function loop() {
         const faceResult = state.trackers.face.detectForVideo(video, ts);
         rec.times.push(ts);
         rec.vectors.push(frameVector(handResult, frame));
-        rec.points.push(framePoints(handResult, poseResult));
-        rec.holistic.push(holisticFrame(handResult, poseResult, faceResult,
-          video.videoWidth, video.videoHeight));
+        const holistic = holisticFrame(handResult, poseResult, faceResult,
+          video.videoWidth, video.videoHeight);
+        rec.holistic.push(holistic);
+        rec.points.push(pointsFromHolistic(holistic, video.videoWidth, video.videoHeight));
         const practising = rec.mode === 'phrase' && state.sentence.plan;
         const limit = rec.mode === 'sign' ? MAX_SIGN_MS : practising ? recordingMs(state.sentence.plan) : MAX_PHRASE_MS;
         const left = Math.ceil((limit - (ts - rec.startedAt)) / 1000);
@@ -378,10 +387,10 @@ function loop() {
         if (ts - rec.startedAt > limit) stopRecording();
         else if (rec.mode === 'sign' && handsDown(rec, handResult, frame, ts)) stopRecording();
         else if (rec.mode === 'understand' && handsDown(rec, handResult, frame, ts, SENTENCE_DOWN_MS)) stopRecording();
-        else if (practising && handsDown(rec, handResult, frame, ts, SENTENCE_DOWN_MS)) stopRecording();
+        else if (rec.mode === 'phrase' && handsDown(rec, handResult, frame, ts, SENTENCE_DOWN_MS)) stopRecording();
       } else if (state.tab === 'signs') {
-        updateFraming(handResult, frame);
-        if (state.signMode === 'understand' && el.uListen.checked && !state.busy) listen(handResult, frame, ts);
+        if (!state.busy && !el.record.disabled) updateFraming(handResult, frame);
+        if (el.uListen.checked && !state.busy && !el.record.disabled && !el.viewer.open) listen(handResult, poseResult, frame, ts);
       }
       if (state.tab === 'spell') updateSpelling(handResult, ts);
     }
@@ -389,15 +398,23 @@ function loop() {
   if (state.stream) requestAnimationFrame(loop);
 }
 
-/** "Understand me": start recording once a hand has come up and stayed up. */
-function listen(handResult, frame, ts) {
+/** Automatic capture includes the onset while the raised-hand trigger settles. */
+function listen(handResult, poseResult, frame, ts) {
   const raised = (handResult?.landmarks ?? []).some((h) =>
     frame && (h[0].y - frame.oy) / frame.scale < REST_BELOW);
-  if (!raised) { state.understand.raisedSince = null; return; }
-  state.understand.raisedSince ??= ts;
-  if (ts - state.understand.raisedSince >= LISTEN_RAISED_MS) {
-    state.understand.raisedSince = null;
-    startRecording();
+  if (!raised) { state.autoFrames = []; state.automatic.observe(false, ts); return; }
+  if (!state.automatic.armed) return;
+  {
+    const video = el.video;
+    const face = state.trackers.face.detectForVideo(video, ts);
+    const holistic = holisticFrame(handResult, poseResult, face, video.videoWidth, video.videoHeight);
+    state.autoFrames.push({ time: ts, vector: frameVector(handResult, frame), holistic,
+      points: pointsFromHolistic(holistic, video.videoWidth, video.videoHeight) });
+    state.autoFrames = state.autoFrames.filter((f) => ts - f.time <= 400);
+  }
+  if (state.automatic.observe(raised, ts)) {
+    startRecording(state.autoFrames);
+    state.autoFrames = [];
   }
 }
 
@@ -424,7 +441,7 @@ function updateFraming(handResult, frame) {
   if (!frame) {
     text = 'Sit back until your head and shoulders are in view — every sign is measured against them.';
   } else if (!hands) {
-    text = 'Ready. Hands down, then record and sign.';
+    text = el.uListen.checked ? 'Ready — raise your hands and sign. Rest them to see the guess.' : 'Ready. Press Record when you want to sign.';
   } else {
     text = hands === 1 ? 'One hand in view.' : 'Both hands in view.';
   }
@@ -442,11 +459,13 @@ function setState(text, live = false) {
 
 // --- Recording ---------------------------------------------------------------
 
-function startRecording() {
+function startRecording(preRoll = []) {
   if (state.recording || state.busy || !state.stream || el.record.disabled) return;
   const mode = state.signMode === 'phrase' || state.signMode === 'understand' ? state.signMode : 'sign';
   state.recording = {
-    mode, startedAt: performance.now(), times: [], vectors: [], points: [], holistic: [],
+    mode, startedAt: preRoll[0]?.time ?? performance.now(),
+    times: preRoll.map((f) => f.time), vectors: preRoll.map((f) => f.vector),
+    points: preRoll.map((f) => f.points), holistic: preRoll.map((f) => f.holistic),
   };
   document.body.classList.add('recording');
   state.watch.quiz?.pause();
@@ -462,6 +481,8 @@ function stopRecording() {
   const rec = state.recording;
   if (!rec) return;
   state.recording = null;
+  state.automatic.finish(rec.loweredSince != null);
+  state.autoFrames = [];
   document.body.classList.remove('recording');
   el.recordLabel.textContent = 'Record';
   setBadge('Ready');
@@ -750,20 +771,12 @@ el.guessCompare.addEventListener('click', () => {
  * a list in between is only placed between the two.
  */
 function rate(n) {
-  if (n <= 5) return 'the top answer is right about nine times in ten';
-  if (n <= 12) return 'the top answer is right about four times in five';
-  if (n <= 20) return 'the top answer is right about three times in four';
-  if (n <= 50) return 'the top answer is right about two times in three';
-  if (n < 1000) return 'the top answer is right less often than two times in three, and less the longer the list';
-  return 'the top answer is right about three times in ten';
+  return n <= 12 ? 'a short list gives the recogniser fewer signs to confuse; guesses still need checking'
+    : 'larger lists are harder to recognise; try a short lesson if guesses are poor';
 }
 
-/** How often the right word is among the three listed (README: 99%, 96%, 91%, 81%). */
-function rateTop3(n) {
-  if (n <= 12) return 'almost always among these three';
-  if (n <= 20) return 'about nine times in ten among these three';
-  if (n <= 50) return 'about four times in five among these three';
-  return '';
+function rateTop3() {
+  return 'check all three suggestions against the sign you intended';
 }
 
 // --- Understand me ---------------------------------------------------------------
@@ -771,15 +784,14 @@ function rateTop3(n) {
 function renderUnderstandNote() {
   const lesson = el.uScope.value === 'lesson' && state.lesson.words.length;
   el.uNote.textContent = lesson
-    ? `Read against your ${state.lesson.words.length} lesson words: the first guess is right about four times in five.`
-    : 'Read against every sign in the dictionary: the first guess is right about one time in three, '
-      + 'so check the other guesses under each sign. Your face and the signing space are not read yet, '
+    ? `Read against your ${state.lesson.words.length} lesson words. These are experimental guesses; check them against what you intended.`
+    : 'Reading the whole dictionary is experimental. Check the other guesses under each sign. Your face and the signing space are not read yet, '
       + 'so a yes/no question comes out as a statement.';
 }
 el.uScope.addEventListener('change', renderUnderstandNote);
 
 async function readUnderstand(rec) {
-  let segments = findSegments(rec.vectors);
+  let segments = findSegments(rec.vectors, { times: rec.times });
   if (!segments.length) segments = [{ start: 0, end: rec.times.length }];
   const lesson = el.uScope.value === 'lesson' ? lessonSet() : new Set();
   const pieces = [];
@@ -838,7 +850,7 @@ el.uTranscript.addEventListener('click', async (e) => {
 // --- Phrases -------------------------------------------------------------------
 
 async function readPhrase(rec) {
-  const segments = findSegments(rec.vectors);
+  const segments = findSegments(rec.vectors, { times: rec.times });
   if (!segments.length) {
     el.phraseList.innerHTML = '';
     el.phraseNote.textContent = 'No separate signs were found. Pause a little longer between signs '
@@ -1563,7 +1575,7 @@ const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
 function loadWatchPrefs() {
   try {
     const saved = JSON.parse(localStorage.getItem('watch') ?? 'null');
-    return { speed: saved?.speed === 0.5 ? 0.5 : 1, mirror: saved?.mirror === true };
+    return { speed: [0.25, 0.5, 1].includes(saved?.speed) ? saved.speed : 1, mirror: saved?.mirror === true };
   } catch {
     return { speed: 1, mirror: false };   // storage unavailable
   }
@@ -1599,6 +1611,9 @@ function syncPlayer(root, stage) {
     b.setAttribute('aria-pressed', String(Number(b.dataset.speed) === state.watch.speed));
   }
   root.querySelector('[data-act="mirror"]').setAttribute('aria-pressed', String(state.watch.mirror));
+  const closeUp = root.querySelector('[data-act="closeup"]');
+  if (closeUp) { closeUp.disabled = !stage; closeUp.setAttribute('aria-pressed', String(Boolean(stage?.closeUp))); }
+  for (const b of root.querySelectorAll('[data-step]')) b.disabled = !stage;
   const larger = root.querySelector('[data-act="larger"]');
   if (larger) larger.disabled = !stage;
   const seek = root.querySelector('[data-act="seek"]');
@@ -1613,6 +1628,9 @@ function wirePlayer(root, stageOf, { larger } = {}) {
     else if (b.dataset.speed) setWatchPref({ speed: Number(b.dataset.speed) });
     else if (b.dataset.act === 'mirror') setWatchPref({ mirror: !state.watch.mirror });
     else if (b.dataset.act === 'larger') larger?.();
+    else if (b.dataset.act === 'closeup') {
+      const stage = stageOf(); stage?.setCloseUp(!stage.closeUp); syncPlayer(root, stage);
+    } else if (b.dataset.step) stageOf()?.step(Number(b.dataset.step));
   });
   const seek = root.querySelector('[data-act="seek"]');
   seek?.addEventListener('input', () => {
