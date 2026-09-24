@@ -15,7 +15,7 @@ export const RUNTIME_FILES = [
   'data/signclip.bin', 'data/signclip-mirror.bin',
   'data/signclip-asl3.bin', 'data/signclip-asl3-mirror.bin',
   'data/replay.json', ...tree('data/replay'),
-  'data/letter-model.json', 'data/lessons.json', 'data/clip-review.json',
+  'data/letter-model.json', 'data/lessons.json', 'data/clip-review.json', 'data/clip-audit.json',
   ...['wlasl_slgcn', 'lsa64_slgcn', 'gsl_slgcn', 'signclip', 'signclip-asl3']
     .map((name) => `models/onnx/${name}.onnx`),
 ];

@@ -56,7 +56,7 @@
   </div>
   <aside class="margin-notes j-collage" aria-label="Margin notes">
     <p class="c c-green j-scrap j-green">SASL became South Africa’s 12th official language in 2023</p>
-    <p class="c c-sticky j-sticky"><span class="j-tape" aria-hidden="true"></span>Nothing you record leaves this computer.</p>
+    <p class="c c-sticky j-sticky"><span class="j-tape" aria-hidden="true"></span>Nothing you record leaves this device.</p>
     <p class="c c-kraft j-scrap j-kraft">Signs vary by region — trust your teacher.</p>
     <p class="c c-cream j-scrap j-cream">Faces carry grammar in SASL. This tracks your face but does not judge expressions or grammar.</p>
   </aside>
@@ -158,7 +158,7 @@
               </div>
               <div id="badge" class="badge" role="status">Camera off</div>
             </div>
-            <figcaption class="photo-caption">Shown mirrored · stays on this computer</figcaption>
+            <figcaption class="photo-caption">Shown mirrored · stays on this device</figcaption>
           </figure>
 
           <div class="cam-controls">
@@ -237,7 +237,7 @@
                           <canvas id="quiz-figure" class="fig-canvas" role="img" aria-label="A drawn signer"></canvas>
                           <p id="quiz-figure-status" class="fig-status">Drawing the signer…</p>
                         </div>
-                        <figcaption class="fig-cap">Drawn from the Real SASL clip</figcaption>
+                        <figcaption id="quiz-figure-cap" class="fig-cap">Drawn from the dictionary clip</figcaption>
                       </figure>
                       <div id="quiz-player" class="player" role="group" aria-label="The drawn sign">
                         <button class="j-btn play-btn" data-act="play" type="button" disabled>
@@ -476,7 +476,7 @@
             <label class="j-caps" for="lesson-input">Add a sign</label>
             <div class="search-row">
               <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#search"/></svg>
-              <input id="lesson-input" class="line-input" type="search" placeholder="Search all 1,471 signs…"
+              <input id="lesson-input" class="line-input" type="search" placeholder="Search all 1,858 signs…"
                      autocomplete="off" spellcheck="false" aria-controls="lesson-suggestions" />
               <button id="lesson-clear" class="text-btn" type="button">Clear the list</button>
               <span id="lesson-cleared" class="lesson-cleared" hidden>
@@ -525,7 +525,7 @@
             <div class="search-slip">
               <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#search"/></svg>
               <label class="visually-hidden" for="dict-input">Search the dictionary</label>
-              <input id="dict-input" type="search" placeholder="Search 1,471 SASL signs…"
+              <input id="dict-input" type="search" placeholder="Search 1,858 SASL signs…"
                      autocomplete="off" spellcheck="false" />
             </div>
           </div>
@@ -540,11 +540,11 @@
           <div class="j-page">
             <p class="page-label"><svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#page"/></svg><span>How it works</span></p>
             <h2 class="page-title">What this does</h2>
-            <p>Your webcam feed goes through hand, body and face tracking on this computer. A recorded sign
+            <p>Your camera feed goes through hand, body and face tracking on this device. A recorded sign
               becomes a sequence of points, and two families of pretrained sign models describe it in a way
-              that ignores who is signing. That description is compared with 1,656 reference clips of 1,471
+              that ignores who is signing. That description is compared with 3,483 reference clips of 1,858
               signs from the <a href="https://www.realsasl.com/" target="_blank" rel="noopener noreferrer">Real
-              SASL</a> dictionary. Nothing is uploaded, and there is nothing to set up: it was built to work for
+              SASL</a> dictionary and the National Institute for the Deaf's SASL Video Dictionary. Nothing is uploaded, and there is nothing to set up: it was built to work for
               someone it has never seen.</p>
 
             <h2 class="page-title">How well it works</h2>

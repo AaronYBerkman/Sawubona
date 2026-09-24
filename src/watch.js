@@ -27,6 +27,35 @@ export function replayPack() {
 }
 
 let review = null;
+let audit = null;
+
+/**
+ * The automatic clip audit (data/clip-audit.json, scripts/export-clip-audit.py):
+ * each flagged clip's suspicion score and flags, and each sign's preferred clip.
+ */
+export function clipAudit() {
+  audit ??= fetch(new URL('../data/clip-audit.json', import.meta.url))
+    .then((r) => (r.ok ? r.json() : {}))
+    .catch(() => ({}))
+    .then((j) => ({ clips: j.clips ?? {}, preferred: j.preferred ?? {} }));
+  return audit;
+}
+
+/**
+ * A sign's clip indices in the order the page offers them: the audit's
+ * preferred clip first, then the rest from least to most suspect (ties keep
+ * the dictionary's order), leaving out any flagged by eye in review.html.
+ */
+export function orderClips(replay, label, { flagged = new Set(), clips = {}, preferred = {} } = {}) {
+  const key = String(label).trim().toUpperCase();
+  const want = Object.entries(preferred).find(([l]) => l.toUpperCase() === key)?.[1];
+  const score = (i) => (replay.clips[i].file === want ? -1 : clips[replay.clips[i].file]?.[0] ?? 0);
+  return replay.variants(label)
+    .filter((i) => !flagged.has(replay.clips[i].file))
+    .map((i, n) => ({ i, n, s: score(i) }))
+    .sort((a, b) => a.s - b.s || a.n - b.n)
+    .map((x) => x.i);
+}
 
 /**
  * The drawings checked by eye in review.html, as committed in
@@ -46,11 +75,12 @@ const sourceOf = (file) => (/\[nid\d+\]/i.test(file || '') ? 'NID' : 'Real SASL'
  * { frames, fps, source, url, variants } for one of a sign's reference clips,
  * or null when there is no drawing. Variants flagged in review.html are left
  * out, so a sign whose first clip tracked badly shows its next one, and a sign
- * with no good clip shows none (the page links the video instead).
+ * with no good clip shows none (the page links the video instead). The best
+ * clip by the automatic audit comes first (orderClips).
  */
 export async function referenceClip(label, variant = 0) {
-  const [replay, flagged] = await Promise.all([loadReplay(), flaggedClips()]);
-  const usable = replay.variants(label).filter((i) => !flagged.has(replay.clips[i].file));
+  const [replay, flagged, checked] = await Promise.all([loadReplay(), flaggedClips(), clipAudit()]);
+  const usable = orderClips(replay, label, { flagged, ...checked });
   if (!usable.length) return null;
   const info = replay.clips[usable[Math.min(variant, usable.length - 1)]];
   if (!(await replay.ready(info.file))) return null;

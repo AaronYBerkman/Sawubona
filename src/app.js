@@ -164,6 +164,7 @@ async function boot() {
       for (const w of l.words) if (!state.wordLesson.has(w)) state.wordLesson.set(w, l);
     }
     el.statSigns.textContent = ref.labels.length.toLocaleString();
+    for (const input of [$('#dict-input'), $('#lesson-input')]) input.placeholder = input.placeholder.replace(/[\d,]+/, ref.labels.length.toLocaleString());
     el.statLessons.textContent = String(state.lessons.length);
     el.statLetters.textContent = String(letterNames().length);
     restoreLesson();
@@ -1022,7 +1023,7 @@ function renderLesson() {
   if (!words.includes(state.quiz.word)) pickQuizWord();
   el.guessIntro.textContent = words.length
     ? 'Sign any word from your lesson and this names it.'
-    : 'With no lesson, tries are compared with all 1,471 signs, which is much less reliable.';
+    : `With no lesson, tries are compared with all ${(state.reference?.labels.length ?? 1858).toLocaleString()} signs, which is much less reliable.`;
   renderLessonUndo();
   // The drawer's "In lesson" / "+ Lesson" buttons follow the lesson however it changed.
   renderDictionary(el.dictInput.value);
@@ -1037,7 +1038,7 @@ function renderLessonChips() {
   }).join('');
   const matched = words.filter((w) => matchedCount(w) > 0).length;
   el.lessonProgress.textContent = !words.length ? ''
-    : matched ? `${matched} of ${words.length} matched at least once on this computer.`
+    : matched ? `${matched} of ${words.length} matched at least once on this device.`
       : 'No tallies yet: each match in the quiz adds a pencil stroke to its word.';
   el.progressClear.hidden = state.progress.size === 0;
 }
@@ -1094,7 +1095,7 @@ function tallyHtml(n, said = true) {
 
 el.progressClear.addEventListener('click', () => {
   // The tallies are the learner's own record: ask before wiping them.
-  if (!window.confirm('Clear every tally of matched signs on this computer?')) return;
+  if (!window.confirm('Clear every tally of matched signs on this device?')) return;
   state.progress.clear();
   saveProgress();
   renderLessonChips();
@@ -1644,7 +1645,6 @@ async function renderQuizFigure(word, { at = STILL_AT } = {}) {
   syncPlayer(el.quizPlayer, null);
   el.quizPlate.hidden = !word;
   if (!word) return;
-  el.quizFigure.setAttribute('aria-label', `A drawn signer performing ${word} in SASL, from the Real SASL clip`);
   el.quizPlate.classList.add('waiting');
   figureStatus(el.quizFigureStatus, 'Drawing the signer…');
   let clip = null;
@@ -1663,6 +1663,8 @@ async function renderQuizFigure(word, { at = STILL_AT } = {}) {
   }
   el.quizPlate.classList.remove('waiting');
   figureStatus(el.quizFigureStatus, '');
+  $('#quiz-figure-cap').textContent = `Drawn from the ${clip.source} clip`;
+  el.quizFigure.setAttribute('aria-label', `A drawn signer performing ${word} in SASL, from the ${clip.source} clip`);
   const stage = createStage([el.quizFigure], [clip], {
     mirror: [state.watch.mirror],
     onState: () => syncPlayer(el.quizPlayer, stage),
@@ -1760,13 +1762,15 @@ async function openViewer({ label, attempt = null, choices = null, at = null, va
   }));
   $('#viewer-variant-label').hidden = clip.variants.length < 2;
   variantSelect.onchange = () => openViewer({ ...state.watch.open, variant: Number(variantSelect.value) });
-  el.viewerRefNo.textContent = clip.source;
-  el.viewerRefCap.textContent = `Drawn from the ${clip.source} clip`;
+  el.viewerRefNo.textContent = compare ? clip.source : 'Fig. 1';
+  el.viewerRefCap.textContent = compare ? `${head}, drawn from the ${clip.source} clip` : `Drawn from the ${clip.source} clip`;
   el.viewerRef.setAttribute('aria-label', `A drawn signer performing ${label} in SASL, from the ${clip.source} clip`);
-  el.viewerSrc.hidden = !clip.url;
-  if (clip.url) {
-    el.viewerSrc.href = clip.url;
-    el.viewerSrc.textContent = `Watch this variant on ${clip.source} ↗`;
+  // NID's clips have no page to link: offer the sign's Real SASL video instead
+  const video = clip.url ?? realSaslUrl(label);
+  el.viewerSrc.hidden = !video;
+  if (video) {
+    el.viewerSrc.href = video;
+    el.viewerSrc.textContent = clip.url ? `Watch this variant on ${clip.source} ↗` : 'Watch it on Real SASL ↗';
   }
   el.viewerFigs.classList.remove('waiting');
   figureStatus(el.viewerRefStatus, '');

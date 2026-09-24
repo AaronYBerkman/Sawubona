@@ -33,9 +33,14 @@ SignCLIP view — 108 MB less to download and hold, for 2–3 points of accuracy
 (`src/device.js`); add `?full` to the address to load it anyway, or `?light` to
 skip it on a computer.
 
-**Checking the drawings.** [`review.html`](https://aaronyberkman.github.io/Sawubona/review.html)
-shows every clip of each sign as the drawn signer, starting with the 999 signs
-that have more than one. Flag the badly tracked ones, download the result and
+**Checking the drawings.** Each sign's drawing comes from its best clip by the
+automatic audit (`tools/audit-clips.py`, cut down to `data/clip-audit.json` by
+`scripts/export-clip-audit.py`): poorly tracked clips, clips cut off mid-sign or
+acting out their opening picture go last. For 454 signs that changed which
+drawing is shown — DOG's first Real SASL clip, tracked in under 60% of its
+frames, gave way to NID's. [`review.html`](https://aaronyberkman.github.io/Sawubona/review.html)
+shows every clip of each sign as the drawn signer, most suspect first, with
+the audit's reasons beside each. Flag the badly tracked ones, download the result and
 commit it as `data/clip-review.json`: the app then skips flagged clips (a sign
 whose every clip is flagged shows no drawing, only the link to its video).
 

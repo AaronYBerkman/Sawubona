@@ -32,6 +32,8 @@
   .card.keep { border-color: var(--j-forest); }
   .card canvas { display: block; width: 100%; aspect-ratio: 1 / 1.02; }
   .card .meta { font-family: 'Courier Prime', monospace; font-size: 13px; margin: 6px 0 8px; display: flex; justify-content: space-between; gap: 8px; }
+  .card .why { font-size: 13px; line-height: 1.35; margin: 0 0 8px; min-height: 2.7em; }
+  .card .first { font-family: 'Courier Prime', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
   .card .choose { display: flex; gap: 8px; }
   .card .choose button { flex: 1; }
   .card .choose button[aria-pressed=true].k { background: var(--j-forest); color: #fff; border-color: var(--j-forest); }
@@ -58,7 +60,8 @@
 
   <div class="bar">
     <label>Show <select id="filter">
-      <option value="multi">Signs with 2 or more clips</option>
+      <option value="suspect">Most suspect first (2 or more clips)</option>
+      <option value="multi">Signs with 2 or more clips, A–Z</option>
       <option value="todo">Signs not yet reviewed</option>
       <option value="flagged">Signs with a flagged clip</option>
       <option value="all">Every sign</option>
@@ -97,11 +100,23 @@
 <script type="module">
   import { loadReplay } from './src/replay-data.js';
   import { createReplay } from './src/figure.js';
+  import { clipAudit, orderClips } from './src/watch.js';
 
   const KEY = 'sawubona-clip-review';
   const $ = (id) => document.getElementById(id);
   const replay = await loadReplay();
   const committed = await fetch('data/clip-review.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+  const audit = await clipAudit();
+  // tools/audit-clips.py's flags, in words
+  const WHY = {
+    'poorly-tracked': 'the moving hand was tracked in under 60% of frames', 'picture-pose': 'acts out the opening picture',
+    'starts-mid-sign': 'starts mid-sign', 'ends-mid-sign': 'ends mid-sign', 'poses-cut': 'stops before the sign ends',
+    short: 'under 0.35 s of signing', low: 'the hand is mostly below the waist, where the drawing fades',
+    'out-of-frame': 'the hand leaves the picture', 'ends-raised': 'ends with a hand still raised',
+    'no-match': "unlike the sign's other clips", 'ocr-mismatch': 'the caption names another word',
+    'ocr-fuzzy': 'the caption only roughly matches', 'ocr-none': 'no caption could be read',
+  };
+  const scoreOf = (file) => audit.clips[file]?.[0] ?? 0;
 
   // file -> 'keep' | 'flag': the committed file, then this browser's choices on top
   const decisions = new Map([
@@ -122,15 +137,22 @@
 
   const labels = [...new Set(replay.clips.map((c) => c.label))].sort((a, b) => a.localeCompare(b));
   $('labels').innerHTML = labels.map((l) => `<option value="${l.replace(/"/g, '&quot;')}">`).join('');
-  const clipsOf = (label) => replay.variants(label).map((i) => replay.clips[i]);
+  // in the order the app offers them: the audit's preferred clip first
+  const clipsOf = (label) => orderClips(replay, label, audit).map((i) => replay.clips[i]);
+  const worst = (label) => Math.max(0, ...clipsOf(label).map((c) => scoreOf(c.file)));
   const reviewed = (label) => clipsOf(label).every((c) => decisions.has(c.file));
   const FILTERS = {
+    suspect: (l) => clipsOf(l).length > 1,
     multi: (l) => clipsOf(l).length > 1,
     todo: (l) => !reviewed(l),
     flagged: (l) => clipsOf(l).some((c) => decisions.get(c.file) === 'flag'),
     all: () => true,
   };
-  let list = labels.filter(FILTERS.multi);
+  const listFor = (name) => {
+    const l = labels.filter(FILTERS[name]);
+    return name === 'suspect' ? l.map((x) => [x, worst(x)]).sort((a, b) => b[1] - a[1]).map(([x]) => x) : l;
+  };
+  let list = listFor('suspect');
   let at = 0;
   let players = [];
   let token = 0;
@@ -149,7 +171,10 @@
   }
 
   function paintChoices() {
+    // the app shows the first clip not flagged
+    const shown = [...$('cards').children].find((c) => decisions.get(c.dataset.file) !== 'flag');
     for (const card of $('cards').children) {
+      card.querySelector('.first').hidden = card !== shown;
       const d = decisions.get(card.dataset.file);
       card.classList.toggle('flag', d === 'flag');
       card.classList.toggle('keep', d === 'keep');
@@ -177,9 +202,12 @@
       const nid = /\[nid\d+\]/i.test(c.file);
       const src = nid ? 'NID' : 'Real SASL';
       const link = !nid && id ? `<a href="https://www.realsasl.com/?vid=${id}" target="_blank" rel="noopener">video ↗</a>` : '';
+      const [score, flags] = audit.clips[c.file] ?? [0, []];
+      const why = flags.map((f) => WHY[f] ?? f).join('; ');
       return `<figure class="card" data-file="${c.file.replace(/"/g, '&quot;')}" style="margin:0">
         <canvas role="img" aria-label="Clip ${n + 1} of ${label}, drawn from the ${src} clip"></canvas>
-        <figcaption class="meta"><span>${n + 1} · ${src}</span>${link}</figcaption>
+        <figcaption class="meta"><span>${n + 1} · ${src}<span class="first" hidden> · shown in the app</span></span>${link}</figcaption>
+        <p class="why">${score ? `Suspicion ${score}: ${why}.` : 'No automatic flags.'}</p>
         <div class="choose"><button type="button" class="k">Keep</button><button type="button" class="f">Flag (${n + 1})</button></div>
       </figure>`;
     }).join('');
@@ -214,7 +242,7 @@
   $('next').onclick = () => go(at + 1);
   $('next-todo').onclick = nextTodo;
   $('keep-rest').onclick = keepRest;
-  $('filter').onchange = () => { list = labels.filter(FILTERS[$('filter').value]); go(0); };
+  $('filter').onchange = () => { list = listFor($('filter').value); go(0); };
   $('find').onchange = () => {
     const want = $('find').value.trim().toUpperCase();
     if (!want) return;
