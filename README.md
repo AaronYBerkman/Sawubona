@@ -152,6 +152,39 @@ figure is why a pass also needs the target to rank in the top 100 of the whole
 dictionary: judged on the lesson alone, an unrelated sign would pass about one
 time in ten by elimination (`tools/quiz-thresholds.py`).
 
+**Learns your signing.** The models have never seen you. When the quiz says a
+try matched, or you tap *That's it* on a guess, that try's embeddings are kept
+on your device (`src/personal.js`: numbers only, never video, two per word;
+*Forget my signing* clears them) and count beside the dictionary's clips.
+Measured through the page's own code (`scripts/bench-personal.mjs`), with NID
+signers standing in for the learner and only Real SASL clips as the dictionary,
+10-word lessons:
+
+| | right answer | a different word |
+|---|---:|---:|
+| quiz passes, dictionary only | 58% | 3.1% |
+| quiz passes, with your earlier try of the word asked | **70%** | 4.5% |
+| *What did I sign?* top guess, dictionary only | 60% | |
+| … with your tries of every lesson word | **65%** | |
+| … with tries of the other words only | 52% | |
+
+The last row is why guesses count your tries only once every lesson word has
+one, and the quiz only your tries of the word asked. A learner at a webcam is
+not an NID presenter in a studio, so the gain for you may differ.
+
+**How sure a guess is.** *What did I sign?* says Sure, Maybe or Not sure, from
+how far the top guess stands clear of the next (`src/confidence.js`). On the
+same data, in 5- to 20-word lessons:
+
+| | share of tries | top guess right | right one in the top three |
+|---|---:|---:|---:|
+| Sure | 32–56% | 83–91% | 88–97% |
+| Maybe | 11–15% | 54–69% | 70–86% |
+| Not sure | 33–57% | 30–40% | 50–78% |
+
+Across the whole dictionary even a clear guess was right only about half the
+time, so there it never says Sure.
+
 ## What it does not do
 
 - **It is not a translator.** No system can yet translate signed language from a

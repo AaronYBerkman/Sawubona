@@ -85,7 +85,9 @@ export async function runDemo(name, api) {
     inLesson();
     api.setSignMode('guess');
     state.lastAttempt = await sampleTry(TARGET, 'guess');
-    api.showGuess(ranking([TARGET, 'PLEASE', 'SORRY']));
+    // a stand-in embedding, so "That's it" shows; a demo never keeps it
+    const unitVec = () => new Float32Array(768).fill(1 / Math.sqrt(768));
+    api.showGuess(Object.assign(ranking([TARGET, 'PLEASE', 'SORRY']), { embedding: { openhands: unitVec(), signclip: unitVec() } }));
   };
 
   const spell = (reading) => {
