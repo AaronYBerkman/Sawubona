@@ -161,13 +161,13 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
   root.classList.add('sb');
   root.innerHTML = `
     <header class="sb-head"${heading ? '' : ' hidden'}>
-      <h2 class="sb-title">Find the shape of your <span class="sb-underline">sentence.</span></h2>
+      <h1 class="sb-title">Find the shape of your <span class="sb-underline">sentence.</span></h1>
       <p class="sb-lede">Paste a sentence or a paragraph. Explore a suggested word order based on SASL lessons. Then practise it one sentence at a time.</p>
     </header>
 
     <div class="sb-top">
       <section class="sb-panel sb-input j-lined" aria-labelledby="sb-h1">
-        <h3 class="sb-h" id="sb-h1"><span class="sb-num">1.</span> Your paragraph</h3>
+        <h2 class="sb-h" id="sb-h1"><span class="sb-num">1.</span> Your paragraph</h2>
         <div class="sb-editor">
           <div class="sb-backdrop" aria-hidden="true"></div>
           <textarea class="sb-text" rows="4" spellcheck="true" aria-label="Your English sentence or paragraph"></textarea>
@@ -180,7 +180,7 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
 
       <aside class="sb-panel sb-list-card" aria-labelledby="sb-h-list">
         <span class="j-tape sb-tape" style="--tilt:-3deg"></span>
-        <h3 class="sb-h" id="sb-h-list">Your sentences</h3>
+        <h2 class="sb-h" id="sb-h-list">Your sentences</h2>
         <ol class="sb-list"></ol>
         <p class="sb-where j-type"></p>
       </aside>
@@ -188,7 +188,7 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
 
     <section class="sb-panel sb-order" aria-labelledby="sb-h2">
       <div class="sb-order-head">
-        <h3 class="sb-h" id="sb-h2"><span class="sb-num">2.</span> Suggested sign order</h3>
+        <h2 class="sb-h" id="sb-h2"><span class="sb-num">2.</span> Suggested sign order</h2>
         <span class="sb-pill sb-kind"></span>
         <span class="sb-pill sb-rough" hidden>Outside the supported rules — ask your SASL teacher</span>
       </div>
@@ -208,7 +208,7 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
 
     <div class="sb-bottom">
       <section class="sb-panel sb-practise" aria-labelledby="sb-h3">
-        <h3 class="sb-h" id="sb-h3"><span class="sb-num">3.</span> Practise this sequence</h3>
+        <h2 class="sb-h" id="sb-h3"><span class="sb-num">3.</span> Practise this sequence</h2>
         <div class="sb-practise-grid">
           <figure class="sb-figure j-photo j-corners" style="--tilt:-.8deg">
             <canvas class="sb-canvas" aria-label="An ink figure signing the sentence"></canvas>
@@ -229,7 +229,7 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
       </section>
 
       <aside class="sb-panel sb-notes j-scrap j-green" style="--tilt:.4deg" aria-labelledby="sb-h4">
-        <h3 class="sb-h" id="sb-h4">More than word order</h3>
+        <h2 class="sb-h" id="sb-h4">More than word order</h2>
         <div class="sb-rules-wrap"></div>
         <img class="sb-sprig j-art--ink" src="assets/art/sprig.svg" alt="" />
       </aside>

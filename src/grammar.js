@@ -365,7 +365,9 @@ function adverbBase(w) {
 
 const ADVERBS = new Set('very really too also just only quite so well together even still almost maybe perhaps please'.split(' '));
 const PARTICLES = new Set('up down out off away back over around'.split(' '));
-const REDUNDANT_PARTICLE = new Set(['sit down', 'lie down', 'stand up', 'hurry up']);
+// words that can stand between "have" and its participle: "have already eaten", "has just left"
+const BETWEEN_HAVE = new Set('already just ever never recently since still also always yet'.split(' '));
+const REDUNDANT_PARTICLE = new Set(['sit down', 'lie down', 'stand up', 'hurry up', 'look at']);
 const MOTION = new Set('go come walk run drive ride fly travel move arrive return leave hurry rush go'.split(' '));
 const GIVING = new Set('give send tell show ask help pay teach bring lend email text phone call visit invite warn copy'.split(' '));
 const COLOURS = new Set('red blue green yellow black white brown grey gray pink purple orange gold silver'.split(' '));
@@ -403,6 +405,12 @@ function joinPhrases(toks) {
       span(2, { tag: 'TIME', parts: [w(i) === 'each' ? 'EVERY' : w(i).toUpperCase(), head.toUpperCase()] });
       continue;
     }
+    // in May / since March: a capitalised month after a preposition is the month
+    // ("May" alone could be the modal)
+    if (['in', 'since', 'until', 'during', 'by'].includes(w(i)) && W.MONTHS.includes(w(i + 1)) && toks[i + 1].cap) {
+      span(2, { tag: 'TIME', parts: [w(i + 1).toUpperCase()], fn: fn(1) });
+      continue;
+    }
     // in the morning / at night / on Monday / during the holidays
     if (['in', 'on', 'at', 'during', 'over'].includes(w(i))) {
       const skip = ['the', 'a'].includes(w(i + 1)) ? 1 : 0;
@@ -412,7 +420,7 @@ function joinPhrases(toks) {
         continue;
       }
       // at 5 / at 5 pm / at 5 o'clock
-      if (w(i) === 'at' && toks[i + 1]?.num) {
+      if (w(i) === 'at' && (toks[i + 1]?.num || typeof W.NUMBERS[w(i + 1)] === 'number' && ['pm', 'am', "o'clock", 'oclock'].includes(w(i + 2)))) {
         const n2 = ['pm', 'am', "o'clock", 'oclock'].includes(w(i + 2)) ? 3 : 2;
         span(n2, { tag: 'TIME', parts: ['TIME', toks.slice(i + 1, i + n2).map((x) => x.w.toUpperCase()).join(' ')], fn: fn(1) });
         continue;
@@ -555,10 +563,17 @@ function tag(toks, question, lex) {
       t.gloss = w.toUpperCase();
       return i;
     }
+    // "I have been to Durban" is having gone there: GO, not a dropped "to be"
+    if (w === 'been' && next?.w === 'to' && toks.slice(0, i).some((x) => W.HAVE.has(x.w))) {
+      t.tag = 'VERB'; t.lemma = 'go'; t.form = 'past'; seenVerb = true; return i;
+    }
     if (W.BE.has(w)) {
       seenBe = true; t.tag = 'BE'; t.form = ['was', 'were'].includes(w) ? 'past' : 'present';
       if (w === 'be' && open && !question) t.imperative = true;             // "Be quiet."
       return i;
+    }
+    if (w === 'used' && next?.w === 'to' && toks[i + 2] && verbBase(toks[i + 2].w)) {
+      t.tag = 'AUX'; t.form = 'past'; next.tag = 'PART'; return i + 1;
     }
     if (W.HAVE.has(w)) {
       // "have to" = must; "have got" = have; "have + participle" = perfect; otherwise possession
@@ -568,9 +583,16 @@ function tag(toks, question, lex) {
         if (toks[i + 2]?.w === 'to') { next.tag = 'MODAL'; next.gloss = 'MUST'; toks[i + 2].tag = 'PART'; return i + 2; }
         Object.assign(next, { tag: 'VERB', lemma: 'have', form: 'base' }); seenVerb = true; return i + 1;
       }
-      const n = toks.slice(i + 1).find((x) => !['NEG', 'ADV'].includes(x.tag) && x.w !== 'not' && !ADVERBS.has(x.w) && !W.FREQUENCY.has(x.w));
-      const participle = n && (W.IRREGULAR[n.w] && !W.IRREGULAR_NOUNS.has(n.w) || /ed$/.test(n.w) && verbBase(n.w)) && !(n.w === 'had');
-      if (participle || (question && clauseStart && n && (n.tag === 'PRON' || W.PRONOUNS[n.w]) && toks.slice(i + 2).some((x) => verbBase(x.w) && /ed$|en$/.test(x.w)))) {
+      // "Have you got a pen?": have got is possession, with the subject between
+      if (question && clauseStart && toks[i + 2]?.w === 'got' && (W.PRONOUNS[next?.w] || next?.cap)) {
+        t.tag = 'AUX'; t.form = w === 'had' ? 'past' : 'present';
+        Object.assign(toks[i + 2], { tag: 'VERB', lemma: 'have', form: 'base' });
+        return i;
+      }
+      const n = toks.slice(i + 1).find((x) => !['NEG', 'ADV'].includes(x.tag) && x.w !== 'not' && !ADVERBS.has(x.w) && !W.FREQUENCY.has(x.w)
+        && !BETWEEN_HAVE.has(x.w));
+      const participle = n && (W.IRREGULAR[n.w] && !W.IRREGULAR_NOUNS.has(n.w) || /ed$/.test(n.w) && verbBase(n.w)) && !(n.w === 'had' && w === 'had');   // "have had" is the perfect of have; "had had" is left alone
+      if (participle || (question && clauseStart && n && (n.tag === 'PRON' || W.PRONOUNS[n.w]) && toks.slice(i + 2).some((x) => verbBase(x.w) && (/ed$|en$/.test(x.w) || W.PAST_FORMS.has(x.w))))) {
         t.tag = 'AUX'; t.form = w === 'had' ? 'past' : 'perfect'; return i;
       }
       t.tag = 'VERB'; t.lemma = 'have'; t.form = w === 'had' ? 'past' : open && !question ? 'imperative' : 'base'; seenVerb = true; return i;
@@ -616,7 +638,8 @@ function tag(toks, question, lex) {
       t.gloss = W.TIME_WORDS[w];
       return i;
     }
-    if ((W.DAYS.includes(w) || W.MONTHS.includes(w) && t.cap && w !== 'may') && !['DET', 'POSS'].includes(prev?.tag)) { t.tag = 'TIME'; t.parts = [w.toUpperCase()]; return i; }
+    const monthMay = w === 'may' && ['in', 'of', 'since', 'until', 'during', 'from', 'by'].includes(prev?.w);
+    if ((W.DAYS.includes(w) || W.MONTHS.includes(w) && t.cap && (w !== 'may' || monthMay)) && !['DET', 'POSS'].includes(prev?.tag)) { t.tag = 'TIME'; t.parts = [w.toUpperCase()]; return i; }
     if (W.PREPOSITIONS.has(w)) {
       if (w === 'like' && prev && (prev.tag === 'PRON' && prev.subject || ['AUX', 'MODAL', 'NEG', 'PART', 'FREQ'].includes(prev.tag) || ['NOUN', 'NAME'].includes(prev.tag) && !seenVerb)) {
         t.tag = 'VERB'; t.lemma = 'like'; t.form = 'base'; seenVerb = true; return i;
@@ -947,6 +970,13 @@ function analyseClause(clause, lex, ctx, sentence) {
     switch (p.kind) {
       case 'TIME': {
         const t = p.tok;
+        // "My birthday is in May": after "to be", with nothing else said, the time is the comment
+        if (pivot === beIdx && verbIdx < 0 && k > beIdx && P.slice(beIdx + 1).every((q) => ['TIME', 'PUNCT'].includes(q.kind))) {
+          t.parts.forEach((g, n) => units.object.push(ctx.sign(n === 0 ? t : { ...t, silent: true }, { gloss: g, role: 'describe', kind: 'describe', rule: 'adj' })));
+          ctx.dropExtra(t, 'time');
+          ctx.rule('adj');
+          break;
+        }
         const signs = [];
         const whole = lex.find(t.w.toUpperCase().replace(/\b(IN|ON|AT|THE|DURING|OVER)\b/g, '').trim());
         if (whole && t.parts.length > 1) signs.push(ctx.sign(t, { gloss: glossKey(whole), role: 'time', rule: 'time' }));
@@ -1228,7 +1258,9 @@ export function buildSentence(text, lex, state = {}) {
   const timeStart = signs.length;
   signs.push(...allTime);
   let added = null;
-  if (!allTime.length && (tense === 'past' || tense === 'future')) {
+  // FINISH already says the action is done, so no PAST is added before it
+  const finished = built.some((b) => b.units.verb.some((v) => v.gloss === 'FINISH'));
+  if (!allTime.length && (tense === 'past' || tense === 'future') && !(tense === 'past' && finished)) {
     if (state.tense === tense) { ctx.rule('timeKept'); }
     else {
       added = { gloss: tense === 'past' ? 'PAST' : 'FUTURE', role: 'time', kind: 'sign', words: [], rule: 'tense', added: true, sub: 'added: sets the tense' };
@@ -1281,6 +1313,16 @@ export function buildSentence(text, lex, state = {}) {
         for (const x of sp ? [pr, sp] : [pr]) { for (const wi of x.words) fate[wi] = { sign: v0 }; v0.words.push(...x.words); }
         unit.length = 0;
         if (sp) u.subject.length = 0;
+      }
+    }
+    if (v0 && v0.rule !== 'directional' && u.object.length === 1 && ['ME', 'YOU', 'HE', 'SHE', 'THEY', 'WE'].includes(u.object[0].gloss)) {
+      const pr = u.object[0];
+      const fused = lex.find(`${v0.gloss} AT ${pr.gloss}`) || lex.find(`${v0.gloss} ${pr.gloss}`);
+      if (fused) {
+        v0.gloss = glossKey(fused); v0.entry = fused; v0.state = 'sign';
+        for (const wi of pr.words) fate[wi] = { sign: v0 };
+        v0.words.push(...pr.words);
+        u.object.length = 0;
       }
     }
     const negHere = negated.filter((t) => b.clause.toks.includes(t));
