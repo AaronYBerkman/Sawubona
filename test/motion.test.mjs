@@ -1,6 +1,8 @@
-// J and Z (src/motion-letters.js) on synthetic hands: the letters drawn either
-// way round must be read, and the movements that are not letters must not be.
+// J and Z (src/motion-letters.js), on synthetic hands and on NID's own letter
+// clips: the letters drawn either way round must be read, and the movements
+// and shapes that are not those letters must not be.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { createMotionReader, motionShape, drawsJ, drawsZ } from '../src/motion-letters.js';
 import { wantsExtraViews } from '../src/device.js';
 
@@ -75,6 +77,27 @@ assert.deepEqual(play(ONE_HAND, [...Z, [0, 0, 20]]), ['Z']);
 assert.ok(drawsJ([{ x: 0, y: 0 }, { x: 0, y: 0.3 }, { x: 0, y: 0.6 }, { x: 0.3, y: 0.6 }]));
 assert.ok(!drawsJ([{ x: 0, y: 0 }, { x: 0.5, y: 0.2 }, { x: 1, y: 0.4 }, { x: 1.5, y: 0.6 }]));
 assert.ok(!drawsZ([{ x: 0, y: 0 }, { x: 0.5, y: 0 }, { x: 1, y: 0 }]));
+
+// Real hands: NID's letter clips, tracked by MediaPipe. J and Z are read,
+// expected or not; I and Y (the J hand held still, and the thumb-out Y) are not.
+const nid = JSON.parse(readFileSync(new URL('fixtures/motion-nid.json', import.meta.url)));
+function playReal(letter, expect) {
+  const clip = nid.clips[letter];
+  const reader = createMotionReader();
+  const read = [];
+  for (const [t, img, world] of clip.frames) {
+    if (!img) { reader.clear(); continue; }
+    const r = reader.push({ t: t * 1000, img: img.map(([x, y]) => ({ x, y })), world: world.map(([x, y, z]) => ({ x, y, z })), aspect: clip.aspect, expect });
+    if (r) read.push(r.letter);
+  }
+  return read;
+}
+for (const expect of [null, 'J', 'Z']) {
+  assert.deepEqual(playReal('J', expect), ['J'], `NID's J, expecting ${expect}`);
+  assert.deepEqual(playReal('Z', expect), ['Z'], `NID's Z, expecting ${expect}`);
+  assert.deepEqual(playReal('I', expect), [], `NID's I, expecting ${expect}`);
+  assert.deepEqual(playReal('Y', expect), [], `NID's Y, expecting ${expect}`);
+}
 
 // Phones leave out the second SignCLIP view; ?full and ?light override
 const iphone = { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Mobile/15E148', maxTouchPoints: 5 };

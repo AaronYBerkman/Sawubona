@@ -63,8 +63,24 @@ each letter as you hold it — names, places, words from your lesson, or anythin
 you type. J and Z are drawn in the air, so they are read from the path of the
 fingertip rather than a held shape (`src/motion-letters.js`): the I hand drawing
 down and hooking is J, the index finger drawing across, down the diagonal and
-across again is Z, either way round. This is new and so far tested on synthetic
-hands only (`test/motion.test.mjs`), not measured on real signers.
+across again is Z, either way round. Measured on real signers
+(`scripts/bench-motion-letters.mjs`, over the tracked hands of NID's letter
+clips and four alphabet videos with checked letter holds):
+
+| | J | Z |
+|---|---:|---:|
+| NID's own letter clips | read | read |
+| alphabet videos, letter expected (*Spell a word*) | 3 of 4 | 4 of 4 |
+| alphabet videos, not expected (*Free spelling*) | 3 of 4 | 2 of 4 |
+
+NID's I and Y (the J hand held still, and the thumb held out) are never read as
+J. Over 36 minutes of those videos — mostly talking and ordinary signing, not
+spelling — 11 readings fall outside the J and Z moments when not expecting one;
+several are the presenter repeating the letter being taught. A letter is read
+from a held shape into a stroke (hold I, then draw), which is what keeps
+ordinary signing out; when the next letter to spell is J or Z, a stroke may also
+start the moment the shape appears, as fluent signers draw it.
+`test/motion.test.mjs` pins NID's four clips.
 
 **Dictionary.** Search all 1,858 signs, open the Real SASL video where there is one, add it to a lesson.
 

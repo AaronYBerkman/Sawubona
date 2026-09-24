@@ -22,9 +22,13 @@ const SHAPES = {
   Z: { up: ['index'], down: ['middle', 'ring', 'little'], tip: 8 },
 };
 
-const MIN_MS = 250;              // quicker than this is a twitch, not a letter
-const MAX_MS = 2200;             // the stroke window: older frames are forgotten
-const GAP_MS = 180;              // the shape may be lost this long without breaking the stroke
+const MIN_MS = 200;              // quicker than this is a twitch, not a letter
+const MAX_MS = 2500;             // the stroke window: older frames are forgotten
+// Mid-stroke the hand blurs and the shape is often lost for a few frames (NID's
+// J: 280 ms; a 15 fps video's: 600 ms); the stroke carries on through a gap this long.
+const GAP_MS = 650;
+const STILL_MS = 150;            // a letter starts from a held shape, still this long...
+const STILL = 0.15;              // ...moving less than this (hand sizes)
 const COOLDOWN_MS = 700;
 
 const sub = (a, b) => [a.x - b.x, a.y - b.y, (a.z ?? 0) - (b.z ?? 0)];
@@ -38,11 +42,20 @@ export function fingerStraight(world, name) {
   return cos(sub(m, k), sub(t, m)) > 0.55 && len(sub(t, wrist)) > len(sub(m, wrist)) * 1.08;
 }
 
+/**
+ * How far the thumb tip stands out from the middle knuckle, in wrist-to-knuckle
+ * lengths: I and J fold it across (0.48-0.58 in NID's clips), Y holds it out (0.86-0.97).
+ */
+export function thumbOut(world) {
+  return len(sub(world[4], world[9])) / (len(sub(world[0], world[9])) || 1);
+}
+
 /** 'J' or 'Z' when the hand is in that letter's shape, else null. */
 export function motionShape(world) {
   if (!world || world.length < 21) return null;
   for (const [letter, s] of Object.entries(SHAPES)) {
-    if (s.up.every((f) => fingerStraight(world, f)) && s.down.every((f) => !fingerStraight(world, f))) return letter;
+    if (s.up.every((f) => fingerStraight(world, f)) && s.down.every((f) => !fingerStraight(world, f))
+      && (letter !== 'J' || thumbOut(world) < 0.72)) return letter;
   }
   return null;
 }
@@ -69,7 +82,12 @@ function horizontalStrokes(pts, min) {
   return strokes;
 }
 
-/** Does this path (image units of hand size, y down) draw a J? */
+/**
+ * Does this path (image units of hand size, y down) draw a J? Down, then the
+ * hook: at the bottom the fingertip turns, sideways or back up. Real signers
+ * (NID, five alphabet videos) curve on the way down as well, so the curve can
+ * start early; a path that is mostly sideways is not a J.
+ */
 export function drawsJ(pts) {
   if (pts.length < 4) return false;
   const start = pts[0];
@@ -77,12 +95,14 @@ export function drawsJ(pts) {
   // since the hook itself may drift a little lower as it turns
   const lowest = Math.max(...pts.map((p) => p.y));
   const low = pts.findIndex((p) => p.y >= lowest - 0.15);
-  const drop = pts[low].y - start.y;
-  const across = Math.abs(pts[pts.length - 1].x - pts[low].x);
-  const sideOnWay = Math.abs(pts[low].x - start.x);
-  const beyond = Math.max(...pts.slice(low).map((p) => Math.abs(p.x - pts[low].x)));
-  // down first, then a hook: the turn at the bottom, not a sideways slide
-  return drop >= 0.45 && Math.max(across, beyond) >= 0.2 && sideOnWay <= drop * 0.9;
+  const bottom = pts[low];
+  const drop = lowest - start.y;
+  const after = pts.slice(low);
+  const rise = lowest - Math.min(...after.map((p) => p.y));
+  const side = Math.max(...after.map((p) => Math.abs(p.x - bottom.x)));
+  const xs = pts.map((p) => p.x);
+  const width = Math.max(...xs) - Math.min(...xs);
+  return drop >= 0.5 && (side >= 0.25 || rise >= 0.25) && width >= 0.25 && width <= drop * 1.5;
 }
 
 /** Does this path draw a Z? */
@@ -103,36 +123,61 @@ export function drawsZ(pts) {
 /**
  * Feed it one hand a frame; it answers { letter, start } the moment a J or Z
  * has been drawn (start: when that letter's hand shape began), else null.
+ *
+ * A letter is read from a held shape into a stroke: the fingertip keeps still
+ * for a moment in the letter's shape, then draws. Signing that merely passes
+ * through the shape on the move is not read, which is what keeps ordinary
+ * signing from reading as J or Z. When the learner is expected to draw one
+ * (push's `expect`), a stroke may also start the moment the shape appears, as
+ * fluent signers draw it: more of them are read, at the cost of more false
+ * alarms elsewhere (measured on NID's clips and five alphabet videos, README).
  */
 export function createMotionReader() {
-  let run = [];                  // frames of the current shape: { t, x, y, scale }
+  let run = [];                  // frames since the shape began: { t, x, y, scale, on }
   let shape = null;
+  let began = 0;
   let lastSeen = -Infinity;
   let quietUntil = -Infinity;
   const reset = () => { run = []; shape = null; };
   return {
     clear: reset,
-    push({ t, img, world, aspect = 1 }) {
+    push({ t, img, world, aspect = 1, expect = null }) {
       const now = motionShape(world);
-      if (now && now !== shape) { reset(); shape = now; }
-      if (!now) {
-        if (t - lastSeen > GAP_MS) reset();
-        return null;
-      }
-      lastSeen = t;
-      const tip = img[SHAPES[now].tip];
+      if (now && now !== shape) { reset(); shape = now; began = t; }
+      if (!now && t - lastSeen > GAP_MS) { reset(); return null; }
+      if (!shape) return null;
+      if (now) lastSeen = t;
+      const tip = img[SHAPES[shape].tip];
       const scale = Math.hypot((img[9].x - img[0].x) * aspect, img[9].y - img[0].y) || 1;
-      run.push({ t, x: tip.x * aspect, y: tip.y, scale });
+      run.push({ t, x: tip.x * aspect, y: tip.y, scale, on: Boolean(now) });
       while (run.length && t - run[0].t > MAX_MS) run.shift();
-      if (t < quietUntil || run.length < 4 || t - run[0].t < MIN_MS) return null;
+      if (t < quietUntil || !now || run.length < 4) return null;
       const scales = run.map((p) => p.scale).sort((a, b) => a - b);
       const s = scales[scales.length >> 1];
-      const pts = run.map((p) => ({ x: (p.x - run[0].x) / s, y: (p.y - run[0].y) / s }));
-      if (shape === 'J' ? drawsJ(pts) : drawsZ(pts)) {
-        const hit = { letter: shape, start: run[0].t };
+      // the stroke starts at the last moment the fingertip was held still
+      const still = (i) => {
+        let j = i;
+        while (j > 0 && run[i].t - run[j - 1].t <= STILL_MS) j--;
+        if (run[i].t - run[j].t < STILL_MS * 0.7) return false;
+        for (let k = j; k < i; k++) if (Math.hypot(run[k].x - run[i].x, run[k].y - run[i].y) / s > STILL) return false;
+        return true;
+      };
+      // A stroke starts where a still moment ends. The signer may also pause
+      // mid-letter (at a corner of the Z), so every such start is tried.
+      const flags = run.map((_, i) => still(i));
+      let hit = false;
+      for (let from = 0; from < run.length - 3 && !hit; from++) {
+        if (!(flags[from] && !flags[from + 1] || expect === shape && from === 0) || t - run[from].t < MIN_MS) continue;
+        const stroke = run.slice(from);
+        if (stroke.filter((p) => p.on).length < stroke.length * 0.5) continue;
+        const pts = stroke.map((p) => ({ x: (p.x - stroke[0].x) / s, y: (p.y - stroke[0].y) / s }));
+        hit = shape === 'J' ? drawsJ(pts) : drawsZ(pts);
+      }
+      if (hit) {
+        const found = { letter: shape, start: began };
         quietUntil = t + COOLDOWN_MS;
         run = [];
-        return hit;
+        return found;
       }
       return null;
     },

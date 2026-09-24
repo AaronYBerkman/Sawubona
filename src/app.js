@@ -1226,7 +1226,7 @@ const LETTER_TIPS = {
   G: 'Point sideways with your index finger. Turn the same hand to point down and it becomes Q.',
   H: 'Point sideways with the index and middle fingers together. One finger is G.',
   I: 'Little finger up, the other fingers closed.',
-  J: 'Make I (little finger up), then draw a J in the air with the little finger: down, then hook to the side. It is read from the movement, so make it clear and not too fast.',
+  J: 'Make I (little finger up) and hold it a moment, then draw a J in the air with the little finger: down, then hook to the side. It is read from the movement, so make it clear.',
   K: 'Index and middle finger up, the thumb between them. Turn it to point down and it becomes P.',
   L: 'Thumb and index finger out at a right angle, like the letter L.',
   M: 'Fold three fingers over the thumb. With two it is N: the two differ by a single finger, so keep them distinct.',
@@ -1242,7 +1242,7 @@ const LETTER_TIPS = {
   W: 'Three fingers up and apart.',
   X: 'Raise the index finger and hook it; the other fingers stay closed.',
   Y: 'Thumb and little finger out, the middle three fingers closed — the same as the American Y.',
-  Z: 'Point with the index finger, the other fingers closed, and draw a Z in the air as you would write it: across, back down the diagonal, across again.',
+  Z: 'Point with the index finger, the other fingers closed, hold it a moment, then draw a Z in the air as you would write it: across, back down the diagonal, across again.',
 };
 // Captions for Plate I: one line on what each drawn hand is doing.
 const PLATE_NOTES = {
@@ -1356,7 +1356,8 @@ function updateSpelling(handResult, ts) {
   const read = sp.reader.read();
   showReading(read);
   // J and Z are drawn, not held: read from the fingertip's path (src/motion-letters.js)
-  const drawn = sp.motion.push({ t: ts, img: hand.img, world: hand.world, aspect });
+  // the letter to spell next, when it is J or Z, is read more readily (src/motion-letters.js)
+  const drawn = sp.motion.push({ t: ts, img: hand.img, world: hand.world, aspect, expect: sp.mode === 'word' ? sp.target[sp.index] ?? null : null });
   if (drawn) { motionLetter(drawn, ts); return; }
   const { letter, p } = read.best;
   const sure = p >= LETTER_SURE;
