@@ -126,11 +126,15 @@ export function resample(frames, times, rate = 25, maxFrames = 256) {
   if (frames.length < 2) return frames.slice();
   const t0 = times[0];
   const span = times[times.length - 1] - t0;
-  const n = Math.min(maxFrames, Math.max(2, Math.round((span / 1000) * rate) + 1));
+  const requested = Math.max(2, Math.round((span / 1000) * rate) + 1);
+  const n = Math.min(maxFrames, requested);
+  // A model's frame budget limits resolution, not the duration it can see.
+  // Using the nominal rate after capping n silently dropped the clip's tail.
+  const step = requested > maxFrames ? span / (n - 1) : 1000 / rate;
   const out = [];
   let j = 0;
   for (let k = 0; k < n; k++) {
-    const t = t0 + (k * 1000) / rate;
+    const t = t0 + k * step;
     while (j + 1 < times.length && Math.abs(times[j + 1] - t) <= Math.abs(times[j] - t)) j++;
     out.push(frames[j]);
   }

@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { Replay, displayFrames } from '../src/replay-data.js';
-import { prepareClip, fitZScale } from '../src/figure.js';
+import { prepareClip, fitZScale, handView, VIEW } from '../src/figure.js';
 import { FRAME_DIM } from '../src/holistic.js';
 
 const PARTS = [[0, 25], [33, 161], [161, 182], [182, 203]];
@@ -159,3 +159,13 @@ if (reference) {
 }
 
 console.log('replay: ok');
+
+// Close-up contains the complete active hand extent and leaves inputs unchanged.
+const closeFrame = new Float32Array(FRAME_DIM);
+for (let j = 0; j < 21; j++) { closeFrame[(161 + j) * 3] = -0.3 + j * 0.03; closeFrame[(161 + j) * 3 + 1] = 0.2; }
+const beforeClose = closeFrame.slice();
+const close = handView([closeFrame]);
+assert.ok(close.w < VIEW.w);
+for (let j = 0; j < 21; j++) assert.ok(Math.abs(closeFrame[(161 + j) * 3] - close.cx) < close.w / 2);
+assert.deepEqual(closeFrame, beforeClose);
+assert.deepEqual(handView([]), VIEW);

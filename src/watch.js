@@ -118,6 +118,7 @@ export function createStage(canvases, clips, opts = {}) {
   let p = 0;
   let speed = 1;
   let playing = false;
+  let closeUp = false;
   let raf = 0;
   let last = 0;
   let resting = 0;
@@ -167,6 +168,14 @@ export function createStage(canvases, clips, opts = {}) {
     seek(progress) { p = clamp01(Number(progress) || 0); resting = 0; render(); },
     setSpeed(x) { speed = Math.min(4, Math.max(0.1, Number(x) || 1)); },
     setMirror(i, on) { players[i]?.setMirror(on); },
+    setCloseUp(on) { closeUp = !!on; for (const pl of players) pl.setCloseUp(closeUp); },
+    step(direction) {
+      setPlaying(false);
+      const fps = clips[0]?.fps ?? DISPLAY_FPS;
+      const frame = Math.round(p * duration * fps) + Math.sign(direction);
+      p = clamp01(frame / (duration * fps)); resting = 0; render();
+    },
+    get closeUp() { return closeUp; },
     redraw() { for (const pl of players) pl.redraw(); render(); },
     destroy() { setPlaying(false); for (const pl of players) pl.destroy(); },
     get playing() { return playing; },

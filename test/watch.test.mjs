@@ -65,3 +65,15 @@ stage.destroy();
 assert.ok(made.every((m) => m.p.destroyed));
 
 console.log('watch: ok');
+
+// Frame stepping uses the reference's native sample rate and stops animation.
+stage.seek(0.5);
+stage.step(1);
+assert.ok(Math.abs(made[0].p.at - (1 + 1 / 15)) < 1e-9);
+assert.equal(stage.playing, false);
+stage.step(-1);
+assert.ok(Math.abs(made[0].p.at - 1) < 1e-9);
+stage.seek(0); stage.step(-1);
+assert.equal(stage.progress, 0);
+stage.seek(1); stage.step(1);
+assert.equal(stage.progress, 1);

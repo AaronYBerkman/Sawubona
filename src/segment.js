@@ -29,7 +29,7 @@ const MIN_GAP_FRAMES = 3;     // frames of stillness needed to call a boundary
  * because leaving them in drags the median up far enough that real signing
  * motion falls below the threshold and no boundary is ever found.
  */
-export function motionEnergy(frames) {
+export function motionEnergy(frames, times = null) {
   const raw = new Float64Array(frames.length);
   const valid = new Array(frames.length).fill(false);
 
@@ -43,7 +43,9 @@ export function motionEnergy(frames) {
       const diff = b[d] - a[d];
       sum += diff * diff;
     }
-    raw[i] = Math.sqrt(sum);
+    const dt = times ? times[i] - times[i - 1] : 40;
+    if (dt <= 0 || dt > 500) continue;
+    raw[i] = Math.sqrt(sum) * 40 / dt;
     valid[i] = true;
   }
   motionEnergy.valid = valid;
@@ -54,7 +56,8 @@ export function motionEnergy(frames) {
   for (let i = 0; i < raw.length; i++) {
     let sum = 0;
     let n = 0;
-    for (let j = Math.max(0, i - SMOOTHING); j <= Math.min(raw.length - 1, i + SMOOTHING); j++) {
+    for (let j = times ? 0 : Math.max(0, i - SMOOTHING); j <= (times ? raw.length - 1 : Math.min(raw.length - 1, i + SMOOTHING)); j++) {
+      if (times && Math.abs(times[j] - times[i]) > SMOOTHING * 40) continue;
       if (!valid[j]) continue;
       sum += raw[j];
       n++;
@@ -71,10 +74,16 @@ export function motionEnergy(frames) {
  * The threshold is relative to the recording's own motion rather than absolute,
  * because how fast someone signs varies enormously between people and moods.
  */
-export function findSegments(frames, { sensitivity = 0.35 } = {}) {
-  if (frames.length < MIN_SIGN_FRAMES) return [];
+export function findSegments(frames, { sensitivity = 0.35, times = null } = {}) {
+  if (times && times.length !== frames.length) throw new Error("One timestamp is required per frame");
+  if (frames.length < (times ? 2 : MIN_SIGN_FRAMES)) return [];
+  const intervals = times ? times.slice(1).map((t, i) => t - times[i]).sort((a, b) => a - b) : [];
+  if (times && intervals.some((dt) => !Number.isFinite(dt) || dt <= 0)) throw new Error("Timestamps must increase");
+  const frameMs = times ? intervals[Math.floor(intervals.length / 2)] : 40;
+  const duration = (start, end) => times ? times[end - 1] - times[start] + frameMs : (end - start) * 40;
+  const longEnough = (start, end) => end > start && duration(start, end) >= MIN_SIGN_FRAMES * 40;
 
-  const energy = motionEnergy(frames);
+  const energy = motionEnergy(frames, times);
   const valid = energy.valid;
 
   // Statistics over genuine hand motion only.
@@ -95,9 +104,9 @@ export function findSegments(frames, { sensitivity = 0.35 } = {}) {
   for (let i = 0; i < frames.length; i++) {
     if (quiet[i]) {
       quietRun++;
-      if (start !== null && quietRun >= MIN_GAP_FRAMES) {
+      if (start !== null && duration(i - quietRun + 1, i + 1) >= MIN_GAP_FRAMES * 40) {
         const end = i - quietRun + 1;
-        if (end - start >= MIN_SIGN_FRAMES) segments.push({ start, end });
+        if (longEnough(start, end)) segments.push({ start, end });
         start = null;
       }
     } else {
@@ -105,7 +114,7 @@ export function findSegments(frames, { sensitivity = 0.35 } = {}) {
       if (start === null) start = i;
     }
   }
-  if (start !== null && frames.length - start >= MIN_SIGN_FRAMES) {
+  if (start !== null && longEnough(start, frames.length)) {
     segments.push({ start, end: frames.length });
   }
 

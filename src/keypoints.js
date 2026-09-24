@@ -23,6 +23,20 @@ export const N_NODES = MINIMAL_27.length; // 27
 const LEFT_SHOULDER = 3;  // indexes INTO the selected 27
 const RIGHT_SHOULDER = 4;
 
+/** Match the gallery builder's 203-point -> OpenHands conversion exactly.
+ * Holistic hands are assigned to body wrists, not the selfie handedness label.
+ * Camera capture must use this same convention as the reference embeddings.
+ */
+export function pointsFromHolistic(frame, width, height) {
+  const out = new Float32Array(N_NODES * 2);
+  MINIMAL_27.forEach((node, i) => {
+    const source = node < 33 ? node : node < 54 ? node - 33 + 161 : node - 54 + 182;
+    out[i * 2] = frame[source * 3] / width;
+    out[i * 2 + 1] = frame[source * 3 + 1] / height;
+  });
+  return out;
+}
+
 /**
  * One frame as a Float32Array(27 * 2), x then y per node.
  *
