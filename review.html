@@ -17,7 +17,8 @@
   h1 { font-family: Fraunces, Georgia, serif; font-size: clamp(28px, 5vw, 40px); margin: 0 0 6px; }
   .lede { max-width: 70ch; margin: 0 0 18px; line-height: 1.5; }
   .bar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin: 0 0 18px; }
-  .bar label { font-family: 'Courier Prime', monospace; font-size: 14px; display: inline-flex; gap: 6px; align-items: center; }
+  .bar label { font-family: 'Courier Prime', monospace; font-size: 14px; display: inline-flex; gap: 6px; align-items: center; max-width: 100%; }
+  .bar select, .bar input { min-width: 0; max-width: 100%; flex: 1 1 auto; }
   select, input[type=search], button { font: inherit; font-size: 15px; color: var(--j-ink); background: var(--j-cream-rim, #fff);
     border: 1px solid color-mix(in srgb, var(--j-ink) 35%, transparent); border-radius: 6px; padding: 6px 10px; }
   button { cursor: pointer; }
