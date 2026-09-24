@@ -473,19 +473,23 @@ body[data-step="see"] .step[data-step-name="see"] .step-n {
 .candidates { list-style: none; padding: 0; margin: 4px 0 6px; }
 .candidates li {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 26% auto;
+  grid-template-columns: minmax(0, 1fr) 16% auto auto;
   align-items: center;
   gap: 14px;
   min-height: 42px;
   font: 18px/1.2 var(--j-font-body);
 }
 .candidates li.best .cand-label { font: 700 27px/1.1 var(--j-font-display); font-variation-settings: "opsz" 96, "SOFT" 50; }
-.cand-label { overflow-wrap: anywhere; }
+.cand-label { overflow-wrap: break-word; }   /* between words, not mid-word */
 .bar { height: 9px; background: color-mix(in srgb, var(--j-pencil) 22%, transparent); border-radius: 5px 3px 4px 2px; overflow: hidden; }
 .bar > span { display: block; height: 100%; background: var(--bar); border-radius: inherit; }
 .candidates li:not(.best) .bar > span { opacity: .55; }
 .cand-dist { font: 700 13px/30px var(--j-font-type); letter-spacing: .06em; text-transform: uppercase; }
 #guess-note, #phrase-note { line-height: 1.7; margin-top: 6px; }
+.cand-yes { font-size: 14px; white-space: nowrap; }
+/* How sure a guess is: a word in the note, never colour alone */
+.sure--sure { color: var(--done); }
+.sure--unsure { color: var(--record); }
 
 /* A phrase: the signs found, in order */
 .phrase-list { list-style: none; counter-reset: sign; padding: 0; margin: 4px 0; }
@@ -1246,7 +1250,10 @@ body[data-step="see"] .step[data-step-name="see"] .step-n {
   .photo { margin: 0; }
   .prep { margin-left: 6px; }
   .quiz-word { font-size: 42px; }
-  .candidates li { grid-template-columns: minmax(0, 1fr) 24% auto; gap: 10px; }
+  /* narrow: the word, then watch and "That's it" on the line under it; the bar gives way */
+  .candidates li { grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; }
+  .candidates li .bar { display: none; }
+  .candidates li .cand-label { grid-column: 1 / -1; }
   .candidates li.best .cand-label { font-size: 25px; }
   .spell-word { font-size: 42px; }
   .how { flex-direction: column; margin-top: 40px; }

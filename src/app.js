@@ -36,6 +36,8 @@ import { referenceClip, attemptClip, createStage } from './watch.js';
 import { alignAttempt, planKey, planNote, recordingMs, signText } from './sentence-practice.js';
 import { decode, toEnglish } from './interpret.js';
 import { createMotionReader } from './motion-letters.js';
+import { createPersonal } from './personal.js';
+import { confidence } from './confidence.js';
 
 const MAX_SIGN_MS = 6000;
 const MAX_PHRASE_MS = 15000;
@@ -110,6 +112,7 @@ const el = {
   spellCueLetter: $('#spell-cue-letter'), spellCueNote: $('#spell-cue-note'), spellCueLabel: $('#spell-cue-label'),
   // Tallies of matched signs
   lessonProgress: $('#lesson-progress'), progressClear: $('#progress-clear'),
+  personalNote: $('#personal-note'), personalClear: $('#personal-clear'),
 };
 
 const state = {
@@ -128,6 +131,9 @@ const state = {
   quiz: { word: null, tried: 0, right: 0, misses: new Map(), log: [] },
   recording: null,
   automatic: createAutoCapture(),
+  // your own confirmed tries, kept on this device (src/personal.js)
+  personal: createPersonal(),
+  guess: null,
   autoFrames: [],
   busy: false,
   spell: {
@@ -154,6 +160,7 @@ const state = {
 async function boot() {
   setState('Loading');
   renderPlate();
+  renderPersonal();
   try {
     const [ref, lessons] = await Promise.all([
       loadReference(),
@@ -575,7 +582,9 @@ async function rank(rec, start = 0, end = rec.times.length) {
     embedOpenHands(rec.points.slice(start, end), times),
     embedSignCLIP(rec.holistic.slice(start, end), times),
   ]);
-  return rankSigns({ openhands, signclip });
+  const ranked = rankSigns({ openhands, signclip });
+  ranked.embedding = { openhands, signclip, asl3: signclip?.asl3 };
+  return ranked;
 }
 
 function lessonSet() {
@@ -660,9 +669,15 @@ function showQuizVerdict(ranked) {
   const target = state.quiz.word;
   if (!target) return;
   const inLesson = lessonSet();
-  const lessonRanked = ranked.filter((r) => inLesson.has(r.label));
+  // Your earlier tries of the asked word count beside the dictionary's clips,
+  // in the lesson and in the whole-dictionary check alike; tries of other words
+  // do not (src/personal.js). Measured through this code on NID signers: right
+  // answers passed 58% -> 70%, other words wrongly passed 3.1% -> 4.5%.
+  const mine = state.personal.refs([target]);
+  const judged = mine.length && ranked.embedding ? rankSigns(ranked.embedding, { personal: mine }) : ranked;
+  const lessonRanked = judged.filter((r) => inLesson.has(r.label));
   const place = lessonRanked.findIndex((r) => r.label === target);
-  const dictRank = ranked.find((r) => r.label === target)?.rank ?? Infinity;
+  const dictRank = judged.find((r) => r.label === target)?.rank ?? Infinity;
 
   let kind;
   if (place === 0 && dictRank < PASS_DICT_RANK) kind = 'yes';
@@ -670,9 +685,13 @@ function showQuizVerdict(ranked) {
   else kind = 'no';
 
   state.quiz.tried += 1;
+  let learned = false;
   if (kind === 'yes') {
     state.quiz.right += 1;
     recordMatch(target);
+    learned = !state.personal.has(target) && Boolean(ranked.embedding);
+    if (ranked.embedding) state.personal.add(target, ranked.embedding);
+    renderPersonal();
   } else {
     state.quiz.misses.set(target, (state.quiz.misses.get(target) ?? 0) + 1);
   }
@@ -687,7 +706,7 @@ function showQuizVerdict(ranked) {
   const name = (w) => `<strong>${escapeHtml(w)}</strong>`;
   const rival = place !== 0 ? lessonRanked[0]?.label : ranked.find((r) => r.label !== target)?.label;
   const text = kind === 'yes'
-    ? `That matched ${name(target)}.`
+    ? `That matched ${name(target)}.${learned ? ' Kept as your own sign for it, so the quiz knows your signing next time.' : ''}`
     : kind === 'close' && place === 0
       ? `Nearly. ${name(target)} was the closest word in your lesson, but not a clear match — `
         + 'watch the reference and try it once more.'
@@ -732,24 +751,34 @@ function revealResult(node) {
 
 function showGuess(ranked) {
   const inLesson = lessonSet();
-  const pool = inLesson.size ? ranked.filter((r) => inLesson.has(r.label)) : ranked;
+  // Your tries count only once every lesson word has one: tries of some words
+  // and not others pull guesses towards the words you have tried (src/personal.js).
+  const everyTried = inLesson.size > 0 && [...inLesson].every((l) => state.personal.has(l));
+  const judged = everyTried && ranked.embedding ? rankSigns(ranked.embedding, { personal: state.personal.refs([...inLesson]) }) : ranked;
+  const pool = inLesson.size ? judged.filter((r) => inLesson.has(r.label)) : judged;
   const top = pool.slice(0, 3);
   const best = top[0]?.score ?? 1;
+  state.guess = { embedding: ranked.embedding ?? null, top: top.map((m) => m.label), kept: null };
   el.guessList.innerHTML = top.map((m, i) => {
     const url = realSaslUrl(m.label);
     return `
     <li class="${i === 0 ? 'best' : ''}">
       <span class="cand-label">${escapeHtml(m.label)}</span>
       <span class="bar" aria-hidden="true"><span style="width:${Math.max(4, (100 * m.score) / best).toFixed(0)}%"></span></span>
-      ${url ? `<a class="cand-dist" href="${url}" target="_blank" rel="noopener noreferrer">watch<span aria-hidden="true"> ↗</span><span class="visually-hidden"> ${escapeHtml(m.label)} on Real SASL</span></a>` : ''}
+      ${url ? `<a class="cand-dist" href="${url}" target="_blank" rel="noopener noreferrer">watch<span aria-hidden="true"> ↗</span><span class="visually-hidden"> ${escapeHtml(m.label)} on Real SASL</span></a>` : '<span></span>'}
+      ${state.guess.embedding ? `<button class="text-btn cand-yes" type="button" data-yes="${i}">That's it<span class="visually-hidden">: ${escapeHtml(m.label)}</span></button>` : ''}
     </li>`;
   }).join('');
   const n = inLesson.size || ranked.length;
+  const sure = confidence(pool, judged.views, inLesson.size && inLesson.size <= 50);
   const wider = inLesson.size
-    ? ` Across the whole dictionary the closest were ${ranked.slice(0, 3).map((r) => escapeHtml(r.label)).join(', ')} — less reliable at that size.`
+    ? ` Across the whole dictionary the closest were ${ranked.slice(0, 3).map((r) => escapeHtml(r.label)).join(', ')}.`
     : '';
-  const three = top.length === 3 && rateTop3(n) ? `, and ${rateTop3(n)}` : '';
-  el.guessNote.innerHTML = `${inLesson.size ? `Out of your ${n} lesson words: ${rate(n)}${three}.` : `Out of all ${n.toLocaleString()} signs: ${rate(n)}. Pick a lesson and it gets far better.`}${wider}`;
+  const learning = !inLesson.size || !state.guess.embedding ? ''
+    : everyTried ? ' Counting your own signing of these words.'
+      : ` Tap “That's it” on the right one and Sawubona learns your signing: it counts once every word here has one (${[...inLesson].filter((l) => state.personal.has(l)).length} of ${inLesson.size}).`;
+  el.guessNote.innerHTML = `${sure ? `<strong class="sure sure--${sure.band}">${sure.label}.</strong> ${sure.text}` : ''}`
+    + `${inLesson.size ? '' : ' Pick a lesson and it gets far better.'}${wider}${learning}`;
   const attempt = state.lastAttempt;
   const canCompare = Boolean(attempt?.clip && attempt.mode === 'guess' && top.length);
   if (canCompare) attempt.choices = top.map((m) => m.label);
@@ -759,25 +788,26 @@ function showGuess(ranked) {
   revealResult(el.guessList.parentElement);
 }
 
+// "That's it": the learner says which sign it was, and that try is kept as theirs.
+el.guessList.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-yes]');
+  const g = state.guess;
+  if (!b || !g?.embedding) return;
+  const label = g.top[Number(b.dataset.yes)];
+  if (!label) return;
+  if (!state.demo) state.personal.add(label, g.embedding);     // a ?demo= page never saves
+  g.embedding = null;                          // one try is kept once
+  for (const x of el.guessList.querySelectorAll('[data-yes]')) x.remove();
+  const inLesson = lessonSet();
+  const tried = [...inLesson].filter((l) => state.personal.has(l)).length;
+  el.guessNote.insertAdjacentHTML('beforeend', ` <strong>Kept as your ${escapeHtml(label)}.</strong>${inLesson.size && tried < inLesson.size ? ` ${tried} of ${inLesson.size} lesson words have your signing so far.` : ''}`);
+  renderPersonal();
+});
+
 el.guessCompare.addEventListener('click', () => {
   const a = state.lastAttempt;
   if (a?.clip && a.choices?.length) openViewer({ label: a.choices[0], attempt: a, choices: a.choices });
 });
-
-/**
- * What a top answer is worth at this list size, measured (README, "How well it
- * works": 89% at 5 words, 82% at 10, 75% at 20, 63% at 50, 30% across all
- * 1,471). Nothing was measured between 50 words and the whole dictionary, so
- * a list in between is only placed between the two.
- */
-function rate(n) {
-  return n <= 12 ? 'a short list gives the recogniser fewer signs to confuse; guesses still need checking'
-    : 'larger lists are harder to recognise; try a short lesson if guesses are poor';
-}
-
-function rateTop3() {
-  return 'check all three suggestions against the sign you intended';
-}
 
 // --- Understand me ---------------------------------------------------------------
 
@@ -1025,7 +1055,7 @@ function renderLesson() {
   const words = state.lesson.words;
   renderLessonChips();
   el.lessonNote.textContent = words.length
-    ? `${words.length} word${words.length === 1 ? '' : 's'}. Your tries are compared with these — ${rate(words.length)}.`
+    ? `${words.length} word${words.length === 1 ? '' : 's'}. Your tries are compared with these: the fewer words, the surer the guesses.`
     : 'Pick a lesson from the contents, or add signs one at a time.';
   const title = currentLessonTitle();
   el.lessonLink.textContent = title;
@@ -1104,6 +1134,19 @@ function tallyHtml(n, said = true) {
     + `${n > 5 ? `<span class="tally-more" aria-hidden="true">+${n - 5}</span>` : ''}`
     + `${said ? `<span class="visually-hidden">, matched ${times(n)}</span>` : ''}</span>`;
 }
+
+/** How many words have your own signing kept, and the way to forget it. */
+function renderPersonal() {
+  const n = state.personal.words;
+  el.personalNote.textContent = n ? `Learning your signing: ${n} word${n === 1 ? '' : 's'} kept on this device.` : '';
+  el.personalClear.hidden = !n;
+}
+
+el.personalClear.addEventListener('click', () => {
+  if (!window.confirm('Forget your own signing? The quiz and guesses go back to the dictionary alone.')) return;
+  state.personal.clear();
+  renderPersonal();
+});
 
 el.progressClear.addEventListener('click', () => {
   // The tallies are the learner's own record: ask before wiping them.

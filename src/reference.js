@@ -114,14 +114,19 @@ function dots(query, bank, dim) {
   return out;
 }
 
-function standardise(v) {
+function moments(v) {
   let mean = 0;
   for (const x of v) mean += x;
   mean /= v.length;
   let sq = 0;
   for (const x of v) sq += (x - mean) ** 2;
-  const sd = Math.sqrt(sq / v.length) || 1;
-  return v.map((x) => (x - mean) / sd);
+  return { mean, sd: Math.sqrt(sq / v.length) || 1 };
+}
+
+function dot(a, b) {
+  let s = 0;
+  for (let i = 0; i < a.length; i++) s += a[i] * b[i];
+  return s;
 }
 
 function bestOf(query, bank, mirror) {
@@ -139,23 +144,35 @@ function bestOf(query, bank, mirror) {
  * and `source` are the sign's best-matching clip. `asl3` defaults to the
  * property embedSignCLIP() puts on its result.
  */
-export function rankSigns({ openhands, signclip, asl3 = signclip?.asl3 }) {
+export function rankSigns({ openhands, signclip, asl3 = signclip?.asl3 }, { personal = [] } = {}) {
   if (!loaded) throw new Error('reference not loaded');
   const views = [
-    standardise(dots(openhands, loaded.openhands, loaded.dimOpenHands)),
-    standardise(bestOf(signclip, loaded.signclip, loaded.mirror)),
+    { key: 'openhands', query: openhands, raw: dots(openhands, loaded.openhands, loaded.dimOpenHands) },
+    { key: 'signclip', query: signclip, raw: bestOf(signclip, loaded.signclip, loaded.mirror) },
   ];
-  if (asl3 && loaded.asl3) views.push(standardise(bestOf(asl3, loaded.asl3, loaded.asl3Mirror)));
+  if (asl3 && loaded.asl3) views.push({ key: 'asl3', query: asl3, raw: bestOf(asl3, loaded.asl3, loaded.asl3Mirror) });
+  for (const v of views) Object.assign(v, moments(v.raw));
 
   const best = new Map();
   loaded.clips.forEach((c, j) => {
     let s = 0;
-    for (const v of views) s += v[j];
+    for (const v of views) s += (v.raw[j] - v.mean) / v.sd;
     const cur = best.get(c.label);
     if (!cur || s > cur.score) best.set(c.label, { label: c.label, score: s, clip: c.file, source: c.source });
   });
+  // The learner's own confirmed tries (src/personal.js), scored on the same
+  // scale as the dictionary's clips: each model's similarity is standardised
+  // with that model's statistics over the whole dictionary for this attempt.
+  // A try made before a model was loaded counts that model at its average.
+  for (const mine of personal) {
+    const z = views.filter((v) => mine[v.key]).map((v) => (dot(v.query, mine[v.key]) - v.mean) / v.sd);
+    if (!z.length || !best.has(mine.label)) continue;
+    const s = (z.reduce((a, b) => a + b, 0) / z.length) * views.length;
+    if (s > best.get(mine.label).score) best.set(mine.label, { label: mine.label, score: s, clip: null, source: 'you' });
+  }
   const ranked = [...best.values()].sort((a, b) => b.score - a.score);
   ranked.forEach((r, i) => { r.rank = i; });
+  ranked.views = views.length;     // scores are sums over this many models
   return ranked;
 }
 
