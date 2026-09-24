@@ -80,7 +80,11 @@ async function heavyFile(request, path) {
 async function networkFirst(request, navigate) {
   const cache = await caches.open(SHELL);
   try {
-    const response = await fetch(request);
+    // revalidate past GitHub Pages' ten-minute HTTP cache, so new code and new
+    // pages arrive together (a navigation cannot be re-sent with options, so by URL)
+    const response = await (navigate
+      ? fetch(request.url, { cache: 'no-cache', credentials: 'same-origin' })
+      : fetch(request, { cache: 'no-cache' }));
     if (response.status === 200) cache.put(request, response.clone()).catch(() => {});
     return response;
   } catch (err) {
