@@ -38,6 +38,7 @@ import { decode, toEnglish } from './interpret.js';
 import { createMotionReader } from './motion-letters.js';
 import { createPersonal } from './personal.js';
 import { confidence } from './confidence.js';
+import { visionFps } from './device.js';
 
 const MAX_SIGN_MS = 6000;
 const MAX_PHRASE_MS = 15000;
@@ -329,7 +330,10 @@ el.startCamera.addEventListener('click', async () => {
     requestAnimationFrame(loop);
     // The sign models are the big download; fetch them while the learner is
     // still getting into frame, not on the first attempt.
-    loadEncoders((m) => setBadge(`${m}…`))
+    Promise.all([
+      loadEncoders((m) => setBadge(`${m}…`)),
+      loadReference({ vectors: true }),
+    ])
       .then(() => {
         setBadge('Ready');
         el.record.disabled = false;
@@ -365,11 +369,16 @@ el.stopCamera.addEventListener('click', () => {
 
 let lastTs = -1;
 let lastVideoTime = -1;
+let lastVisionAt = -Infinity;
+const VISION_INTERVAL_MS = 1000 / visionFps();
 function loop() {
   const video = el.video;
   if (state.stream && video.readyState >= 2) {
-    const ts = state.clock();
-    if (ts > lastTs && video.currentTime !== lastVideoTime) {
+    const now = performance.now();
+    if (now - lastVisionAt >= VISION_INTERVAL_MS && video.currentTime !== lastVideoTime) {
+      lastVisionAt = now;
+      const ts = state.clock();
+      if (ts <= lastTs) { requestAnimationFrame(loop); return; }
       lastTs = ts;
       lastVideoTime = video.currentTime;
       const handResult = state.trackers.hands.detectForVideo(video, ts);
@@ -578,7 +587,8 @@ document.addEventListener('keyup', (e) => {
 /** Every sign in the dictionary ranked for one stretch of recording. */
 async function rank(rec, start = 0, end = rec.times.length) {
   const times = rec.times.slice(start, end);
-  const [openhands, signclip] = await Promise.all([
+  const [, openhands, signclip] = await Promise.all([
+    loadReference({ vectors: true }),
     embedOpenHands(rec.points.slice(start, end), times),
     embedSignCLIP(rec.holistic.slice(start, end), times),
   ]);

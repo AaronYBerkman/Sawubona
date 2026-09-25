@@ -16,3 +16,12 @@ export function wantsExtraViews(nav = globalThis.navigator, search = globalThis.
   const phone = /iPhone|iPad|iPod|Android|Mobile/i.test(ua) || (/Macintosh/.test(ua) && nav?.maxTouchPoints > 1);
   return !phone || memory >= 8;
 }
+
+/** Landmark passes per second. Camera previews stay smooth independently. */
+export function visionFps(nav = globalThis.navigator) {
+  const memory = nav?.deviceMemory;
+  const ua = nav?.userAgent ?? '';
+  const mobile = /iPhone|iPad|iPod|Android|Mobile/i.test(ua)
+    || (/Macintosh/.test(ua) && nav?.maxTouchPoints > 1);
+  return mobile || (memory && memory < 4) ? 20 : 30;
+}

@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createMotionReader, motionShape, drawsJ, drawsZ } from '../src/motion-letters.js';
-import { wantsExtraViews } from '../src/device.js';
+import { visionFps, wantsExtraViews } from '../src/device.js';
 
 // A right hand in world metres, fingers up (y negative is up): straight
 // fingers reach past their middle joint, curled ones fold back towards the palm.
@@ -99,7 +99,7 @@ for (const expect of [null, 'J', 'Z']) {
   assert.deepEqual(playReal('Y', expect), [], `NID's Y, expecting ${expect}`);
 }
 
-// Phones leave out the second SignCLIP view; ?full and ?light override
+// Phones leave out the second SignCLIP view and cap landmark work; ?full and ?light override
 const iphone = { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Mobile/15E148', maxTouchPoints: 5 };
 const ipad = { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15', maxTouchPoints: 5 };
 const mac = { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15', maxTouchPoints: 0 };
@@ -112,5 +112,10 @@ assert.equal(wantsExtraViews(smallPc, ''), false);
 assert.equal(wantsExtraViews(bigAndroid, ''), true);
 assert.equal(wantsExtraViews(iphone, '?full'), true);
 assert.equal(wantsExtraViews(mac, '?light'), false);
+assert.equal(visionFps(iphone), 20);
+assert.equal(visionFps(ipad), 20);
+assert.equal(visionFps(smallPc), 20);
+assert.equal(visionFps(mac), 30);
+assert.equal(visionFps(bigAndroid), 20);
 
 console.log('motion letters and device: ok');

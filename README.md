@@ -5,6 +5,14 @@
 Runs in the browser on a phone, tablet or computer with a camera (Chrome, Edge,
 Safari or Firefox). Nothing to install, and nothing you sign leaves your device.
 
+The dictionary and sentence builder open from the small sign index. The roughly
+30 MB recognition gallery loads only after the camera starts. Landmark tracking
+is capped at 20 passes per second on phones and small-memory devices (30 on
+larger computers); the camera preview remains at its normal frame rate. After
+the first visit, versioned app assets are served from the offline cache while
+the browser checks the service worker for new deployments. HTML and code stay
+on the same deployed version; after an update installs, the next visit uses it.
+
 *Sawubona* is the Zulu greeting, literally "we see you" — which is what a camera
 pointed at someone signing is for.
 
