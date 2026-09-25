@@ -1,0 +1,6 @@
+{
+  "about": "Drawn-signer clips checked by eye in review.html. Flagged clips are badly tracked: the app shows a sign's next clip instead, or no drawing when every clip is flagged. Kept clips were checked and are fine.",
+  "reviewed": null,
+  "flagged": [],
+  "kept": []
+}

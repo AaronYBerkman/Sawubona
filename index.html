@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sawubona — SASL practice</title>
+<meta name="description" content="Practise South African Sign Language with your camera: signs, fingerspelling, sentences and a dictionary. Everything runs on your device." />
+<meta name="color-scheme" content="light dark" />
+<!-- Installable (Add to Home Screen) and a card when the link is shared -->
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="assets/brand/icon.svg" type="image/svg+xml" />
+<link rel="icon" href="assets/brand/icon-192.png" type="image/png" sizes="192x192" />
+<link rel="apple-touch-icon" href="assets/brand/icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Sawubona" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="theme-color" content="#f4efe3" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1b231d" media="(prefers-color-scheme: dark)" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Sawubona" />
+<meta property="og:title" content="Sawubona — practise South African Sign Language" />
+<meta property="og:description" content="Sign to your camera and it tells you whether you got it: 1,858 SASL signs, fingerspelling and sentences. Free, in the browser, and nothing leaves your device." />
+<meta property="og:url" content="https://aaronyberkman.github.io/Sawubona/" />
+<meta property="og:image" content="https://aaronyberkman.github.io/Sawubona/assets/brand/card.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Sawubona: an ink protea beside the words Practise South African Sign Language with your camera." />
+<meta name="twitter:card" content="summary_large_image" />
+<script>
+  // ?theme=dark|light wins; otherwise the choice made with the footer switch; otherwise the system.
+  (function () {
+    var t = new URLSearchParams(location.search).get('theme');
+    if (t !== 'dark' && t !== 'light') { try { t = localStorage.getItem('theme'); } catch (e) { t = null; } }
+    if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..800,0..100;1,9..144,400..600,0..100&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..600&display=swap" />
+<link rel="stylesheet" href="assets/art/paper.css" />
+<link rel="stylesheet" href="src/styles.css" />
+<link rel="stylesheet" href="src/sentence.css" />
+</head>
+<body class="j-grid" data-tab="signs" data-step="watch">
+<a class="skip-link" href="#main">Skip to the practice</a>
+
+<div class="desk">
+
+  <!-- The collage lives in the margins, behind the sheet, and never over content. -->
+  <div class="collage j-collage" aria-hidden="true">
+    <img class="c c-table j-art--ink" src="assets/art/table-mountain.svg" alt="" width="900" height="380" />
+    <img class="c c-protea j-art--wash" src="assets/art/protea-pincushion.svg" alt="" width="380" height="1060" />
+    <img class="c c-koppies j-art--ink" src="assets/art/koppies.svg" alt="" width="640" height="260" />
+    <img class="c c-king j-art--ink" src="assets/art/protea-king.svg" alt="" width="420" height="580" />
+  </div>
+  <aside class="margin-notes j-collage" aria-label="Margin notes">
+    <p class="c c-green j-scrap j-green">SASL became South Africa’s 12th official language in 2023</p>
+    <p class="c c-sticky j-sticky"><span class="j-tape" aria-hidden="true"></span>Nothing you record leaves this device.</p>
+    <p class="c c-kraft j-scrap j-kraft">Signs vary by region — trust your teacher.</p>
+    <p class="c c-cream j-scrap j-cream">Faces carry grammar in SASL. This tracks your face but does not judge expressions or grammar.</p>
+  </aside>
+
+  <div class="sheet j-sheet">
+    <header class="top">
+      <div class="brand">
+        <img class="brand-mark" src="assets/art/sprig.svg" alt="" width="44" height="44" />
+        <div>
+          <p class="wordmark">sawubona</p>
+          <p class="tagline j-caps">We see you · South African Sign Language practice</p>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Sections">
+        <button class="tab" id="tab-signs" data-tab="signs" role="tab" aria-selected="true" aria-controls="panel-signs">Practise</button>
+        <button class="tab" id="tab-spell" data-tab="spell" role="tab" aria-selected="false" aria-controls="panel-spell">Fingerspelling</button>
+        <button class="tab" id="tab-sentences" data-tab="sentences" role="tab" aria-selected="false" aria-controls="panel-sentences">Sentences</button>
+        <button class="tab" id="tab-dict" data-tab="dict" role="tab" aria-selected="false" aria-controls="panel-dict">Dictionary</button>
+        <button class="tab" id="tab-about" data-tab="about" role="tab" aria-selected="false" aria-controls="panel-about">About</button>
+      </nav>
+    </header>
+
+    <main id="main">
+    <section class="hero" data-only="signs">
+      <h1>A little closer, sign by sign.</h1>
+      <p class="hero-sub">Practise South African Sign Language with your webcam.</p>
+      <p class="hero-counts j-type"><span id="stat-signs">…</span> signs · <span id="stat-lessons">…</span> lessons ·
+        <span id="stat-letters">…</span> letter handshapes</p>
+    </section>
+    <section class="hero" data-only="spell">
+      <h1>Letters, one hand at a time.</h1>
+      <p class="hero-sub">Fingerspell to your webcam. Each letter is read while you hold it still.</p>
+    </section>
+    <section class="hero" data-only="sentences">
+      <h1>Find the shape of your <span class="sb-underline">sentence.</span></h1>
+      <p class="hero-sub">Paste a sentence or a paragraph. Explore a suggested word order based on SASL lessons. Check the meaning and expression with your teacher.</p>
+    </section>
+    <section class="hero" data-only="dict">
+      <h1>Every sign, on a card.</h1>
+      <p class="hero-sub">The whole Real SASL reference. Watch any sign, or add it to your lesson.</p>
+    </section>
+    <section class="hero" data-only="about">
+      <h1>How it works, and how well.</h1>
+      <p class="hero-sub">What it measures, what it cannot do, and whose work it stands on.</p>
+    </section>
+
+
+      <!-- ============ The open notebook: your camera | the practice ============ -->
+      <div class="spread j-notebook" data-only="signs spell">
+
+        <section class="j-page camera-page" aria-labelledby="camera-label">
+          <p class="page-label" id="camera-label">
+            <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#camera"/></svg>
+            <span>Your camera</span>
+            <span id="stat-state" class="cam-state">Camera off</span>
+          </p>
+
+          <figure class="photo j-photo j-corners">
+            <div class="video-wrap">
+              <video id="video" playsinline muted></video>
+              <canvas id="overlay"></canvas>
+              <div id="camera-placeholder" class="camera-placeholder">
+                <svg class="framing-sketch" viewBox="0 0 400 300" aria-hidden="true" focusable="false">
+                  <defs>
+                    <filter id="pencil-wobble" x="-4%" y="-4%" width="108%" height="108%">
+                      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="n" />
+                      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G" />
+                    </filter>
+                  </defs>
+                  <g class="sketch-lines" filter="url(#pencil-wobble)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <!-- head, drawn twice the way a pencil goes round -->
+                    <path d="M200 56c19 0 31 17 31 40s-12 42-31 42-31-19-31-42 12-40 31-40z" stroke-width="1.3" />
+                    <path d="M201 58c17 1 29 16 28.5 38.5S218 137 199 136.5 170 118 171 95s12-38 30-37" stroke-width=".8" opacity=".55" />
+                    <path d="M169.5 92c-4-1-6 3-5 8s3.5 8 6 7M230.5 92c4-1 6 3 5 8s-3.5 8-6 7" stroke-width=".9" opacity=".7" />
+                    <!-- neck and shoulders -->
+                    <path d="M188 134c1 9 0 17-2 23M212 134c-1 9 0 17 2 23" stroke-width="1.2" />
+                    <path d="M186 157c-9 6-26 11-44 16-28 8-44 34-50 70-3 20-4 40-4 57" stroke-width="1.3" />
+                    <path d="M214 157c9 6 26 11 44 16 28 8 44 34 50 70 3 20 4 40 4 57" stroke-width="1.3" />
+                    <path d="M186 158c4 8 9 13 14 16 5-3 10-8 14-16" stroke-width=".9" opacity=".7" />
+                    <!-- forearms rising to the hands -->
+                    <path d="M101 300c-1-30 0-62-6-98M127 300c0-30 1-60-6-96" stroke-width="1.1" opacity=".85" />
+                    <path d="M299 300c1-30 0-62 6-98M273 300c0-30-1-60 6-96" stroke-width="1.1" opacity=".85" />
+                    <!-- light hatching on the far side of the torso -->
+                    <path d="M263 196l-12 30M272 204l-14 34M280 214l-13 32M287 226l-11 28" stroke-width=".6" opacity=".45" />
+                    <!-- leader lines -->
+                    <path class="leader" d="M290 58c-18 2-34 12-48 28" stroke-width=".8" stroke-dasharray="2 3" />
+                    <path class="leader" d="M72 40c6 14 16 30 30 50" stroke-width=".8" stroke-dasharray="2 3" />
+                    <path class="leader" d="M346 256c-12-8-22-22-30-40" stroke-width=".8" stroke-dasharray="2 3" />
+                  </g>
+                  <image class="sketch-hand" href="assets/hands/ink/B.svg" x="52" y="96" width="92" height="112" preserveAspectRatio="xMidYMid meet" transform="translate(196 0) scale(-1 1)" />
+                  <image class="sketch-hand" href="assets/hands/ink/B.svg" x="256" y="96" width="92" height="112" preserveAspectRatio="xMidYMid meet" />
+                  <g class="sketch-notes" fill="currentColor">
+                    <text x="294" y="56">head &amp; face</text>
+                    <text x="26" y="34">both hands</text>
+                    <text x="320" y="276">shoulders</text>
+                  </g>
+                </svg>
+                <p class="placeholder-title">Ready when you are.</p>
+              </div>
+              <div id="badge" class="badge" role="status">Camera off</div>
+            </div>
+            <figcaption class="photo-caption">Shown mirrored · stays on this device</figcaption>
+          </figure>
+
+          <div class="cam-controls">
+            <!-- On a phone, the word to sign rides along with the camera (the quiz says it too). -->
+            <p id="cam-word" class="cam-word" data-only="signs" aria-hidden="true" hidden><span class="j-caps">Sign</span>
+              <span id="cam-word-text" class="cam-word-text"></span></p>
+            <button id="start-camera" class="j-btn start-btn" type="button">
+              <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#camera"/></svg>
+              <span class="btn-label">Start camera</span>
+            </button>
+            <label class="u-listen" data-only="signs"><input type="checkbox" id="u-listen" checked />
+              <span>Automatic recognition — raise your hands and sign</span></label>
+            <label class="accuracy-mode" data-only="signs"><input type="checkbox" id="accuracy-mode" />
+              <span>Higher accuracy <small>2–3 percentage points in tests · 108 MB extra</small></span></label>
+            <div class="record-row" data-only="signs">
+              <button id="record" class="j-btn record-btn" type="button" disabled>
+                <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#record"/></svg>
+                <span class="btn-label">Record</span>
+              </button>
+              <span class="space-hint">Manual option: hold <kbd>Space</kbd> while you sign</span>
+            </div>
+            <button id="stop-camera" class="text-btn" type="button" hidden>Turn camera off</button>
+          </div>
+
+          <p class="j-hint framing-hint">
+            <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#info"/></svg>
+            <span id="framing" aria-live="polite">Keep your face, shoulders and hands in frame. Sit back far enough that all three show.</span>
+          </p>
+
+          <div class="prep j-scrap j-kraft" data-only="signs" style="--tilt:-1.2deg">
+            <span class="j-tape" aria-hidden="true"></span>
+            <p class="prep-title j-caps">Before you record</p>
+            <ul>
+              <li>Light in front of you, not behind.</li>
+              <li>Sit back until your raised hands show.</li>
+              <li>Start and finish with your hands resting.</li>
+            </ul>
+          </div>
+          <div class="prep j-scrap j-kraft" data-only="spell" style="--tilt:-1.2deg">
+            <span class="j-tape" aria-hidden="true"></span>
+            <p class="prep-title j-caps">Before you spell</p>
+            <ul>
+              <li>One hand, palm towards the camera.</li>
+              <li>Hold each letter still for a moment.</li>
+              <li>Keep your hand near the middle of the picture.</li>
+            </ul>
+          </div>
+        </section>
+
+        <div class="j-page j-lined work-page">
+
+          <!-- -------------------------------- Practise ------------------------------ -->
+          <section class="panel" id="panel-signs" role="tabpanel" aria-labelledby="tab-signs">
+            <div class="page-tabs" role="group" aria-label="What to practise">
+              <button class="mode" data-signmode="quiz" aria-pressed="true" type="button">Quiz me</button>
+              <button class="mode" data-signmode="guess" aria-pressed="false" type="button">What did I sign?</button>
+              <button class="mode" data-signmode="phrase" aria-pressed="false" type="button">A phrase</button>
+              <button class="mode" data-signmode="understand" aria-pressed="false" type="button">Understand me</button>
+            </div>
+
+            <p class="lesson-line">
+              <span class="j-caps">Lesson</span>
+              <a href="#lessons" id="lesson-link">…</a>
+              <span id="lesson-size" class="pencil"></span>
+              <a href="#lessons" class="change-link">change<span class="visually-hidden"> lesson</span></a>
+            </p>
+
+            <div id="quiz" class="mode-body quiz">
+              <ol class="steps">
+                <li class="step" data-step-name="watch">
+                  <span class="step-n" aria-hidden="true">1</span>
+                  <div class="step-body">
+                    <p class="step-title">Watch</p>
+                    <p id="quiz-word" class="quiz-word">—</p>
+                    <p id="quiz-progress" class="quiz-progress"></p>
+                    <div id="quiz-plate" class="sign-plate">
+                      <figure class="fig-card j-photo" style="--tilt:-1.2deg">
+                        <span class="j-tape fig-tape" aria-hidden="true"></span>
+                        <div class="fig-frame">
+                          <canvas id="quiz-figure" class="fig-canvas" role="img" aria-label="A drawn signer"></canvas>
+                          <p id="quiz-figure-status" class="fig-status">Drawing the signer…</p>
+                        </div>
+                        <figcaption id="quiz-figure-cap" class="fig-cap">Drawn from the dictionary clip</figcaption>
+                      </figure>
+                      <div id="quiz-player" class="player" role="group" aria-label="The drawn sign">
+                        <button class="j-btn play-btn" data-act="play" type="button" disabled>
+                          <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#play"/></svg>
+                          <span class="btn-label">Play</span>
+                        </button>
+                        <div class="speed" role="group" aria-label="Speed">
+                          <button type="button" data-speed="1" aria-pressed="true">1×<span class="visually-hidden"> speed</span></button>
+                          <button type="button" data-speed="0.5" aria-pressed="false">0.5×<span class="visually-hidden"> speed</span></button>
+        <button type="button" data-speed="0.25" aria-pressed="false">0.25×<span class="visually-hidden"> speed</span></button>
+                        </div>
+                        <button class="toggle" type="button" data-act="mirror" aria-pressed="false" title="Mirror the drawing, for signing with your left hand">
+                          <svg class="j-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2Q12.1 12 12 20.8" stroke-dasharray="1.6 2.4"/><path d="M9.4 8.3Q6.6 8.2 3.9 8.3M6.3 5.8L3.8 8.3L6.3 10.7M14.6 15.7Q17.4 15.8 20.1 15.7M17.7 13.3L20.2 15.7L17.7 18.2"/></svg>Left-handed<span class="visually-hidden">: mirror the drawing</span></button>
+                        <button class="text-btn" type="button" data-act="larger" disabled>See it larger</button>
+                      </div>
+                    </div>
+                    <p class="quiz-links">
+                      <a id="quiz-watch" class="watch-link" target="_blank" rel="noopener noreferrer">
+                        <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#play"/></svg>Watch it on Real SASL<span class="ext" aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span></a>
+                      <button id="quiz-next" class="text-btn" type="button">Another word</button>
+                    </p>
+                  </div>
+                </li>
+                <li class="step" data-step-name="sign">
+                  <span class="step-n" aria-hidden="true">2</span>
+                  <div class="step-body">
+                    <p class="step-title">Sign</p>
+                    <p class="step-text">With the camera on, raise your hands and sign once. Rest your hands to see the guess.
+                      Automatic recognition is on by default; Record and Space are optional.</p>
+                  </div>
+                </li>
+                <li class="step" data-step-name="see">
+                  <span class="step-n" aria-hidden="true">3</span>
+                  <div class="step-body">
+                    <p class="step-title">See how you did</p>
+                    <div class="result" aria-live="polite">
+                      <div id="quiz-verdict" class="verdict" hidden></div>
+                    </div>
+                    <ol id="quiz-log" class="log" aria-label="Your tries this session"></ol>
+                    <p id="quiz-score" class="pencil small"></p>
+                  </div>
+                </li>
+              </ol>
+            </div>
+
+            <div id="guess" class="mode-body" hidden>
+              <ol class="steps">
+                <li class="step" data-step-name="sign">
+                  <span class="step-n" aria-hidden="true">1</span>
+                  <div class="step-body">
+                    <p class="step-title">Sign</p>
+                    <p class="step-text" id="guess-intro">Sign any word from your lesson and this names it.</p>
+                    <p class="step-text pencil">Raise your hands and sign. Pause briefly between signs, then rest your hands to see the result.</p>
+                  </div>
+                </li>
+                <li class="step" data-step-name="see">
+                  <span class="step-n" aria-hidden="true">2</span>
+                  <div class="step-body">
+                    <p class="step-title">What it looked like</p>
+                    <div class="result" aria-live="polite">
+                      <ol id="guess-list" class="candidates"></ol>
+                      <p id="guess-note" class="pencil small"></p>
+                      <p id="guess-actions" class="verdict-actions" hidden>
+                        <button id="guess-compare" class="j-btn j-btn--quiet small-btn" type="button" aria-haspopup="dialog">
+                          <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#eye"/></svg><span class="btn-label">Compare</span></button>
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              </ol>
+            </div>
+
+            <div id="understand" class="mode-body" hidden>
+              <ol class="steps">
+                <li class="step" data-step-name="sign">
+                  <span class="step-n" aria-hidden="true">1</span>
+                  <div class="step-body">
+                    <p class="step-title">Sign to me</p>
+                    <p class="step-text">Sign a few words, with a short pause between signs, then rest your hands.
+                      Each sign is read, the likeliest sequence is chosen, and it is turned back into English.</p>
+                    <div class="u-controls">
+                      <label class="u-scope"><span class="j-caps">Words to expect</span>
+                        <select id="u-scope">
+                          <option value="all">Every sign in the dictionary</option>
+                          <option value="lesson">Only this lesson's words</option>
+                        </select></label>
+                    </div>
+                    <p class="step-text pencil small" id="u-note"></p>
+                  </div>
+                </li>
+                <li class="step" data-step-name="see">
+                  <span class="step-n" aria-hidden="true">2</span>
+                  <div class="step-body">
+                    <p class="step-title">What I understood</p>
+                    <div class="result" aria-live="polite">
+                      <ol id="u-transcript" class="u-transcript"></ol>
+                      <p class="u-empty pencil small" id="u-empty">Nothing yet. Start the camera and sign to it.</p>
+                    </div>
+                  </div>
+                </li>
+              </ol>
+            </div>
+
+            <div id="phrase" class="mode-body" hidden>
+              <ol class="steps">
+                <li class="step" data-step-name="sign">
+                  <span class="step-n" aria-hidden="true">1</span>
+                  <div class="step-body">
+                    <div id="phrase-target" class="phrase-target" hidden></div>
+                    <p class="step-title">Sign a phrase</p>
+                    <p class="step-text">Sign two to five words from your lesson, with a short pause between them.
+                      Each sign is read on its own: this checks which signs you made, and in what order.</p>
+                    <p class="step-text pencil small">It does not translate. SASL grammar lives in space, facial
+                      expression and how signs are changed, and none of that is interpreted here.</p>
+                  </div>
+                </li>
+                <li class="step" data-step-name="see">
+                  <span class="step-n" aria-hidden="true">2</span>
+                  <div class="step-body">
+                    <p class="step-title">The signs it found</p>
+                    <div class="result" aria-live="polite">
+                      <ol id="phrase-list" class="phrase-list"></ol>
+                      <p id="phrase-note" class="pencil small"></p>
+                    </div>
+                  </div>
+                </li>
+              </ol>
+            </div>
+          </section>
+
+          <!-- ------------------------------ Fingerspelling --------------------------- -->
+          <section class="panel" id="panel-spell" role="tabpanel" aria-labelledby="tab-spell" hidden>
+            <div class="page-tabs" role="group" aria-label="Fingerspelling mode">
+              <button class="mode" data-spellmode="word" aria-pressed="true" type="button">Spell a word</button>
+              <button class="mode" data-spellmode="free" aria-pressed="false" type="button">Free spelling</button>
+            </div>
+
+            <div id="spell-target" class="spell-target">
+              <p class="step-title">Spell this word</p>
+              <div id="spell-word" class="spell-word" aria-live="polite"></div>
+              <div id="spell-cue" class="spell-cue">
+                <button id="spell-cue-btn" class="cue-btn" type="button" aria-haspopup="dialog">
+                  <img id="spell-cue-img" class="j-art--ink" src="assets/hands/ink/A.svg" alt="" width="100" height="100" />
+                  <span class="visually-hidden" id="spell-cue-label">Show the letter larger, with a tip</span>
+                </button>
+                <div class="cue-text">
+                  <p class="step-title">Next letter <span id="spell-cue-letter" class="cue-letter"></span></p>
+                  <p id="spell-cue-note" class="cue-note"></p>
+                  <p id="spell-hint" class="spell-hint"></p>
+                </div>
+              </div>
+              <div class="spell-controls">
+                <button id="spell-next" class="text-btn" type="button">New word</button>
+                <label class="visually-hidden" for="spell-custom">Type your own word to spell</label>
+                <input id="spell-custom" class="line-input" type="text" placeholder="…or type your own"
+                       autocomplete="off" spellcheck="false" maxlength="24" />
+              </div>
+            </div>
+
+            <div id="spell-free" class="spell-free" hidden>
+              <p class="step-title">Spell anything</p>
+              <p class="step-text pencil small">Hold each letter still. Hold on, or change shape, to repeat a letter.</p>
+              <div class="free-row">
+                <div id="spell-buffer" class="spell-buffer" aria-live="polite"></div>
+                <button id="spell-clear" class="text-btn" type="button">Clear</button>
+              </div>
+            </div>
+
+            <div class="spell-readout">
+              <div class="spell-dial">
+                <svg viewBox="0 0 120 120" aria-hidden="true">
+                  <circle class="dial-track" cx="60" cy="60" r="52" />
+                  <circle class="dial-fill" id="dial-fill" cx="60" cy="60" r="52" />
+                </svg>
+                <div id="spell-letter" class="spell-letter">–</div>
+              </div>
+              <div class="spell-meta">
+                <p class="step-title">What the camera reads</p>
+                <p id="spell-confidence" class="spell-confidence">Start the camera and hold up a letter</p>
+                <p id="spell-alts" class="pencil small"></p>
+              </div>
+              <figure class="spell-guide" id="spell-guide" hidden>
+                <img id="spell-guide-img" class="j-art--ink" src="assets/hands/ink/A.svg" alt="" width="100" height="100" />
+                <figcaption id="spell-guide-cap"></figcaption>
+              </figure>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ============ Practise, below the notebook ============ -->
+      <section class="how" data-only="signs" aria-label="How practice works">
+        <div class="how-card j-scrap j-cream" data-card="watch" style="--tilt:-1.5deg">
+          <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#eye"/></svg>
+          <h2>Watch</h2>
+          <p>The drawn signer, then the Deaf signer on Real SASL.</p>
+        </div>
+        <svg class="how-arrow" aria-hidden="true"><use href="assets/art/icons.svg#arrow-curve"/></svg>
+        <div class="how-card j-scrap j-kraft" data-card="sign" style="--tilt:1deg">
+          <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#hands"/></svg>
+          <h2>Sign</h2>
+          <p>Sign it to your camera, once.</p>
+        </div>
+        <svg class="how-arrow" aria-hidden="true"><use href="assets/art/icons.svg#arrow-loop"/></svg>
+        <div class="how-card j-scrap j-cream" data-card="see" style="--tilt:-.5deg">
+          <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#check"/></svg>
+          <h2>See how you did</h2>
+          <p>Matched, close or not yet, and your try beside the reference.</p>
+        </div>
+      </section>
+
+      <section class="lessons j-notebook" id="lessons" data-only="signs" aria-labelledby="lessons-title">
+        <div class="j-page contents-page">
+          <p class="page-label">
+            <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#book"/></svg><span>Contents</span>
+          </p>
+          <h2 id="lessons-title" class="page-title">Lessons</h2>
+          <p class="page-sub">Each lesson is a short list of signs. Your tries are compared with that list, so the
+            shorter it is, the more reliable the answer.</p>
+          <ol id="lesson-select" class="contents" aria-label="Choose a lesson"></ol>
+          <p class="footnote"><span class="tag">NID</span> from the National Institute for the Deaf’s sign charts.</p>
+        </div>
+        <div class="j-page j-lined words-page">
+          <p class="page-label">
+            <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#page"/></svg><span>In this lesson</span>
+          </p>
+          <h3 id="lesson-title" class="page-title">…</h3>
+          <div id="lesson-chips" class="chips" aria-label="Words in this lesson"></div>
+          <p id="lesson-note" class="pencil small"></p>
+          <p class="lesson-progress">
+            <span id="lesson-progress"></span>
+            <button id="progress-clear" class="text-btn" type="button" hidden>Clear the tallies</button>
+          </p>
+          <p class="lesson-progress">
+            <span id="personal-note"></span>
+            <button id="personal-teach" class="text-btn" type="button" hidden>Teach Sawubona this lesson</button>
+            <button id="personal-clear" class="text-btn" type="button" hidden>Forget my signing</button>
+          </p>
+          <div class="add-word">
+            <label class="j-caps" for="lesson-input">Add a sign</label>
+            <div class="search-row">
+              <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#search"/></svg>
+              <input id="lesson-input" class="line-input" type="search" placeholder="Search all 1,858 signs…"
+                     autocomplete="off" spellcheck="false" aria-controls="lesson-suggestions" />
+              <button id="lesson-clear" class="text-btn" type="button">Clear the list</button>
+              <span id="lesson-cleared" class="lesson-cleared" hidden>
+                <span class="pencil">List cleared ·</span>
+                <button id="lesson-undo" class="text-btn" type="button">Undo<span class="visually-hidden"> clearing the list</span></button>
+              </span>
+            </div>
+            <ul id="lesson-suggestions" class="suggestions" hidden></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Fingerspelling, below the notebook: the plate ============ -->
+      <section class="plate-wrap" data-only="spell" aria-labelledby="plate-title">
+        <div class="j-plate plate">
+          <h2 id="plate-title">Plate I — the SASL manual alphabet</h2>
+          <p class="plate-sub j-caps">Right hand, as you see it facing the signer · J and Z move · tap a hand to enlarge it</p>
+          <div id="plate-grid" class="plate-grid"></div>
+          <div class="plate-notes">
+            <h3 class="j-caps">Letters worth a second look</h3>
+            <ul>
+              <li><b>T</b> — fold your index finger down over the tip of your thumb. The American T, with the
+                thumb poking out between index and middle finger, is not the South African one; every SASL
+                presenter this learned from uses the folded index.</li>
+              <li><b>Y</b> — thumb and little finger out, as in ASL.</li>
+              <li><b>U, V, R</b> — two fingers up: together, apart, or crossed.</li>
+              <li><b>G and H</b> — pointing sideways with one finger, or with two.</li>
+              <li><b>P and Q</b> — the K hand and the G hand, turned to point down.</li>
+              <li><b>J and Z</b> are drawn in the air: the I hand draws a J, the index finger a Z. The camera
+                reads them from the fingertip's path, not a held shape, so draw them clearly and not too fast.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Sentences: English in, SASL sign order out ============ -->
+      <section class="panel" id="panel-sentences" role="tabpanel" aria-labelledby="tab-sentences" hidden>
+        <div id="sentences"></div>
+      </section>
+
+      <!-- ============ Dictionary: index cards in a drawer ============ -->
+      <section class="panel" id="panel-dict" role="tabpanel" aria-labelledby="tab-dict" hidden>
+        <div class="drawer j-drawer">
+          <div class="drawer-head">
+            <h2 class="j-label-holder">Dictionary · A–Z</h2>
+            <div class="search-slip">
+              <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#search"/></svg>
+              <label class="visually-hidden" for="dict-input">Search the dictionary</label>
+              <input id="dict-input" type="search" placeholder="Search 1,858 SASL signs…"
+                     autocomplete="off" spellcheck="false" />
+            </div>
+          </div>
+          <p id="dict-count" class="drawer-count" aria-live="polite"></p>
+          <ul id="dict-list" class="dict-list"></ul>
+        </div>
+      </section>
+
+      <!-- ============ About ============ -->
+      <section class="panel about" id="panel-about" role="tabpanel" aria-labelledby="tab-about" hidden>
+        <div class="about-spread j-notebook">
+          <div class="j-page">
+            <p class="page-label"><svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#page"/></svg><span>How it works</span></p>
+            <h2 class="page-title">What this does</h2>
+            <p>Your camera feed goes through hand, body and face tracking on this device. A recorded sign
+              becomes a sequence of points, and two families of pretrained sign models describe it in a way
+              that ignores who is signing. That description is compared with 3,483 reference clips of 1,858
+              signs from the <a href="https://www.realsasl.com/" target="_blank" rel="noopener noreferrer">Real
+              SASL</a> dictionary and the National Institute for the Deaf's SASL Video Dictionary. Nothing is uploaded, and there is nothing to set up: it was built to work for
+              someone it has never seen.</p>
+
+            <h2 class="page-title">How well it works</h2>
+            <p>Measured on signers the models had never seen, never on the data they learned from:</p>
+            <ul class="measures">
+              <li><span class="figure">96%</span><span><strong>Fingerspelling.</strong> Held letters read
+                correctly, tested on each of five SASL presenters in turn after training on the other four.</span></li>
+              <li><span class="figure">82%</span><span><strong>A 10-word lesson.</strong> The top answer is right
+                82% of the time, and the right word is in the top three 96% of the time.</span></li>
+              <li><span class="figure">3 in 10</span><span><strong>The whole dictionary.</strong> That is why
+                practice happens in lessons: the smaller the list, the more reliable the answer.</span></li>
+              <li><span class="figure">82%</span><span><strong>The quiz.</strong> Sign the word asked and it says
+                “matched” 82% of the time and “close” 15%; sign an unrelated word and it wrongly says “matched”
+                about one time in twenty.</span></li>
+            </ul>
+          </div>
+          <div class="j-page">
+            <p class="page-label"><svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#info"/></svg><span>Limits</span></p>
+            <h2 class="page-title">What it does not do</h2>
+            <ul class="limits">
+              <li><strong>It is not a translator.</strong> No system can yet translate signed language from a
+                webcam, and this one does not try.</li>
+              <li><strong>A match is not a grade.</strong> “That looked like FRIDAY” is not the same as “that was
+                a perfect FRIDAY”. Your teacher is the judge of that.</li>
+              <li><strong>Facial grammar is not judged.</strong> Facial expression, eyebrows and the use of
+                space carry SASL grammar. The face is tracked as part of a sign’s shape, but none of that
+                grammar is interpreted.</li>
+              <li><strong>SASL varies.</strong> Signs differ between regions and schools. If your course teaches a
+                different version from Real SASL, trust your course.</li>
+            </ul>
+
+            <h2 class="page-title">Where it comes from</h2>
+            <ul class="credits">
+              <li>Reference signs: <a href="https://www.realsasl.com/" target="_blank" rel="noopener noreferrer">Real SASL</a>.
+                The app keeps only numbers derived from the clips (the tracked movement of the body, hands
+                and face outline) and links to the site for the videos.</li>
+              <li>Letters learned from SASL alphabet videos by the National Institute for the Deaf, The Sign
+                Tutors, and three other presenters, every example checked by hand; and from
+                <a href="https://doi.org/10.17632/j4y5w2c8w9.1" target="_blank" rel="noopener noreferrer">ASL-HG</a>
+                (Mendeley Data, CC BY 4.0) for the letters SASL shares with ASL.</li>
+              <li>Sign models: <a href="https://github.com/J22Melody/fairseq/tree/main/examples/MMPT" target="_blank"
+                rel="noopener noreferrer">SignCLIP</a> (Jiang et al., 2024) and
+                <a href="https://github.com/AI4Bharat/OpenHands" target="_blank" rel="noopener noreferrer">OpenHands</a>
+                (AI4Bharat). Tracking: <a href="https://ai.google.dev/edge/mediapipe" target="_blank"
+                rel="noopener noreferrer">MediaPipe</a>.</li>
+              <li>Drawings: made for this app — the letter hands are traced from real, hand-checked frames; the
+                plants and mountains are drawn by code. The drawn signer is made from the points tracked in each
+                Real SASL clip: an illustration of the movement, not the video, so it always links the original.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span class="j-rule" role="presentation"></span>
+      <div class="foot-row j-caps">
+        <span>Sawubona — we see you</span>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">Night journal</button>
+        <span>Signs: Real SASL · Letters checked by hand</span>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- ============ Watch / Compare: the drawn signer, laid on the desk ============ -->
+<dialog id="viewer" class="viewer" aria-labelledby="viewer-title">
+  <div class="viewer-sheet j-sheet">
+    <span class="j-tape viewer-tape" aria-hidden="true"></span>
+    <button class="sheet-close" type="button" data-close>
+      <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#close"/></svg><span class="visually-hidden">Close</span>
+    </button>
+    <p class="page-label"><svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#eye"/></svg><span id="viewer-kind">Watch the sign</span></p>
+    <h2 id="viewer-title" class="viewer-word"></h2>
+    <p id="viewer-note" class="viewer-note"></p>
+    <label id="viewer-variant-label" class="j-caps" hidden>Reference variant <select id="viewer-variant" aria-label="Reference variant"></select></label>
+    <div id="viewer-choices" class="viewer-choices" hidden></div>
+    <div id="viewer-figs" class="viewer-figs">
+      <figure class="fig-card j-photo" style="--tilt:-.8deg">
+        <span class="j-tape fig-tape" aria-hidden="true"></span>
+        <p class="fig-no j-caps" id="viewer-ref-no">Real SASL</p>
+        <div class="fig-frame">
+          <canvas id="viewer-ref" class="fig-canvas" role="img" aria-label="A drawn signer"></canvas>
+          <p id="viewer-ref-status" class="fig-status"></p>
+        </div>
+        <figcaption id="viewer-ref-cap" class="fig-cap"></figcaption>
+      </figure>
+      <figure id="viewer-you-card" class="fig-card j-photo fig-card--you" style="--tilt:.8deg" hidden>
+        <span class="j-tape fig-tape" aria-hidden="true"></span>
+        <p class="fig-no j-caps">You</p>
+        <div class="fig-frame">
+          <canvas id="viewer-you" class="fig-canvas" role="img" aria-label="Your last try, drawn"></canvas>
+          <p id="viewer-you-status" class="fig-status"></p>
+        </div>
+        <figcaption id="viewer-you-cap" class="fig-cap"></figcaption>
+      </figure>
+    </div>
+    <div id="viewer-player" class="player player--wide" role="group" aria-label="The drawn sign">
+      <button class="j-btn play-btn" data-act="play" type="button" disabled>
+        <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#play"/></svg>
+        <span class="btn-label">Play</span>
+      </button>
+      <div class="speed" role="group" aria-label="Speed">
+        <button type="button" data-speed="1" aria-pressed="true">1×<span class="visually-hidden"> speed</span></button>
+        <button type="button" data-speed="0.5" aria-pressed="false">0.5×<span class="visually-hidden"> speed</span></button>
+        <button type="button" data-speed="0.25" aria-pressed="false">0.25×<span class="visually-hidden"> speed</span></button>
+      </div>
+      <button class="toggle" type="button" data-act="mirror" aria-pressed="false" title="Mirror the Real SASL drawing, for signing with your left hand">
+        <svg class="j-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2Q12.1 12 12 20.8" stroke-dasharray="1.6 2.4"/><path d="M9.4 8.3Q6.6 8.2 3.9 8.3M6.3 5.8L3.8 8.3L6.3 10.7M14.6 15.7Q17.4 15.8 20.1 15.7M17.7 13.3L20.2 15.7L17.7 18.2"/></svg>Left-handed<span class="visually-hidden">: mirror the drawing</span></button>
+      <button class="toggle" type="button" data-act="closeup" aria-pressed="false" disabled>Hand close-up</button>
+      <button class="toggle" type="button" data-step="-1" aria-label="Previous frame" disabled>← Frame</button>
+      <button class="toggle" type="button" data-step="1" aria-label="Next frame" disabled>Frame →</button>
+      <label class="scrub">
+        <span class="visually-hidden">Position in the sign</span>
+        <input type="range" min="0" max="1000" step="1" value="0" data-act="seek" disabled />
+      </label>
+      <span class="play-time" data-time aria-hidden="true">0.0 s</span>
+    </div>
+    <p id="viewer-explain" class="viewer-explain"></p>
+    <p class="viewer-credit">
+      <a id="viewer-src" class="watch-link" target="_blank" rel="noopener noreferrer">
+        <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#play"/></svg>Watch the video on Real SASL<span class="ext" aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span></a>
+      <button id="viewer-lesson" class="text-btn" type="button" hidden></button>
+    </p>
+  </div>
+</dialog>
+
+<!-- ============ Plate I, one hand enlarged ============ -->
+<dialog id="loupe" class="loupe" aria-labelledby="loupe-title">
+  <div class="loupe-sheet j-plate">
+    <button class="sheet-close" type="button" data-close>
+      <svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#close"/></svg><span class="visually-hidden">Close</span>
+    </button>
+    <p class="loupe-kicker j-caps">Plate I · detail</p>
+    <div class="loupe-body">
+      <div class="loupe-art"><img id="loupe-img" class="j-art--ink" src="assets/hands/ink/A.svg" alt="" width="300" height="300" /></div>
+      <div class="loupe-text">
+        <h2 id="loupe-title" class="loupe-letter">A</h2>
+        <p id="loupe-note" class="loupe-note"></p>
+        <p class="loupe-tip-label j-caps">Tip</p>
+        <p id="loupe-tip" class="loupe-tip"></p>
+        <p id="loupe-src" class="loupe-src"></p>
+      </div>
+    </div>
+    <div class="loupe-nav">
+      <button id="loupe-prev" class="text-btn" type="button"><svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#back"/></svg><span></span></button>
+      <span id="loupe-count" class="j-caps"></span>
+      <button id="loupe-next" class="text-btn" type="button"><span></span><svg class="j-icon" aria-hidden="true"><use href="assets/art/icons.svg#arrow"/></svg></button>
+    </div>
+  </div>
+</dialog>
+
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

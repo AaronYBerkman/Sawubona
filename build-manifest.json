@@ -1,0 +1,485 @@
+{
+  "bytes": 282253792,
+  "files": [
+    {
+      "file": "index.html",
+      "bytes": 45382
+    },
+    {
+      "file": "sentences.html",
+      "bytes": 2026
+    },
+    {
+      "file": "review.html",
+      "bytes": 16190
+    },
+    {
+      "file": "manifest.webmanifest",
+      "bytes": 828
+    },
+    {
+      "file": "sw.js",
+      "bytes": 4481
+    },
+    {
+      "file": "src/app.js",
+      "bytes": 94214
+    },
+    {
+      "file": "src/auto-capture.js",
+      "bytes": 609
+    },
+    {
+      "file": "src/confidence.js",
+      "bytes": 1362
+    },
+    {
+      "file": "src/demo.js",
+      "bytes": 8310
+    },
+    {
+      "file": "src/device.js",
+      "bytes": 1364
+    },
+    {
+      "file": "src/encoder.js",
+      "bytes": 6770
+    },
+    {
+      "file": "src/features.js",
+      "bytes": 5002
+    },
+    {
+      "file": "src/figure.js",
+      "bytes": 73556
+    },
+    {
+      "file": "src/grammar-words.js",
+      "bytes": 45743
+    },
+    {
+      "file": "src/grammar.js",
+      "bytes": 79751
+    },
+    {
+      "file": "src/hand-topology.js",
+      "bytes": 646
+    },
+    {
+      "file": "src/holistic.js",
+      "bytes": 5859
+    },
+    {
+      "file": "src/interpret.js",
+      "bytes": 23892
+    },
+    {
+      "file": "src/keypoints.js",
+      "bytes": 4096
+    },
+    {
+      "file": "src/letters.js",
+      "bytes": 5040
+    },
+    {
+      "file": "src/motion-letters.js",
+      "bytes": 8384
+    },
+    {
+      "file": "src/personal.js",
+      "bytes": 4129
+    },
+    {
+      "file": "src/reference.js",
+      "bytes": 8012
+    },
+    {
+      "file": "src/replay-data.js",
+      "bytes": 11229
+    },
+    {
+      "file": "src/segment.js",
+      "bytes": 5462
+    },
+    {
+      "file": "src/sentence-practice.js",
+      "bytes": 14175
+    },
+    {
+      "file": "src/sentence-view.js",
+      "bytes": 26870
+    },
+    {
+      "file": "src/sentence.css",
+      "bytes": 25163
+    },
+    {
+      "file": "src/styles.css",
+      "bytes": 51150
+    },
+    {
+      "file": "src/vision.js",
+      "bytes": 4297
+    },
+    {
+      "file": "src/watch.js",
+      "bytes": 9672
+    },
+    {
+      "file": "assets/art/board.html",
+      "bytes": 15712
+    },
+    {
+      "file": "assets/art/icons.svg",
+      "bytes": 8907
+    },
+    {
+      "file": "assets/art/koppies.svg",
+      "bytes": 22804
+    },
+    {
+      "file": "assets/art/paper.css",
+      "bytes": 41578
+    },
+    {
+      "file": "assets/art/protea-king.svg",
+      "bytes": 92998
+    },
+    {
+      "file": "assets/art/protea-pincushion.svg",
+      "bytes": 101024
+    },
+    {
+      "file": "assets/art/sprig.svg",
+      "bytes": 2086
+    },
+    {
+      "file": "assets/art/table-mountain.svg",
+      "bytes": 44841
+    },
+    {
+      "file": "assets/brand/card.png",
+      "bytes": 53879
+    },
+    {
+      "file": "assets/brand/card.svg",
+      "bytes": 2833
+    },
+    {
+      "file": "assets/brand/icon-180.png",
+      "bytes": 3465
+    },
+    {
+      "file": "assets/brand/icon-192.png",
+      "bytes": 3654
+    },
+    {
+      "file": "assets/brand/icon-512.png",
+      "bytes": 10104
+    },
+    {
+      "file": "assets/brand/icon.svg",
+      "bytes": 2068
+    },
+    {
+      "file": "assets/hands/A.svg",
+      "bytes": 3260
+    },
+    {
+      "file": "assets/hands/B.svg",
+      "bytes": 3262
+    },
+    {
+      "file": "assets/hands/C.svg",
+      "bytes": 3236
+    },
+    {
+      "file": "assets/hands/D.svg",
+      "bytes": 3232
+    },
+    {
+      "file": "assets/hands/E.svg",
+      "bytes": 3263
+    },
+    {
+      "file": "assets/hands/F.svg",
+      "bytes": 3261
+    },
+    {
+      "file": "assets/hands/G.svg",
+      "bytes": 3239
+    },
+    {
+      "file": "assets/hands/H.svg",
+      "bytes": 3230
+    },
+    {
+      "file": "assets/hands/hands.json",
+      "bytes": 9030
+    },
+    {
+      "file": "assets/hands/I.svg",
+      "bytes": 3203
+    },
+    {
+      "file": "assets/hands/ink/A.svg",
+      "bytes": 4782
+    },
+    {
+      "file": "assets/hands/ink/B.svg",
+      "bytes": 4739
+    },
+    {
+      "file": "assets/hands/ink/C.svg",
+      "bytes": 4710
+    },
+    {
+      "file": "assets/hands/ink/D.svg",
+      "bytes": 4725
+    },
+    {
+      "file": "assets/hands/ink/E.svg",
+      "bytes": 4750
+    },
+    {
+      "file": "assets/hands/ink/F.svg",
+      "bytes": 4754
+    },
+    {
+      "file": "assets/hands/ink/G.svg",
+      "bytes": 7693
+    },
+    {
+      "file": "assets/hands/ink/H.svg",
+      "bytes": 6790
+    },
+    {
+      "file": "assets/hands/ink/I.svg",
+      "bytes": 4719
+    },
+    {
+      "file": "assets/hands/ink/J.svg",
+      "bytes": 5044
+    },
+    {
+      "file": "assets/hands/ink/K.svg",
+      "bytes": 4685
+    },
+    {
+      "file": "assets/hands/ink/L.svg",
+      "bytes": 4775
+    },
+    {
+      "file": "assets/hands/ink/M.svg",
+      "bytes": 4731
+    },
+    {
+      "file": "assets/hands/ink/N.svg",
+      "bytes": 4741
+    },
+    {
+      "file": "assets/hands/ink/O.svg",
+      "bytes": 4774
+    },
+    {
+      "file": "assets/hands/ink/P.svg",
+      "bytes": 7827
+    },
+    {
+      "file": "assets/hands/ink/Q.svg",
+      "bytes": 7689
+    },
+    {
+      "file": "assets/hands/ink/R.svg",
+      "bytes": 4704
+    },
+    {
+      "file": "assets/hands/ink/S.svg",
+      "bytes": 4741
+    },
+    {
+      "file": "assets/hands/ink/T.svg",
+      "bytes": 4715
+    },
+    {
+      "file": "assets/hands/ink/U.svg",
+      "bytes": 4697
+    },
+    {
+      "file": "assets/hands/ink/V.svg",
+      "bytes": 4720
+    },
+    {
+      "file": "assets/hands/ink/W.svg",
+      "bytes": 4725
+    },
+    {
+      "file": "assets/hands/ink/X.svg",
+      "bytes": 4688
+    },
+    {
+      "file": "assets/hands/ink/Y.svg",
+      "bytes": 4794
+    },
+    {
+      "file": "assets/hands/ink/Z.svg",
+      "bytes": 5043
+    },
+    {
+      "file": "assets/hands/K.svg",
+      "bytes": 3214
+    },
+    {
+      "file": "assets/hands/L.svg",
+      "bytes": 3265
+    },
+    {
+      "file": "assets/hands/M.svg",
+      "bytes": 3227
+    },
+    {
+      "file": "assets/hands/N.svg",
+      "bytes": 3237
+    },
+    {
+      "file": "assets/hands/O.svg",
+      "bytes": 3265
+    },
+    {
+      "file": "assets/hands/P.svg",
+      "bytes": 3219
+    },
+    {
+      "file": "assets/hands/Q.svg",
+      "bytes": 3249
+    },
+    {
+      "file": "assets/hands/R.svg",
+      "bytes": 3240
+    },
+    {
+      "file": "assets/hands/S.svg",
+      "bytes": 3239
+    },
+    {
+      "file": "assets/hands/sheet.html",
+      "bytes": 87811
+    },
+    {
+      "file": "assets/hands/T.svg",
+      "bytes": 3246
+    },
+    {
+      "file": "assets/hands/U.svg",
+      "bytes": 3226
+    },
+    {
+      "file": "assets/hands/V.svg",
+      "bytes": 3249
+    },
+    {
+      "file": "assets/hands/W.svg",
+      "bytes": 3232
+    },
+    {
+      "file": "assets/hands/X.svg",
+      "bytes": 3231
+    },
+    {
+      "file": "assets/hands/Y.svg",
+      "bytes": 3252
+    },
+    {
+      "file": "data/signs.json",
+      "bytes": 275024
+    },
+    {
+      "file": "data/signs.bin",
+      "bytes": 10699776
+    },
+    {
+      "file": "data/signclip.bin",
+      "bytes": 10699776
+    },
+    {
+      "file": "data/signclip-mirror.bin",
+      "bytes": 10699776
+    },
+    {
+      "file": "data/signclip-asl3.bin",
+      "bytes": 10699776
+    },
+    {
+      "file": "data/signclip-asl3-mirror.bin",
+      "bytes": 10699776
+    },
+    {
+      "file": "data/replay.json",
+      "bytes": 501701
+    },
+    {
+      "file": "data/replay/000.bin",
+      "bytes": 4488844
+    },
+    {
+      "file": "data/replay/001.bin",
+      "bytes": 4610034
+    },
+    {
+      "file": "data/replay/002.bin",
+      "bytes": 4656141
+    },
+    {
+      "file": "data/replay/003.bin",
+      "bytes": 3784990
+    },
+    {
+      "file": "data/replay/004.bin",
+      "bytes": 3468051
+    },
+    {
+      "file": "data/replay/005.bin",
+      "bytes": 3481674
+    },
+    {
+      "file": "data/replay/006.bin",
+      "bytes": 3292558
+    },
+    {
+      "file": "data/letter-model.json",
+      "bytes": 367144
+    },
+    {
+      "file": "data/lessons.json",
+      "bytes": 8676
+    },
+    {
+      "file": "data/clip-review.json",
+      "bytes": 273
+    },
+    {
+      "file": "data/clip-audit.json",
+      "bytes": 104875
+    },
+    {
+      "file": "models/onnx/wlasl_slgcn.onnx",
+      "bytes": 8058467
+    },
+    {
+      "file": "models/onnx/lsa64_slgcn.onnx",
+      "bytes": 8058467
+    },
+    {
+      "file": "models/onnx/gsl_slgcn.onnx",
+      "bytes": 8058467
+    },
+    {
+      "file": "models/onnx/signclip.onnx",
+      "bytes": 87115268
+    },
+    {
+      "file": "models/onnx/signclip-asl3.onnx",
+      "bytes": 87115268
+    }
+  ]
+}
