@@ -40,6 +40,7 @@ export async function runDemo(name, api) {
       .map((label, i) => ({ label, rank: i, score: i < first.length ? [8.6, 6.4, 5.1, 4.2][i] ?? 3 : 2 / (1 + i / 50) }));
   };
   const top = (words) => words.filter((w) => known.has(w)).map((label) => ({ label }));
+  const unitVec = () => new Float32Array(768).fill(1 / Math.sqrt(768));
 
   /** A learner's try, made from a reference clip: slower, hands a little lower, in pixels. */
   const sampleTry = async (label, mode) => {
@@ -78,7 +79,9 @@ export async function runDemo(name, api) {
       close: ['PLEASE', TARGET, 'SORRY'],
       no: ['EXCUSE ME', 'PLEASE', 'HELLO'],
     }[kind];
-    api.showQuizVerdict(ranking(lead));
+    const ranked = ranking(lead);
+    ranked.embedding = { openhands: unitVec(), signclip: unitVec() };
+    api.showQuizVerdict(ranked);
   };
 
   const guess = async () => {
@@ -86,7 +89,6 @@ export async function runDemo(name, api) {
     api.setSignMode('guess');
     state.lastAttempt = await sampleTry(TARGET, 'guess');
     // a stand-in embedding, so "That's it" shows; a demo never keeps it
-    const unitVec = () => new Float32Array(768).fill(1 / Math.sqrt(768));
     api.showGuess(Object.assign(ranking([TARGET, 'PLEASE', 'SORRY']), { embedding: { openhands: unitVec(), signclip: unitVec() } }));
   };
 

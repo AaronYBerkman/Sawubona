@@ -1,7 +1,9 @@
 // Camera + MediaPipe landmark tracking.
 //
-// Hands and body run on every frame. The face runs only while a sign is being
-// recorded: SignCLIP reads 128 face-contour points, and nothing else needs them.
+// Hands and body run on every tracked frame. The face runs only while a sign is
+// recorded: SignCLIP reads 128 face-contour points, and nothing else needs it.
+// Face setup is exposed lazily so the camera preview does not wait for a third
+// model before it can open.
 // Models are fetched from Google's CDN the first time and then served from the
 // browser cache, so the first load needs a network connection and later ones
 // do not.
@@ -47,14 +49,20 @@ export async function createTrackers(onProgress = () => {}) {
     minTrackingConfidence: 0.4,
   });
 
-  onProgress('Loading face model');
-  const face = await FaceLandmarker.createFromOptions(vision, {
-    baseOptions: { modelAssetPath: FACE_MODEL, delegate: 'GPU' },
-    runningMode: 'VIDEO',
-    numFaces: 1,
-  });
+  let faceReady = null;
+  const loadFace = () => {
+    if (!faceReady) {
+      onProgress('Loading face model');
+      faceReady = FaceLandmarker.createFromOptions(vision, {
+        baseOptions: { modelAssetPath: FACE_MODEL, delegate: 'GPU' },
+        runningMode: 'VIDEO',
+        numFaces: 1,
+      }).catch((err) => { faceReady = null; throw err; });
+    }
+    return faceReady;
+  };
 
-  return { hands, pose, face };
+  return { hands, pose, face: null, loadFace };
 }
 
 export async function startCamera(video) {

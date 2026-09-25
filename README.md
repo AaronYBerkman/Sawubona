@@ -191,6 +191,11 @@ The last row is why guesses count your tries only once every lesson word has
 one, and the quiz only your tries of the word asked. A learner at a webcam is
 not an NID presenter in a studio, so the gain for you may differ.
 
+If a quiz attempt is marked close or not yet even though the learner signed the
+requested word, *I signed … — learn this try* saves it as a personal example.
+The lesson page shows how many of its words have a personal example. This is an
+explicit correction: the app never silently treats a failed guess as correct.
+
 **How sure a guess is.** *What did I sign?* says Sure, Maybe or Not sure, from
 how far the top guess stands clear of the next (`src/confidence.js`). On the
 same data, in 5- to 20-word lessons:

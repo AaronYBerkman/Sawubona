@@ -331,10 +331,13 @@ el.startCamera.addEventListener('click', async () => {
     // The sign models are the big download; fetch them while the learner is
     // still getting into frame, not on the first attempt.
     Promise.all([
+      state.trackers.loadFace(),
       loadEncoders((m) => setBadge(`${m}…`)),
       loadReference({ vectors: true }),
     ])
-      .then(() => {
+      .then(([face]) => {
+        state.trackers.face = face;
+        if (!state.stream) return;
         setBadge('Ready');
         el.record.disabled = false;
         // ask the browser not to clear the cached models when space runs low
@@ -709,6 +712,7 @@ function showQuizVerdict(ranked) {
   const attempt = state.lastAttempt;
   if (attempt && attempt.word === target && attempt.n == null) Object.assign(attempt, { n: state.quiz.tried, kind });
   const canCompare = Boolean(attempt?.clip && attempt.n === state.quiz.tried);
+  const canTeach = kind !== 'yes' && Boolean(ranked.embedding);
 
   // What it looked like instead: the nearest lesson word if that was not the
   // target, otherwise the nearest sign anywhere (the attempt won the lesson only
@@ -737,10 +741,21 @@ function showQuizVerdict(ranked) {
       ${canCompare
         ? `<button class="j-btn j-btn--quiet small-btn" id="quiz-compare" type="button" aria-haspopup="dialog">${icon('eye')}Compare with Real SASL</button>`
         : ''}
+      ${canTeach
+        ? `<button class="j-btn j-btn--quiet small-btn" id="quiz-teach" type="button">I signed ${escapeHtml(splitLabel(target).head)} — learn this try</button>`
+        : ''}
     </p>`;
   el.quizVerdict.hidden = false;
   $('#quiz-continue')?.addEventListener('click', pickQuizWord);
   $('#quiz-compare')?.addEventListener('click', compareLastTry);
+  $('#quiz-teach')?.addEventListener('click', (e) => {
+    if (!state.demo) state.personal.add(target, ranked.embedding);
+    renderPersonal();
+    e.currentTarget.disabled = true;
+    e.currentTarget.textContent = `${splitLabel(target).head} saved on this device`;
+    el.quizVerdict.querySelector('.verdict-text').insertAdjacentText('beforeend',
+      ' This try is now one of your personal examples for future guesses.');
+  });
   setStep('see');
   renderQuizScore();
   revealResult(el.quizVerdict);
@@ -1079,6 +1094,7 @@ function renderLesson() {
   renderLessonUndo();
   // The drawer's "In lesson" / "+ Lesson" buttons follow the lesson however it changed.
   renderDictionary(el.dictInput.value);
+  renderPersonal();
 }
 
 /** The lesson's words as kraft chips, each with a pencil tally of its matches. */
@@ -1148,7 +1164,11 @@ function tallyHtml(n, said = true) {
 /** How many words have your own signing kept, and the way to forget it. */
 function renderPersonal() {
   const n = state.personal.words;
-  el.personalNote.textContent = n ? `Learning your signing: ${n} word${n === 1 ? '' : 's'} kept on this device.` : '';
+  const words = state.lesson.words;
+  const here = words.filter((w) => state.personal.has(w)).length;
+  el.personalNote.textContent = n
+    ? `Learning your signing: ${here} of ${words.length} words in this lesson, ${n} total, kept on this device.`
+    : 'Sawubona can learn your signing when you confirm a guess or correct a quiz result.';
   el.personalClear.hidden = !n;
 }
 
