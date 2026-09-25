@@ -113,7 +113,7 @@ const el = {
   spellCueLetter: $('#spell-cue-letter'), spellCueNote: $('#spell-cue-note'), spellCueLabel: $('#spell-cue-label'),
   // Tallies of matched signs
   lessonProgress: $('#lesson-progress'), progressClear: $('#progress-clear'),
-  personalNote: $('#personal-note'), personalClear: $('#personal-clear'),
+  personalNote: $('#personal-note'), personalTeach: $('#personal-teach'), personalClear: $('#personal-clear'),
 };
 
 const state = {
@@ -134,6 +134,8 @@ const state = {
   automatic: createAutoCapture(),
   // your own confirmed tries, kept on this device (src/personal.js)
   personal: createPersonal(),
+  calibrating: false,
+  calibrationQueue: [],
   guess: null,
   autoFrames: [],
   busy: false,
@@ -624,11 +626,21 @@ function pickQuizWord() {
   if (!words.length) {
     state.quiz.word = null;
   } else {
+    // In guided teaching, cover every lesson word once before returning to the
+    // normal weighted quiz. This avoids a partial personal gallery, which the
+    // held-out benchmark found can make free guesses less reliable.
+    let candidates = state.calibrating ? state.calibrationQueue : words;
+    if (!candidates.length) {
+      state.calibrating = false;
+      candidates = words;
+      renderPersonal();
+    }
     // Words missed before come up more often; never the same word twice running.
-    const pool = words.length > 1 ? words.filter((w) => w !== state.quiz.word) : words;
+    const pool = candidates.length > 1 ? candidates.filter((w) => w !== state.quiz.word) : candidates;
     const weight = (w) => 1 + 2 * (state.quiz.misses.get(w) ?? 0);
     let r = Math.random() * pool.reduce((s, w) => s + weight(w), 0);
     state.quiz.word = pool.find((w) => (r -= weight(w)) <= 0) ?? pool[pool.length - 1];
+    if (state.calibrating) state.calibrationQueue = state.calibrationQueue.filter((w) => w !== state.quiz.word);
   }
   renderQuiz();
 }
@@ -736,7 +748,7 @@ function showQuizVerdict(ranked) {
     <p class="verdict-text">${text}</p>
     <p class="verdict-actions">
       ${kind === 'yes'
-        ? `<button class="j-btn small-btn" id="quiz-continue" type="button">Next word ${icon('arrow')}</button>`
+        ? `<button class="j-btn small-btn" id="quiz-continue" type="button">${state.calibrating ? 'Teach next word' : 'Next word'} ${icon('arrow')}</button>`
         : ''}
       ${canCompare
         ? `<button class="j-btn j-btn--quiet small-btn" id="quiz-compare" type="button" aria-haspopup="dialog">${icon('eye')}Compare with Real SASL</button>`
@@ -755,6 +767,14 @@ function showQuizVerdict(ranked) {
     e.currentTarget.textContent = `${splitLabel(target).head} saved on this device`;
     el.quizVerdict.querySelector('.verdict-text').insertAdjacentText('beforeend',
       ' This try is now one of your personal examples for future guesses.');
+    if (state.calibrating) {
+      const next = document.createElement('button');
+      next.className = 'j-btn small-btn';
+      next.type = 'button';
+      next.innerHTML = `Teach next word ${icon('arrow')}`;
+      next.addEventListener('click', pickQuizWord);
+      el.quizVerdict.querySelector('.verdict-actions').append(next);
+    }
   });
   setStep('see');
   renderQuizScore();
@@ -1055,6 +1075,8 @@ function markLesson() {
 }
 
 function pickLesson(id) {
+  state.calibrating = false;
+  state.calibrationQueue = [];
   state.clearedLesson = null;
   const l = state.lessons.find((x) => x.id === id);
   state.lesson = l ? { id: l.id, words: [...l.words] } : { id: 'custom', words: [...state.lesson.words] };
@@ -1069,6 +1091,8 @@ el.lessonSelect.addEventListener('click', (e) => {
 });
 
 function editLesson(change) {
+  state.calibrating = false;
+  state.calibrationQueue = [];
   state.clearedLesson = null;          // any change after a clear keeps the new list
   change(state.lesson.words);
   state.lesson.id = 'custom';
@@ -1169,8 +1193,26 @@ function renderPersonal() {
   el.personalNote.textContent = n
     ? `Learning your signing: ${here} of ${words.length} words in this lesson, ${n} total, kept on this device.`
     : 'Sawubona can learn your signing when you confirm a guess or correct a quiz result.';
+  el.personalTeach.hidden = !words.length;
+  el.personalTeach.textContent = state.calibrating
+    ? `Teaching Sawubona · ${here} of ${words.length}`
+    : here === words.length ? 'Refresh my signs for this lesson' : 'Teach Sawubona this lesson';
   el.personalClear.hidden = !n;
 }
+
+el.personalTeach.addEventListener('click', () => {
+  if (!state.lesson.words.length) return;
+  state.calibrating = true;
+  // If the lesson already has a complete personal gallery, start a fresh pass.
+  // createPersonal keeps the latest two examples for each word.
+  const remaining = state.lesson.words.filter((w) => !state.personal.has(w));
+  state.calibrationQueue = [...(remaining.length ? remaining : state.lesson.words)];
+  state.quiz.word = state.calibrationQueue.shift();
+  setSignMode('quiz');
+  renderPersonal();
+  renderQuiz();
+  el.quiz.scrollIntoView({ block: 'start', behavior: reduceMotion?.matches ? 'auto' : 'smooth' });
+});
 
 el.personalClear.addEventListener('click', () => {
   if (!window.confirm('Forget your own signing? The quiz and guesses go back to the dictionary alone.')) return;

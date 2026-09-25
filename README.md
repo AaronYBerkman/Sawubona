@@ -193,8 +193,11 @@ not an NID presenter in a studio, so the gain for you may differ.
 
 If a quiz attempt is marked close or not yet even though the learner signed the
 requested word, *I signed … — learn this try* saves it as a personal example.
-The lesson page shows how many of its words have a personal example. This is an
-explicit correction: the app never silently treats a failed guess as correct.
+The lesson page shows how many of its words have a personal example. *Teach
+Sawubona this lesson* walks through every missing word so the learner can build
+a complete personal gallery deliberately; once complete it can collect a fresh
+second example of every word. This is an explicit correction: the app never
+silently treats a failed guess as correct.
 
 **How sure a guess is.** *What did I sign?* says Sure, Maybe or Not sure, from
 how far the top guess stands clear of the next (`src/confidence.js`). On the
