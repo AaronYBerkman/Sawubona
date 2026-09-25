@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node scripts/serve.mjs",
     "dev": "node scripts/serve.mjs",
-    "test": "node test/logic.test.mjs && node test/models.test.mjs && node test/replay.test.mjs && node test/watch.test.mjs && node test/gallery.test.mjs && node test/grammar.test.mjs && node test/interpret.test.mjs && node test/practice.test.mjs && node test/motion.test.mjs && node test/release.test.mjs && node test/capture.test.mjs && node test/personal.test.mjs",
+    "test": "node test/logic.test.mjs && node test/models.test.mjs && node test/replay.test.mjs && node test/watch.test.mjs && node test/gallery.test.mjs && node test/reference-load.test.mjs && node test/grammar.test.mjs && node test/interpret.test.mjs && node test/practice.test.mjs && node test/motion.test.mjs && node test/release.test.mjs && node test/capture.test.mjs && node test/personal.test.mjs",
     "package": "node scripts/package.mjs",
     "build": "node scripts/build-pages.mjs",
     "test:corpus": "node test/grammar-corpus.test.mjs"

@@ -28,6 +28,8 @@ const FILES = {
 };
 
 let loaded = null;
+let indexReady = null;
+let vectorsReady = null;
 
 async function floats(url, count, dim) {
   const r = await fetch(url);
@@ -39,29 +41,41 @@ async function floats(url, count, dim) {
   return data;
 }
 
-export async function loadReference() {
-  if (loaded) return loaded;
-  const index = await fetch(FILES.index).then((r) => {
+/**
+ * Load the small dictionary index. Recognition vectors are deliberately lazy:
+ * browsing signs and building sentences should not download roughly 30 MB of
+ * embeddings. Pass { vectors: true } when recognition is about to start.
+ */
+export async function loadReference({ vectors = false } = {}) {
+  if (!indexReady) indexReady = fetch(FILES.index).then((r) => {
     if (!r.ok) throw new Error(`reference index: ${r.status}`);
     return r.json();
-  });
-  // the asl3 view is left out where its model is (phones, src/device.js)
-  const optional = (url) => (wantsExtraViews() ? floats(url, index.count, 768).catch(() => null) : Promise.resolve(null));
-  const [openhands, signclip, mirror, asl3, asl3Mirror] = await Promise.all([
-    floats(FILES.openhands, index.count, index.dim),
-    floats(FILES.signclip, index.count, 768),
-    floats(FILES.mirror, index.count, 768),
-    optional(FILES.asl3),
-    optional(FILES.asl3Mirror),
-  ]);
-  const clips = index.entries.map((e) => ({
-    label: e.label, file: e.file, id: realSaslId(e.file), source: e.source ?? sourceOf(e.file),
-  }));
-  const labels = [...new Set(clips.map((c) => c.label))].sort();
-  loaded = {
-    clips, labels, openhands, signclip, mirror, dimOpenHands: index.dim,
-    asl3: asl3 && asl3Mirror ? asl3 : null, asl3Mirror: asl3 && asl3Mirror ? asl3Mirror : null,
-  };
+  }).then((index) => {
+    const clips = index.entries.map((e) => ({
+      label: e.label, file: e.file, id: realSaslId(e.file), source: e.source ?? sourceOf(e.file),
+    }));
+    loaded = { clips, labels: [...new Set(clips.map((c) => c.label))].sort(), dimOpenHands: index.dim };
+    return { index, reference: loaded };
+  }).catch((err) => { indexReady = null; throw err; });
+
+  const { index, reference: ref } = await indexReady;
+  if (!vectors) return ref;
+  if (!vectorsReady) vectorsReady = (async () => {
+    // the asl3 view is left out where its model is (phones, src/device.js)
+    const optional = (url) => (wantsExtraViews() ? floats(url, index.count, 768).catch(() => null) : Promise.resolve(null));
+    const [openhands, signclip, mirror, asl3, asl3Mirror] = await Promise.all([
+      floats(FILES.openhands, index.count, index.dim),
+      floats(FILES.signclip, index.count, 768),
+      floats(FILES.mirror, index.count, 768),
+      optional(FILES.asl3),
+      optional(FILES.asl3Mirror),
+    ]);
+    Object.assign(ref, { openhands, signclip, mirror,
+      asl3: asl3 && asl3Mirror ? asl3 : null,
+      asl3Mirror: asl3 && asl3Mirror ? asl3Mirror : null });
+    return ref;
+  })().catch((err) => { vectorsReady = null; throw err; });
+  await vectorsReady;
   return loaded;
 }
 
@@ -146,6 +160,7 @@ function bestOf(query, bank, mirror) {
  */
 export function rankSigns({ openhands, signclip, asl3 = signclip?.asl3 }, { personal = [] } = {}) {
   if (!loaded) throw new Error('reference not loaded');
+  if (!loaded.openhands || !loaded.signclip || !loaded.mirror) throw new Error('recognition vectors not loaded');
   const views = [
     { key: 'openhands', query: openhands, raw: dots(openhands, loaded.openhands, loaded.dimOpenHands) },
     { key: 'signclip', query: signclip, raw: bestOf(signclip, loaded.signclip, loaded.mirror) },
@@ -179,4 +194,6 @@ export function rankSigns({ openhands, signclip, asl3 = signclip?.asl3 }, { pers
 /** For tests: install a gallery without fetching one. */
 export function setReference(ref) {
   loaded = ref;
+  indexReady = Promise.resolve({ index: { count: ref.clips.length, dim: ref.dimOpenHands }, reference: ref });
+  vectorsReady = Promise.resolve(ref);
 }

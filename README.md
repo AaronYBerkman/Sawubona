@@ -5,6 +5,14 @@
 Runs in the browser on a phone, tablet or computer with a camera (Chrome, Edge,
 Safari or Firefox). Nothing to install, and nothing you sign leaves your device.
 
+The dictionary and sentence builder open from the small sign index. The roughly
+30 MB recognition gallery loads only after the camera starts. Landmark tracking
+is capped at 20 passes per second on phones and small-memory devices (30 on
+larger computers); the camera preview remains at its normal frame rate. After
+the first visit, versioned app assets are served from the offline cache while
+the browser checks the service worker for new deployments. HTML and code stay
+on the same deployed version; after an update installs, the next visit uses it.
+
 *Sawubona* is the Zulu greeting, literally "we see you" — which is what a camera
 pointed at someone signing is for.
 
@@ -182,6 +190,11 @@ signers standing in for the learner and only Real SASL clips as the dictionary,
 The last row is why guesses count your tries only once every lesson word has
 one, and the quiz only your tries of the word asked. A learner at a webcam is
 not an NID presenter in a studio, so the gain for you may differ.
+
+If a quiz attempt is marked close or not yet even though the learner signed the
+requested word, *I signed … — learn this try* saves it as a personal example.
+The lesson page shows how many of its words have a personal example. This is an
+explicit correction: the app never silently treats a failed guess as correct.
 
 **How sure a guess is.** *What did I sign?* says Sure, Maybe or Not sure, from
 how far the top guess stands clear of the next (`src/confidence.js`). On the

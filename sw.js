@@ -61,7 +61,10 @@ self.addEventListener('fetch', (event) => {
   const path = pathOf(url);
   if (path !== null) {
     if (isHeavy(path) && BUILD.files[path]) event.respondWith(heavyFile(request, path));
-    else event.respondWith(networkFirst(request, request.mode === 'navigate'));
+    // Keep HTML and code on the same deployed version. The browser still checks
+    // sw.js for updates on navigation; the new worker fills a new SHELL before
+    // it activates, and the next navigation uses that complete build.
+    else event.respondWith(shellFirst(request, request.mode === 'navigate'));
     return;
   }
   if (RUNTIME_HOSTS.includes(url.hostname)) event.respondWith(cacheFirst(request, RUNTIME));
@@ -77,21 +80,13 @@ async function heavyFile(request, path) {
   return response;
 }
 
-async function networkFirst(request, navigate) {
+async function shellFirst(request, navigate) {
   const cache = await caches.open(SHELL);
-  try {
-    // revalidate past GitHub Pages' ten-minute HTTP cache, so new code and new
-    // pages arrive together (a navigation cannot be re-sent with options, so by URL)
-    const response = await (navigate
-      ? fetch(request.url, { cache: 'no-cache', credentials: 'same-origin' })
-      : fetch(request, { cache: 'no-cache' }));
-    if (response.status === 200) cache.put(request, response.clone()).catch(() => {});
-    return response;
-  } catch (err) {
-    const hit = await cache.match(request, { ignoreSearch: navigate }) ?? (navigate ? await cache.match(new URL('./', scope).href) : null);
-    if (hit) return hit;
-    throw err;
-  }
+  const hit = await cache.match(request, { ignoreSearch: navigate });
+  if (hit) return hit;
+  const response = await fetch(request);
+  if (response.status === 200) cache.put(request, response.clone()).catch(() => {});
+  return response;
 }
 
 async function cacheFirst(request, name) {

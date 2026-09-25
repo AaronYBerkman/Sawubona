@@ -26,4 +26,9 @@ for (const page of ['index.html', 'sentences.html', 'review.html']) {
 }
 assert.ok(!RUNTIME_FILES.some((f) => /(?:calibration|external|handpoints|holistic-v|\.mp4$|fp32)/.test(f)),
   'Research inputs do not belong in a public build');
+const worker = readFileSync(join(ROOT, 'sw.js'), 'utf8');
+assert.match(worker, /shellFirst\(request, request\.mode === 'navigate'\)/,
+  'HTML and app assets use the same versioned shell on repeat visits');
+assert.match(worker, /cache\.match\(request, \{ ignoreSearch: navigate \}\)/,
+  'navigation query strings still find the versioned app shell');
 console.log('release: imports, page assets and public file boundaries pass');
