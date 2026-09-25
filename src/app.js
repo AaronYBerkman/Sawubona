@@ -38,7 +38,7 @@ import { decode, toEnglish } from './interpret.js';
 import { createMotionReader } from './motion-letters.js';
 import { createPersonal } from './personal.js';
 import { confidence } from './confidence.js';
-import { visionFps } from './device.js';
+import { visionFps, wantsExtraViews } from './device.js';
 
 const MAX_SIGN_MS = 6000;
 const MAX_PHRASE_MS = 15000;
@@ -82,6 +82,7 @@ const el = {
   guess: $('#guess'), guessList: $('#guess-list'), guessNote: $('#guess-note'), guessIntro: $('#guess-intro'),
   phrase: $('#phrase'), phraseList: $('#phrase-list'), phraseNote: $('#phrase-note'), phraseTarget: $('#phrase-target'),
   understand: $('#understand'), uListen: $('#u-listen'), uScope: $('#u-scope'), uNote: $('#u-note'),
+  accuracyMode: $('#accuracy-mode'),
   uTranscript: $('#u-transcript'), uEmpty: $('#u-empty'),
   record: $('#record'), recordLabel: $('#record .btn-label'),
   camWord: $('#cam-word'), camWordText: $('#cam-word-text'),
@@ -157,6 +158,33 @@ const state = {
   // "Understand me": what was signed and read, newest first (kept in memory only)
   understand: { entries: [] },
 };
+
+// Let a capable phone opt into the second SignCLIP view. The preference is
+// reflected in the address because both the encoder and reference loaders use
+// ?full / ?light, and persisted so a home-screen launch keeps the choice.
+function storedAccuracy() {
+  try { return localStorage.getItem('accuracy-mode'); } catch { return null; }
+}
+
+function setAccuracyMode(enabled, { save = false } = {}) {
+  el.accuracyMode.checked = enabled;
+  const params = new URLSearchParams(location.search);
+  params.delete('full');
+  params.delete('light');
+  const automatic = wantsExtraViews(navigator, '');
+  if (enabled !== automatic) params.set(enabled ? 'full' : 'light', '');
+  const query = params.toString();
+  history.replaceState(null, '', `${location.pathname}${query ? `?${query}` : ''}${location.hash}`);
+  if (save) {
+    try { localStorage.setItem('accuracy-mode', enabled ? 'full' : 'light'); } catch { /* this visit only */ }
+  }
+}
+
+const accuracyParams = new URLSearchParams(location.search);
+const accuracyPreference = accuracyParams.has('full') ? 'full'
+  : accuracyParams.has('light') ? 'light' : storedAccuracy();
+setAccuracyMode(accuracyPreference ? accuracyPreference === 'full' : wantsExtraViews());
+el.accuracyMode.addEventListener('change', () => setAccuracyMode(el.accuracyMode.checked, { save: true }));
 
 // --- Startup ---------------------------------------------------------------
 
@@ -318,6 +346,7 @@ function setStep(step) {
 
 el.startCamera.addEventListener('click', async () => {
   el.startCamera.disabled = true;
+  el.accuracyMode.disabled = true;
   try {
     if (!state.trackers) state.trackers = await createTrackers((m) => setBadge(`${m}…`));
     setBadge('Starting camera…');
@@ -348,6 +377,7 @@ el.startCamera.addEventListener('click', async () => {
       .catch((err) => { setBadge('Sign models failed to load'); el.framing.textContent = err.message; });
   } catch (err) {
     el.startCamera.disabled = false;
+    el.accuracyMode.disabled = false;
     setBadge('Camera unavailable');
     el.framing.textContent = `Could not start the camera: ${err.message}`;
   }

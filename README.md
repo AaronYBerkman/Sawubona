@@ -38,8 +38,9 @@ screen with its own icon. The models are downloaded the first time sign checking
 starts and then kept (`sw.js`), so later visits load at once and the app opens
 without a connection. Phones and machines with little memory skip the second
 SignCLIP view — 108 MB less to download and hold, for 2–3 points of accuracy
-(`src/device.js`); add `?full` to the address to load it anyway, or `?light` to
-skip it on a computer.
+(`src/device.js`). Before starting the camera, *Higher accuracy* lets a capable
+phone opt into that model and remembers the choice on the device. `?full` and
+`?light` remain direct overrides.
 
 **Checking the drawings.** Each sign's drawing comes from its best clip by the
 automatic audit (`tools/audit-clips.py`, cut down to `data/clip-audit.json` by
