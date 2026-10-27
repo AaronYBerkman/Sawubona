@@ -38,6 +38,8 @@ const GREET = new Set(['NO', 'HELLO', 'HI', 'BYE', 'BYE BYE', 'GOODBYE', 'PLEASE
 const MASS = new Set('language english money water food milk bread meat coffee tea rice sugar juice information work homework music time fish chicken salt butter cheese soup weather news advice furniture luggage hair paper'.split(' '));
 const NO_ARTICLE = new Set('school work church bed class university college prison court town home'.split(' '));
 const COLOURS = new Set('red blue green yellow black white brown grey gray pink purple orange gold silver'.split(' '));
+// how an action is done, after the verb in SASL and in English: WORK HARD, SIGN SLOW
+const MANNER = new Set('fast slow hard quick careful loud quiet well late early'.split(' '));
 const CHAIN = new Set('want need like love hate try start begin stop finish learn'.split(' '));
 // verb signs that are usually the thing after another verb: WANT WATER (but WANT SWIM is "want to swim")
 const THINGS = new Set('water book phone video email text paint plan test train dress coach record ring rent order present park match question iron'.split(' '));
@@ -185,6 +187,22 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
  * glosses: sign labels in signed order. Returns { english, assumed: [..], question }.
  */
 export function toEnglish(glosses) {
+  // SEE TOMORROW, SEE NEXT WEEK: the goodbye "see you tomorrow"
+  if (glosses.length > 1 && bare(glosses[0]) === 'SEE' && glosses.slice(1).every((g) => kindOf(g) === 'time' || bare(g) === 'SOON' || bare(g) === 'LATER')) {
+    return { english: `See you ${glosses.slice(1).map((g) => lower(bare(g))).join(' ')}.`, assumed: [], question: false };
+  }
+  // BUSY VERY: VERY strengthens the word before it; English puts it in front ("very busy")
+  const strong = [];
+  glosses = glosses.filter((g, i) => {
+    const keep = !(i > 0 && ['VERY', 'REALLY', 'TOO'].includes(bare(g)) && ['adj', 'verb', 'noun'].includes(kindOf(glosses[i - 1])));
+    if (!keep) strong.push([lower(bare(g)), lower(bare(glosses[i - 1]))]);
+    return keep;
+  });
+  if (strong.length) {
+    const out = toEnglish(glosses);
+    for (const [very, word] of strong) out.english = out.english.replace(new RegExp(`\\b(an? )?${word}\\b`), (m, a) => `${a ? 'a ' : ''}${very} ${word}`);
+    return out;
+  }
   const signs = glosses.map((g) => ({ g: spelledName(g) ?? bare(g).replace(/-/g, ' '), kind: kindOf(g), src: [g] }));
   const complementAt = signs.findIndex((s, i) => ['THINK', 'KNOW', 'BELIEVE', 'HOPE', 'REMEMBER'].includes(s.g) && signs[i + 1]?.kind === 'pron');
   if (complementAt >= 0) {
@@ -280,7 +298,8 @@ export function toEnglish(glosses) {
       const last = nounish[nounish.length - 1];
       if (last && !last.adjs && !['pron', 'dem'].includes(last.kind) && !(verbs.length && ['feel', 'look', 'seem', 'become', 'smell', 'taste', 'sound'].includes(verbs[0]))) { (last.mods ??= []).push(s); continue; }
       // with an action and nothing to describe, a word like ORANGE is the thing itself
-      nounish.push(verbs.length && s.kind === 'adj' && !['feel', 'look', 'seem', 'become', 'smell', 'taste', 'sound'].includes(verbs[0]) ? { ...s, kind: 'noun', poss: pending } : { ...s, predicate: true });
+      // ...but WORK HARD, SIGN SLOW say how the action is done
+      nounish.push(verbs.length && s.kind === 'adj' && !MANNER.has(lower(s.g)) && !['feel', 'look', 'seem', 'become', 'smell', 'taste', 'sound'].includes(verbs[0]) ? { ...s, kind: 'noun', poss: pending } : { ...s, predicate: true });
       if (verbs.length) pending = null;
       continue;
     }
@@ -410,6 +429,14 @@ export function toEnglish(glosses) {
   }
   english = english.replace(/\bi\b/g, 'I');
   const subjectGlosses = subjectN ? [...subjectN.src, ...(subjectN.with ?? []).flatMap((m) => ['AND', ...m.src])] : [];
+  // DOOR CLOSE PLEASE: no one named and PLEASE at the end is a request, "Please close the door."
+  if (greet.includes('Please') && subjectAssumed && verbs.length && !wh && !modal) {
+    const [v, ...more] = verbs;
+    const chain = more.length ? ` to ${more.join(' to ')}` : '';
+    english = `Please ${neg ? 'do not ' : ''}${v}${chain} ${clause.rest.replace(/^an? /, 'the ')}`.replace(/\s+/g, ' ').trim() + '.';
+    greet.splice(greet.indexOf('Please'), 1);
+    assumed.length = 0;
+  }
   return { english: [...greet.map((g) => `${g}.`), core.length || wh || times.length ? english : ''].filter(Boolean).join(' '), assumed, question,
     subjectText: subject, subjectGlosses, subjectAssumed };
 }
