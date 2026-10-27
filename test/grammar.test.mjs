@@ -66,6 +66,10 @@ assert.match(two[1].signs.find((x) => x.gloss === 'SHE').sub, /whoever you mean:
 assert.match(two[2].signs.find((x) => x.gloss === 'THEY').sub, /sweep across my mother and Lerato/);
 assert.ok(!buildParagraph('Thabo is my friend.', lex)[0].signs.some((x) => x.gloss === 'FRIEND' && x.spot));
 
+// "gave her some oranges": her receives them (GIVE moves toward her), it does not own them
+assert.equal(line('She gave her some oranges.'), 'PAST ORANGE SOME GIVE');
+assert.equal(line('I like her two dogs.'), 'ME HER DOG TWO LIKE');
+
 // the builder checks its own answer: a sentence that breaks a rule says so
 assert.equal(buildSentence('I want to learn sign language.', lex).rough, false);
 
