@@ -39,6 +39,8 @@ const MASS = new Set('language english money water food milk bread meat coffee t
 const NO_ARTICLE = new Set('school work church bed class university college prison court town home'.split(' '));
 const COLOURS = new Set('red blue green yellow black white brown grey gray pink purple orange gold silver'.split(' '));
 const CHAIN = new Set('want need like love hate try start begin stop finish learn'.split(' '));
+// verb signs that are usually the thing after another verb: WANT WATER (but WANT SWIM is "want to swim")
+const THINGS = new Set('water book phone video email text paint plan test train dress coach record ring rent order present park match question iron'.split(' '));
 const MOTION = new Set(['go', 'come', 'walk', 'run', 'drive', 'ride', 'fly', 'travel', 'move', 'return', 'arrive', 'visit']);
 // where you are rather than where you go: LIVE DURBAN is "live in Durban"
 const STAYING = new Set(['live', 'stay', 'work', 'study', 'born', 'grow up']);
@@ -234,6 +236,10 @@ export function toEnglish(glosses) {
   // SASL puts the action last: only the final run of verbs is the action, and a
   // verb-looking sign before it (SHOP ME GO, FISH DON'T LIKE) is a thing
   const negIdx = signs.findIndex((s) => s.kind === 'neg' && /^(DON'?T|DOESN'?T|CAN'?T) /.test(s.g));
+  // ...or, in subject-verb-object order, a thing after the verb: WANT WATER is "want water",
+  // while WANT SWIM is "want to swim"
+  const lastV = signs.map((s) => s.kind).lastIndexOf('verb');
+  if (negIdx < 0 && lastV > 0 && signs[lastV - 1].kind === 'verb' && THINGS.has(lower(signs[lastV].g))) signs[lastV].kind = 'noun';
   let lastVerb = negIdx >= 0 ? negIdx : signs.map((s) => s.kind).lastIndexOf('verb');
   let runStart = lastVerb;
   if (negIdx < 0) while (runStart > 0 && signs[runStart - 1].kind === 'verb' && CHAIN.has(lower(signs[runStart - 1].g))) runStart--;

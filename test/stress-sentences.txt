@@ -1,0 +1,205 @@
+# Everyday sentences a learner might type. test/grammar-invariants.test.mjs
+# runs every one through the builder and checks the rules that must hold for
+# any sentence (no English-only words signed, time first, question word last,
+# every word accounted for). One sentence per line; # starts a comment.
+
+# people and description
+My mother is a teacher.
+My father is tall.
+Her brother is a doctor.
+The children are happy.
+My dog is black and white.
+Our house is very old.
+His car is new.
+The weather is nice today.
+My name is Thabo.
+I am deaf.
+Are you deaf?
+I am hearing.
+She is my best friend.
+My grandmother is eighty years old.
+She is twenty years old.
+How old are you?
+I am happy to meet you.
+Nice to meet you.
+
+# simple actions
+I eat bread.
+She cooks dinner.
+We play soccer.
+They watch television.
+He reads a book.
+I drink coffee every morning.
+My sister plays the piano.
+The baby is sleeping.
+The children are playing in the garden.
+The dog is running.
+I love my family.
+I like chocolate.
+She likes to dance.
+We need help.
+I want water.
+He has a red car.
+I have two brothers.
+I have a cat and a dog.
+
+# past and future
+Yesterday I went to the shop.
+I went to the movies on Friday.
+We went to the beach last week.
+She bought three dresses.
+We watched two movies.
+I saw a beautiful bird in the tree.
+I forgot my phone at home.
+They didn't come to the party last night.
+I didn't work yesterday.
+I haven't eaten today.
+I kissed my girlfriend yesterday.
+Tomorrow I will visit my grandmother.
+Next year I will study at university.
+We will travel to Durban in December.
+She will call you later.
+I am going to cook tonight.
+
+# place and space
+The cat is sleeping on the bed.
+I put the keys on the table.
+The book is under the chair.
+We ate dinner at the restaurant.
+She works at the hospital.
+My sister lives in Cape Town.
+He is reading a book in the library.
+I live with my parents.
+I played with the puppies.
+She drove to work by car.
+I go to school by bus.
+The shop is next to the bank.
+The ball is in the box.
+They are waiting outside.
+Come here.
+I walked to the park with my friend.
+
+# time and duration
+I wake up at six o'clock.
+I usually eat breakfast at seven.
+The class starts at 9 am.
+I have lived here for ten years.
+I have been learning SASL for two months.
+I have been waiting for an hour.
+We stayed in Durban for a week.
+I work from Monday to Friday.
+I always walk to work.
+She sometimes forgets her keys.
+I see my friends every weekend.
+
+# two verbs
+I want to learn sign language.
+I need to buy milk and bread.
+She wants to go home.
+We like to swim in the sea.
+He started to cry.
+I forgot to call my mother.
+They are trying to help.
+I have to go now.
+You must sign slowly.
+I can't swim.
+He can drive.
+Can you help me?
+Can I have some water?
+I want you to come.
+
+# think, know, say, hope
+I think it will rain tomorrow.
+I think he is right.
+I know that she is sick.
+I hope you feel better.
+He said he was busy.
+She told me that she is tired.
+I don't know.
+I don't understand.
+I believe you.
+I remember your name.
+
+# comparing
+She is taller than her sister.
+My brother is older than me.
+This car is bigger than that car.
+This is the best day of my life.
+He runs faster than me.
+
+# giving and telling
+She gave the book to her friend.
+My friend told me a funny story.
+I will help you.
+Can you help me please?
+Please give me the pen.
+I sent my mother a letter.
+He showed me his new phone.
+I talked to my teacher about the test.
+Ask your teacher.
+
+# negatives
+I don't like fish.
+She is not happy.
+We have no money.
+He never eats meat.
+I don't want to go.
+They can't come today.
+It is not cold.
+Nobody came.
+
+# questions
+Where do you live?
+What is your name?
+What is your sign name?
+Who is your teacher?
+Why are you sad?
+When does the class start?
+How are you?
+How many brothers do you have?
+How much is this?
+Which one do you want?
+What time is it?
+Where is the toilet?
+Where is the nearest bus stop?
+What are you doing?
+What did you eat yesterday?
+Who did you see at the party?
+Did you go to school?
+Do you want coffee or tea?
+Is this your bag?
+Are you going home now?
+Do you have a pen?
+Can you sign?
+Have you eaten?
+Is she your sister?
+
+# commands and manners
+Please sit down.
+Please sign slowly.
+Sit down.
+Close the door.
+Don't touch that.
+Wait here.
+Thank you very much.
+Thank you.
+Sorry, I am late.
+Excuse me.
+Good morning.
+Goodbye, see you tomorrow.
+
+# joining
+I am very tired because I worked all day.
+I like animals because they are beautiful.
+If it rains, I will stay home.
+When I was young, I lived in Soweto.
+I wanted to go but I was sick.
+She is hungry and tired.
+I called him but he didn't answer.
+After school I go home.
+Before I eat, I wash my hands.
+
+# relative clauses
+The man who lives next door is deaf.
+The book that you gave me is good.
+The girl who sings is my sister.

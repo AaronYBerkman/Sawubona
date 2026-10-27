@@ -54,7 +54,8 @@ function annotation(sentence) {
   const at = (pred) => S.findIndex(pred);
   const picks = [
     [at((s) => s.role === 'question' && s.rule === 'wh'), 'question word goes last'],
-    [at((s) => s.added), 'added: sets the tense'],
+    [at((s) => s.added && s.rule === 'tense'), 'added: sets the tense'],
+    [at((s) => s.rule === 'compare'), 'compare: then MORE'],
     [at((s) => s.role === 'time'), 'time goes first'],
     [at((s) => s.role === 'place' && s.rule === 'place'), 'the place sets the scene'],
     [at((s) => s.rule === 'because'), 'because → a question'],
