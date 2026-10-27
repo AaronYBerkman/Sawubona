@@ -24,6 +24,9 @@ const RS_ADJ = 'Real SASL, "Where to place an adjective" (topic-comment)';
 const RS_Q = 'Real SASL, "Three types of questions"';
 const RS_INDEX = 'Real SASL, "Indexing and pointing"';
 const RS_DIR = 'Real SASL, "What is a directional verb"';
+const WEHRMEYER = 'Wehrmeyer 2025, "Structure of simple declarative clauses in SASL", Sign Language & Linguistics 28(1)';
+const WRIGHT = 'Wright 2017, "A preliminary description of SASL syntax", MA, Wits';
+const NAPOLI = 'Napoli & Sutton-Spence 2014, "Order of the major constituents in sign languages"';
 
 export const RULES = {
   time: {
@@ -47,9 +50,19 @@ export const RULES = {
     source: `${RS_TIME}; ${RS_INDEX}`, strength: 'moderate',
   },
   order: {
-    title: 'Who, what, then the action',
-    text: 'Real SASL teaches subject, object, verb: ME APPLE EAT. Signers also use the English-like order ME EAT APPLE, but the appropriate order depends on context; this app cannot validate that context.',
-    source: `${RS_GRAMMAR}; Wehrmeyer 2025 (SVO in natural signing)`, strength: 'flexible',
+    title: 'Who, the action, then what',
+    text: 'A study of 25 Deaf signers from three provinces found subject, verb, object is the basic SASL order: ME EAT APPLE. Real SASL teaches ME APPLE EAT, which is also correct and common, so it is shown as the other order.',
+    source: `${WEHRMEYER}; ${WRIGHT}; ${RS_GRAMMAR}`, strength: 'flexible',
+  },
+  objFirst: {
+    title: 'HAVE and LIKE come last',
+    text: 'The thing comes first, then HAVE or LIKE: ME HOUSE WHITE BIG TWO HAVE, ANIMALS LIKE. Every SASL example of these two verbs in the sources is signed this way.',
+    source: `${RS_ADJ}; ${RS_Q}; ${WRIGHT}`, strength: 'moderate',
+  },
+  helper: {
+    title: 'WANT, TRY, NEED: before the action',
+    text: 'A verb that says what you want, try or need to do comes right before that action: ME WANT LEARN SIGN LANGUAGE. "to" is not signed.',
+    source: WRIGHT, strength: 'moderate',
   },
   wh: {
     title: 'Question word at the end',
@@ -111,6 +124,26 @@ export const RULES = {
     text: 'SASL turns "because" into a rhetorical question: "I like animals because they are beautiful" is ANIMALS LIKE, WHY? BEAUTIFUL. Raise your eyebrows on WHY, then give the answer.',
     source: RS_Q, strength: 'strong',
   },
+  prep: {
+    title: 'No sign for "to", "by", "of" or "than"',
+    text: 'These words only join English words together. In SASL the order of the signs, the place you sign them and where you look show how things connect: "I went to the movies" is MOVIE ME GO.',
+    source: `${RS_TIME}; ${RS_INDEX}`, strength: 'moderate',
+  },
+  that: {
+    title: '"That" joining two ideas is not signed',
+    text: 'Sign the first idea, then the second: "I think that he is right" is ME THINK HE RIGHT.',
+    source: WRIGHT, strength: 'moderate',
+  },
+  relative: {
+    title: '"Who" and "which" are not signed',
+    text: 'Name the person or thing, describe them, then say the rest: "the man who lives next door is deaf" is MAN LIVE NEXT DOOR, then DEAF. Point back to the man before DEAF.',
+    source: '', strength: 'note',
+  },
+  compare: {
+    title: 'Comparing: set both up, then MORE',
+    text: 'Place the two people or things on either side of you, then sign the quality and MORE toward the one that has more of it. THAN is not signed.',
+    source: WRIGHT, strength: 'moderate',
+  },
   plural: {
     title: 'Plurals',
     text: 'SASL does not add -s. Show more than one with a number, MANY, or by repeating the sign in a few places.',
@@ -128,8 +161,8 @@ export const RULES = {
   },
   directional: {
     title: 'The verb moves between people',
-    text: 'HELP, GIVE, SHOW, SEND, TELL and EMAIL move from the giver toward the receiver, so the verb says who does it to whom: "I help you" is one sign, HELP, moving from you to them.',
-    source: `${RS_DIR}; ${CAPS}`, strength: 'strong',
+    text: 'HELP, GIVE, SHOW, SEND, TELL and EMAIL move from the giver toward the receiver, so the verb says who does it to whom: "I help you" is one sign, HELP, moving from me to you. The people and things it moves between are set up first, and the verb comes last.',
+    source: `${RS_DIR}; ${CAPS}; ${NAPOLI}`, strength: 'strong',
   },
   spell: {
     title: 'Names are fingerspelled',
@@ -163,9 +196,12 @@ export function glossKey(s) {
 const SPELLINGS = [['OUR', 'OR'], ['ISE', 'IZE'], ['ISED', 'IZED'], ['ISING', 'IZING'], ['TRE', 'TER'], ['OGUE', 'OG']];
 function variants(k) {
   const out = [k, k.replace(/-/g, ' '), k.replace(/ /g, '-')];
-  for (const [a, b] of SPELLINGS) {
-    if (k.endsWith(a)) out.push(k.slice(0, -a.length) + b);
-    if (k.endsWith(b)) out.push(k.slice(0, -b.length) + a);
+  // colour/color, centre/center - but never on a short word: FOR is not FOUR
+  if (k.length >= 5 && !k.includes(' ')) {
+    for (const [a, b] of SPELLINGS) {
+      if (k.endsWith(a)) out.push(k.slice(0, -a.length) + b);
+      if (k.endsWith(b) && !/OOR$/.test(k)) out.push(k.slice(0, -b.length) + a);
+    }
   }
   if (k === 'PRACTICE') out.push('PRACTISE');
   if (k === 'PRACTISE') out.push('PRACTICE');
@@ -330,7 +366,8 @@ function nounBase(w) {
   if (W.IRREGULAR_NOUNS.has(w) || /ies$/.test(w) && W.IRREGULAR[w]) return { base: W.IRREGULAR[w], plural: true };
   let r;
   if (w.length > 3 && !/(ss|us|is|ous)$/.test(w)) {
-    if ((r = /^(.+)ies$/.exec(w))) return { base: r[1] + 'y', plural: true };
+    // movies -> movie, but babies -> baby
+    if ((r = /^(.+)ies$/.exec(w))) return W.COMMON.has(r[1] + 'ie') ? { base: r[1] + 'ie', plural: true } : { base: r[1] + 'y', plural: true };
     if ((r = /^(.+(?:ss|x|zz|ch|sh))es$/.exec(w))) return { base: r[1], plural: true };
     if ((r = /^(.+[sz])es$/.exec(w))) return { base: r[1] + 'e', alt: r[1], plural: true };
     if ((r = /^(.+[^s])s$/.exec(w))) return { base: r[1], plural: true };
@@ -372,8 +409,23 @@ const MOTION = new Set('go come walk run drive ride fly travel move arrive retur
 const GIVING = new Set('give send tell show ask help pay teach bring lend email text phone call visit invite warn copy'.split(' '));
 const COLOURS = new Set('red blue green yellow black white brown grey gray pink purple orange gold silver'.split(' '));
 const WEATHER = new Set('rain snow hail thunder storm shine'.split(' '));
+// people: "to my teacher" is who you talk to, not where you go
+const PEOPLE = new Set(`friend friends mother father mom mum dad mommy daddy parent parents brother sister son daughter
+  child children baby boy girl man men woman women person people teacher teachers doctor nurse boss family aunt uncle
+  cousin grandmother grandfather granny grandma grandpa husband wife boyfriend girlfriend neighbour neighbor student
+  students learner class everyone everybody someone somebody`.split(/\s+/));
+// verbs you do to someone, with "to": talk to, explain to, write to
+const TO_SOMEONE = new Set('talk speak say explain write reply listen wave lie sign report apologise apologize complain whisper shout read sing'.split(' '));
+// verbs that move a thing to a place: the place goes with the thing, before the verb
+const PUTTING = new Set('put place hang'.split(' '));
 const LINKING = new Set('smell look feel taste sound seem become get stay'.split(' '));
 const WEATHER_ADJ = new Set('cold hot warm cool sunny windy cloudy rainy wet dry dark late early'.split(' '));
+// verbs whose object comes first in every SASL source example (rule objFirst)
+const OBJECT_FIRST = new Set(['HAVE', 'LIKE']);
+// verbs that move the thing to a place: the place and the thing come first (rule space)
+const SPATIAL = new Set(['PUT', 'PLACE', 'HANG']);
+// verbs that come right before a second verb: WANT LEARN, TRY LEARN (rule helper)
+const HELPERS = new Set(['WANT', 'TRY', 'NEED', 'START', 'STOP', 'FORGET', 'LIKE', 'MUST', 'SHOULD', 'CAN', 'LEARN', 'HAVE TO']);
 const PERCEPTION_COMPLEMENT = new Set('think know say believe hope feel mean see hear understand remember forget wish tell'.split(' '));
 
 function isTimeNoun(w) { return W.TIME_NOUNS.has(w) || W.TIME_NOUNS.has(nounBase(w).base); }
@@ -382,6 +434,7 @@ function isTimeNoun(w) { return W.TIME_NOUNS.has(w) || W.TIME_NOUNS.has(nounBase
 function joinPhrases(toks) {
   const out = [];
   const w = (k) => toks[k]?.w;
+  const numWordAt = (k) => toks[k]?.num || typeof W.NUMBERS[w(k)] === 'number';
   for (let i = 0; i < toks.length; i++) {
     const t = toks[i];
     const span = (n, extra) => { out.push({ ...t, w: toks.slice(i, i + n).map((x) => x.w).join(' '), wis: toks.slice(i, i + n).flatMap((x) => x.wis || [x.wi]), ...extra }); i += n - 1; };
@@ -390,6 +443,11 @@ function joinPhrases(toks) {
     const two = `${w(i)} ${w(i + 1)}`;
     const opening = out.every((x) => x.punct || x.tag === 'INTJ');
     // "see you (tomorrow)" is the goodbye only on its own; "I will see you" is the verb
+    // "thank you very much" is one THANK-YOU, signed with more emphasis
+    if (['thank you', 'thanks'].includes(w(i) === 'thanks' ? 'thanks' : two) && w(i + (w(i) === 'thanks' ? 1 : 2)) === 'very' && w(i + (w(i) === 'thanks' ? 2 : 3)) === 'much') {
+      span(w(i) === 'thanks' ? 3 : 4, { tag: 'INTJ', gloss: 'THANK-YOU' });
+      continue;
+    }
     if (W.GREETINGS[two] && (two !== 'see you' || opening)) { span(2, { tag: 'INTJ', gloss: W.GREETINGS[two], farewell: two === 'see you' }); continue; }
     if (W.WH[two]) { span(2, { tag: 'WH', gloss: W.WH[two] }); continue; }
     // a lot of / lots of / plenty of: how much, signed after the thing (FOOD LOT)
@@ -419,12 +477,41 @@ function joinPhrases(toks) {
         span(2 + skip, { tag: 'TIME', parts: [nounBase(n).base.toUpperCase()], fn: fn(2 + skip) });
         continue;
       }
-      // at 5 / at 5 pm / at 5 o'clock
-      if (w(i) === 'at' && (toks[i + 1]?.num || typeof W.NUMBERS[w(i + 1)] === 'number' && ['pm', 'am', "o'clock", 'oclock'].includes(w(i + 2)))) {
-        const n2 = ['pm', 'am', "o'clock", 'oclock'].includes(w(i + 2)) ? 3 : 2;
-        span(n2, { tag: 'TIME', parts: ['TIME', toks.slice(i + 1, i + n2).map((x) => x.w.toUpperCase()).join(' ')], fn: fn(1) });
+      // at 5 / at 5 pm / at seven / at 5 o'clock: TIME and the hour ("o'clock" is not signed)
+      const hour = typeof W.NUMBERS[w(i + 1)] === 'number' && W.NUMBERS[w(i + 1)] >= 1 && W.NUMBERS[w(i + 1)] <= 12;
+      if (w(i) === 'at' && (toks[i + 1]?.num || hour && !(toks[i + 2] && !toks[i + 2].punct && nounBase(w(i + 2)).plural))) {
+        const clock = ["o'clock", 'oclock'].includes(w(i + 2));
+        const n2 = ['pm', 'am'].includes(w(i + 2)) || clock ? 3 : 2;
+        const said = toks.slice(i + 1, i + (clock ? 2 : n2)).map((x) => x.w.toUpperCase()).join(' ');
+        span(n2, { tag: 'TIME', parts: ['TIME', said], fn: [...fn(1), ...(clock ? [{ wi: toks[i + 2].wi, why: 'time' }] : [])] });
         continue;
       }
+    }
+    // for two years / for an hour: how long, first like any time; the number goes with the
+    // time sign (numeral incorporation: TWO WEEK)
+    if (w(i) === 'for' && (numWordAt(i + 1) || ['a', 'an', 'one'].includes(w(i + 1))) && isTimeNoun(w(i + 2) || '') && !['time', 'past', 'future'].includes(w(i + 2))) {
+      const num = ['a', 'an'].includes(w(i + 1)) ? 'ONE' : w(i + 1).toUpperCase();
+      span(3, { tag: 'TIME', parts: [num, nounBase(w(i + 2)).base.toUpperCase()], duration: true,
+        fn: [{ wi: toks[i].wi, why: 'prep' }, ...(['a', 'an'].includes(w(i + 1)) ? [{ wi: toks[i + 1].wi, why: 'articles' }] : [])] });
+      continue;
+    }
+    // from Monday to Friday: the two days, "from" and "to" are not signed
+    if (['from'].includes(w(i)) && W.DAYS.includes(w(i + 1)) && ['to', 'until', 'till'].includes(w(i + 2)) && W.DAYS.includes(w(i + 3))) {
+      span(4, { tag: 'TIME', parts: [w(i + 1).toUpperCase(), w(i + 3).toUpperCase()],
+        fn: [{ wi: toks[i].wi, why: 'prep' }, { wi: toks[i + 2].wi, why: 'prep' }] });
+      continue;
+    }
+    // "twenty years old" is AGE TWENTY (Wright 2017: AGE SIX); "years" and "old" go into AGE
+    if (numWordAt(i) && ['years', 'year'].includes(w(i + 1)) && w(i + 2) === 'old' && (!toks[i + 3] || toks[i + 3].punct)) {
+      out.push({ ...toks[i + 1], w: 'age', text: toks[i + 1].text, wis: [toks[i + 1].wi, toks[i + 2].wi] });
+      out.push({ ...t, wis: t.wis || [t.wi] });
+      i += 2;
+      continue;
+    }
+    // after school / before work / after lunch: a time, first like any other
+    if (['after', 'before'].includes(w(i)) && ['school', 'work', 'class', 'lunch', 'dinner', 'breakfast', 'church', 'supper'].includes(w(i + 1))) {
+      span(2, { tag: 'TIME', parts: [w(i).toUpperCase(), w(i + 1).toUpperCase()] });
+      continue;
     }
     // two weeks ago / in three days
     const numWord = (k) => toks[k]?.num || typeof W.NUMBERS[w(k)] === 'number' || w(k) === 'a';
@@ -546,7 +633,8 @@ function tag(toks, question, lex) {
     if (W.PRONOUNS[w]) { t.tag = 'PRON'; t.gloss = W.PRONOUNS[w]; t.subject = W.SUBJECT_PRONOUNS.has(w); return i; }
     if (w === 'that' || w === 'this' || w === 'these' || w === 'those') {
       const n = next;
-      if (w === 'that' && prev && (prev.tag === 'VERB' && PERCEPTION_COMPLEMENT.has(prev.lemma) || prev.tag === 'ADJ')) { t.tag = 'COMP'; return i; }
+      if (w === 'that' && prev && (prev.tag === 'VERB' && PERCEPTION_COMPLEMENT.has(prev.lemma) || prev.tag === 'ADJ'
+        || prev.tag === 'PRON' && toks[i - 2]?.tag === 'VERB' && PERCEPTION_COMPLEMENT.has(toks[i - 2].lemma))) { t.tag = 'COMP'; return i; }
       if (w === 'that' && prev && ['NOUN', 'NAME'].includes(prev.tag)) { t.tag = 'REL'; return i; }
       // "this book" points at the book; "this your book" / "that is" is the pronoun
       const nounNext = n && !n.punct && !n.tag && !W.BE.has(n.w) && !W.MODALS[n.w] && !W.PREPOSITIONS.has(n.w) && !W.POSSESSIVES[n.w]
@@ -685,6 +773,8 @@ function tag(toks, question, lex) {
       if (adj && nounAfter) { t.tag = 'ADJ'; t.lemma = adj; return i; }
       if (adj && !nounAfter && !(next && !next.punct && !next.tag && !W.PREPOSITIONS.has(next.w))) { t.tag = pt === 'ADJ' || pt === 'DET' || pt === 'INTENS' ? 'ADJ' : 'NOUN'; t.lemma = adj; if (t.tag === 'NOUN') t.lemma = w; if (pt === 'DET' && !nounAfter) { t.tag = 'NOUN'; t.lemma = nounBase(w).base; } return i; }
     }
+    // "I hope you feel better": a new subject after THINK, HOPE or KNOW starts a second idea with its own verb
+    if ((pt === 'PRON' && prev.subject || pt === 'NAME') && toks[i - 2]?.tag === 'VERB' && PERCEPTION_COMPLEMENT.has(toks[i - 2].lemma)) seenVerb = false;
     if (!nominalBefore && subjectBefore && vb && !seenVerb && !(seenBe && verbForm(w) === 'base')) return verb(identicalPast(w) && (auxEarlier(i) || !thirdSingular(toks, i)) ? 'base' : verbForm(w));
     // "I cook and clean": a verb after "and" shares the subject when it joins two verbs
     if (!nominalBefore && pt === 'CONJ' && vb && (toks[i - 2]?.tag === 'VERB' || toks[i - 2]?.tag === 'PARTICLE' || next && (W.DETERMINERS.has(next.w) || W.POSSESSIVES[next.w] || W.PRONOUNS[next.w] && !W.SUBJECT_PRONOUNS.has(next.w)))) {
@@ -771,9 +861,12 @@ function splitClauses(toks) {
     const t = toks[i];
     const rest = toks.slice(i + 1);
     const complement = cur.toks.some((x) => x.tag === 'VERB' && PERCEPTION_COMPLEMENT.has(x.lemma));
-    if (complement && (t.tag === 'COMP' || t.tag === 'PRON' && rest[0]?.tag === 'BE')) {
+    // "I think it will rain", "I hope you feel better": a new subject with its own verb starts the
+    // second idea, which keeps its own time and order
+    const ownVerb = ['BE', 'VERB', 'MODAL', 'FUT', 'AUX', 'NEG'].includes(rest[0]?.tag);
+    if (complement && (t.tag === 'COMP' || (t.tag === 'PRON' && t.w !== 'me' || t.tag === 'NAME') && ownVerb)) {
       clauses.push(cur);
-      cur = { toks: t.tag === 'COMP' ? [] : [t], marker: t.tag === 'COMP' ? t : null };
+      cur = { toks: t.tag === 'COMP' ? [] : [t], marker: t.tag === 'COMP' ? t : null, complement: true };
       continue;
     }
     const restUntilBreak = [];
@@ -890,7 +983,9 @@ function signsForNP(np, role, lex, ctx) {
     }
     if (matched) { k += matched; continue; }
     const n = nouns[k];
-    if (n.tag === 'NAME') out.push(ctx.name(n, role));
+    // SASL, SABC, ID: letters with no sign of their own are fingerspelled
+    const acronym = /^[A-Z]{2,5}$/.test(n.text || '') && !lex.find(n.text);
+    if (n.tag === 'NAME' || acronym) out.push(ctx.name(n, role));
     else {
       const surface = n.w.toUpperCase();
       const base = (n.lemma || n.w).toUpperCase();
@@ -925,7 +1020,7 @@ function signsForNP(np, role, lex, ctx) {
 
 function analyseClause(clause, lex, ctx, sentence) {
   const toks = clause.toks;
-  const units = { time: [], place: [], relation: [], subject: [], recipient: [], object: [], modal: [], verb: [], how: [], other: [], neg: [], wh: [], intj: [], freq: [], link: [] };
+  const units = { time: [], place: [], compare: [], relation: [], subject: [], recipient: [], object: [], modal: [], verb: [], how: [], other: [], neg: [], wh: [], intj: [], freq: [], link: [] };
   const P = phrases(toks);
   const beIdx = P.findIndex((p) => p.kind === 'BE');
   // "The man who lives next door is a teacher": no source covers relative
@@ -943,6 +1038,9 @@ function analyseClause(clause, lex, ctx, sentence) {
   let lastUnit = null;
   let joinNext = null;
 
+  // "I have lived here for ten years": still true now, so not PAST
+  const ongoing = toks.some((t) => t.tag === 'TIME' && t.duration) && toks.some((t) => t.tag === 'AUX' && t.form === 'perfect');
+  const past = () => { if (!ongoing) ctx.tense('past'); };
   let beforeRelative = null;
   for (let k = 0; k < P.length; k++) {
     const p = P[k];
@@ -979,9 +1077,10 @@ function analyseClause(clause, lex, ctx, sentence) {
         }
         const signs = [];
         const whole = lex.find(t.w.toUpperCase().replace(/\b(IN|ON|AT|THE|DURING|OVER)\b/g, '').trim());
-        if (whole && t.parts.length > 1) signs.push(ctx.sign(t, { gloss: glossKey(whole), role: 'time', rule: 'time' }));
+        if (whole && t.parts.length > 1 && t.parts[0] !== 'TIME' && !t.duration) signs.push(ctx.sign(t, { gloss: glossKey(whole), role: 'time', rule: 'time' }));
         else t.parts.forEach((g, n) => signs.push(ctx.sign(n === 0 ? t : { ...t, silent: true }, { gloss: g, role: 'time', rule: 'time', number: /^\d/.test(g) })));
         ctx.dropExtra(t, 'time');
+        if (t.duration) { signs[0].sub = 'how long'; for (const x of signs) x.duration = true; }
         units.time.push(...signs);
         ctx.rule('time');
         if (t.past) ctx.tense('past', true);
@@ -996,12 +1095,12 @@ function analyseClause(clause, lex, ctx, sentence) {
       case 'NEG': ctx.negate(p.tok); break;
       case 'INTJ': units.intj.push(ctx.sign(p.tok, { gloss: p.tok.gloss, role: 'greeting' })); break;
       case 'EXIST': ctx.drop(p.tok, 'be'); existential = true; break;
-      case 'BE': ctx.drop(p.tok, 'be'); ctx.rule('be'); if (p.tok.form === 'past') ctx.tense('past'); break;
-      case 'AUX': ctx.drop(p.tok, 'aux'); ctx.rule('aux'); if (p.tok.form === 'past' || p.tok.form === 'perfect') ctx.tense('past'); break;
+      case 'BE': ctx.drop(p.tok, 'be'); ctx.rule('be'); if (p.tok.form === 'past') past(); break;
+      case 'AUX': ctx.drop(p.tok, 'aux'); ctx.rule('aux'); if (p.tok.form === 'past' || p.tok.form === 'perfect') past(); break;
       case 'FUT': ctx.drop(p.tok, 'aux'); ctx.rule('aux'); ctx.tense('future'); break;
       case 'PART': ctx.drop(p.tok, 'to'); ctx.rule('to'); break;
-      case 'COMP': ctx.drop(p.tok, 'kept'); break;
-      case 'REL': rough = true; ctx.drop(p.tok, 'kept'); break;
+      case 'COMP': ctx.drop(p.tok, 'that'); break;
+      case 'REL': rough = true; ctx.drop(p.tok, 'relative'); break;
       case 'PARTICLE': {
         if (p.tok.of) break;
         const v = units.verb[units.verb.length - 1];
@@ -1024,7 +1123,7 @@ function analyseClause(clause, lex, ctx, sentence) {
         const g = [t.lemma || t.w, redundant ? null : t.particle].filter(Boolean).join(' ').toUpperCase();
         const particle = t.particle && toks.find((x) => x.of === t);
         const s = ctx.sign(particle ? [t, particle] : t, { gloss: g, role: 'verb' });
-        if (t.form === 'past') ctx.tense('past');
+        if (t.form === 'past') past();
         if (t.form !== 'base' && t.form !== 'imperative' && s.gloss !== t.w.toUpperCase()) { s.rule = 'tense'; }
         if (GIVING.has(t.lemma)) { s.rule = 'directional'; ctx.rule('directional'); }
         units.verb.push(s);
@@ -1060,8 +1159,38 @@ function analyseClause(clause, lex, ctx, sentence) {
           break;
         }
         if (prep === 'by' && head && ['bus', 'car', 'taxi', 'train', 'plane', 'bike', 'bicycle', 'boat', 'foot'].includes(head.lemma || head.w)) {
-          ctx.drop(p.prep, 'kept');
+          ctx.drop(p.prep, 'prep');
           units.how.push(...signsForNP(p.np, 'other', lex, ctx));
+          break;
+        }
+        const person = head && (head.tag === 'PRON' || PEOPLE.has(head.w) || PEOPLE.has(head.lemma) || head.tag === 'NAME' && !isPlace);
+        // "older than me": the other side of a comparison is set up first (rule compare)
+        if (prep === 'than') {
+          ctx.drop(p.prep, 'prep');
+          units.compare.push(...signsForNP(p.np, 'subject', lex, ctx));
+          ctx.rule('compare');
+          break;
+        }
+        // "talk to my teacher": the person is who it is done to; "to" is not signed
+        if (prep === 'to' && person && mainVerb && (TO_SOMEONE.has(mainVerb.lemma) || GIVING.has(mainVerb.lemma))) {
+          ctx.drop(p.prep, GIVING.has(mainVerb.lemma) ? 'directional' : 'prep');
+          units.recipient.push(...signsForNP(p.np, 'object', lex, ctx));
+          break;
+        }
+        // "put the keys on the table": the table comes after the keys, before PUT
+        if (mainVerb && PUTTING.has(mainVerb.lemma) && W.PLACE_PREPS.has(prep) && !person) {
+          ctx.drop(p.prep, 'space');
+          ctx.rule('space');
+          units.object.push(...signsForNP(p.np, 'place', lex, ctx));
+          if (units.verb[0]) units.verb[0].sub = `${prep} the ${head.w}`;
+          break;
+        }
+        // "went to the movies", "went to my friend", "saw a bird in the tree": the place sets the scene
+        if (!isPlace && (head?.tag === 'NOUN' || person && head.tag !== 'PRON') && (['to', 'into', 'towards', 'toward'].includes(prep) && mainVerb && MOTION.has(mainVerb.lemma)
+          || ['in', 'at', 'inside'].includes(prep) && mainVerb && !person)) {
+          ctx.drop(p.prep, 'place');
+          units.place.push(...signsForNP(p.np, 'place', lex, ctx));
+          ctx.rule('place');
           break;
         }
         if (prep === 'to' && mainVerb && GIVING.has(mainVerb.lemma) && !isPlace) {
@@ -1075,7 +1204,7 @@ function analyseClause(clause, lex, ctx, sentence) {
           ctx.rule('place');
           break;
         }
-        if (isPlace || ['under', 'on', 'behind', 'above', 'below', 'beside', 'between', 'near', 'inside', 'outside', 'next'].includes(prep) && head?.tag !== 'PRON') {
+        if (isPlace || !mainVerb && prep === 'in' && head?.tag === 'NOUN' || ['under', 'on', 'behind', 'above', 'below', 'beside', 'between', 'near', 'inside', 'outside', 'next'].includes(prep) && head?.tag !== 'PRON') {
           const np = signsForNP(p.np, 'place', lex, ctx);
           const rel = ctx.sign(p.prep, { gloss: prep.toUpperCase(), role: 'place', rule: prep === 'from' ? 'place' : 'space' });
           units.place.push(...np);
@@ -1233,7 +1362,7 @@ export function buildSentence(text, lex, state = {}) {
 
   const clauses = splitClauses(toks);
   const built = clauses.map((c) => {
-    ctx.inSub = !!(c.marker && c.marker.tag === 'SUB' && !['if', 'when', 'whenever', 'unless'].includes(c.marker.w));
+    ctx.inSub = !!(c.complement || c.marker && c.marker.tag === 'SUB' && !['if', 'when', 'whenever', 'unless'].includes(c.marker.w));
     const r = { clause: c, ...analyseClause(c, lex, ctx, text) };
     ctx.inSub = false;
     return r;
@@ -1260,13 +1389,16 @@ export function buildSentence(text, lex, state = {}) {
   let added = null;
   // FINISH already says the action is done, so no PAST is added before it
   const finished = built.some((b) => b.units.verb.some((v) => v.gloss === 'FINISH'));
-  if (!allTime.length && (tense === 'past' || tense === 'future') && !(tense === 'past' && finished)) {
+  // how long something lasted (ONE WEEK) does not say when, so it still needs PAST or FUTURE
+  const when = allTime.filter((s) => !s.duration);
+  if (!when.length && (tense === 'past' || tense === 'future') && !(tense === 'past' && finished)) {
     if (state.tense === tense) { ctx.rule('timeKept'); }
     else {
       added = { gloss: tense === 'past' ? 'PAST' : 'FUTURE', role: 'time', kind: 'sign', words: [], rule: 'tense', added: true, sub: 'added: sets the tense' };
       const entry = lex.find(added.gloss);
       if (entry) { added.entry = entry; added.state = 'sign'; } else added.state = 'missing';
-      signs.push(added);
+      // before a "how long" sign: PAST ONE WEEK
+      signs.splice(timeStart, 0, added);
       ctx.rule('tense');
     }
   }
@@ -1288,7 +1420,7 @@ export function buildSentence(text, lex, state = {}) {
       ctx.rule('because');
       link.unshift(rhetorical);
     } else if (b.clause.marker?.tag === 'COMP') {
-      ctx.drop(b.clause.marker, 'kept');
+      ctx.drop(b.clause.marker, 'that');
     } else if (b.clause.marker && !isCond) {
       const s = ctx.sign(b.clause.marker, { gloss: b.clause.marker.w.toUpperCase(), role: 'link' });
       link.unshift(s);
@@ -1353,28 +1485,69 @@ export function buildSentence(text, lex, state = {}) {
         negSigns = negHere.map((t) => ctx.sign(t, { gloss: t.gloss || 'NOT', role: 'neg', rule: 'neg', sub: t.contracted ? `from "${t.text}"` : null }));
       }
     }
-    const partsInOrder = [
+    // Where the object goes. Subject, verb, object is the basic order (Wehrmeyer 2025); the
+    // object comes first for HAVE and LIKE, and for a verb that moves between the people
+    // or places it names (rules objFirst, directional, space). The other order is the alternative.
+    const objects = [...u.recipient, ...u.object];
+    const hasObj = verbs.length > 0 && objects.some((o) => o.role === 'object');
+    const head = u.verb.at(-1);
+    const objFirst = hasObj && head && (OBJECT_FIRST.has(head.gloss) || head.rule === 'directional' || head.rule === 'negSign' && OBJECT_FIRST.has(head.gloss.replace(/^DON'T /, '')) || SPATIAL.has(head.gloss));
+    // object first: helpers, then the object right before its own verb (SHOULD SCHOOL GO, Wright 2017);
+    // verb first: verbs and objects in the order English says them (WANT YOU COME, NEED BUY MILK)
+    const at = (x) => (x.words?.length ? Math.min(...x.words) : Infinity);
+    const svo = () => {
+      // each object goes after the verb it follows in English; a phrase stays whole (CAT SMALL)
+      let anchor = verbs.length - 1;
+      const after = objects.map((o) => {
+        // an object English puts first ("how many sisters do you have") follows the last verb
+        if (o.words?.length) {
+          const before = verbs.map((v, n) => (at(v) < at(o) ? n : -1)).filter((n) => n >= 0);
+          anchor = before.length ? before.at(-1) : verbs.length - 1;
+        }
+        return anchor;
+      });
+      const out = [];
+      verbs.forEach((v, n) => out.push(v, ...objects.filter((_, k) => after[k] === n)));
+      return out;
+    };
+    const core = (first) => (first ? [...verbs.slice(0, -1), ...objects, ...verbs.slice(-1)] : svo());
+    // a comparison: the other side first, then who, the quality, and MORE (rule compare)
+    let more = [];
+    if (u.compare.length && ![...u.object, ...u.how, ...u.subject].some((x) => x.gloss === 'MORE')) {
+      const m = { gloss: 'MORE', role: 'describe', kind: 'describe', words: [], rule: 'compare', added: true, sub: 'toward the one with more' };
+      const entry = lex.find('MORE');
+      if (entry) { m.entry = entry; m.state = 'sign'; } else m.state = 'missing';
+      more = [m];
+      u.compare[0].sub = u.compare[0].sub || 'set up on one side';
+      if (u.subject[0]) u.subject[0].sub = u.subject[0].sub || 'set up on the other side';
+    }
+    const arrange = (first) => [
       ...link,
       ...(b === order[0] ? [] : u.time),
       ...u.place,
+      ...u.compare,
       ...u.subject,
       ...u.freq.filter((s) => s.gloss !== 'AGAIN'),
       ...u.relation,
-      ...u.recipient,
-      ...u.object,
-      ...verbs,
+      ...core(first),
       ...u.how,
+      ...more,
       ...u.freq.filter((s) => s.gloss === 'AGAIN'),
       ...u.other,
       ...negSigns,
       ...u.wh,
       ...u.intj.filter((s) => !intj.includes(s)),
     ];
-    signs.push(...partsInOrder);
-    // English-like alternative: object after the verb
-    altSigns.push(...link, ...(b === order[0] ? [] : u.time), ...u.place, ...u.subject, ...u.freq.filter((s) => s.gloss !== 'AGAIN'), ...u.relation, ...verbs, ...u.recipient, ...u.object, ...u.how, ...u.freq.filter((s) => s.gloss === 'AGAIN'), ...u.other, ...negSigns, ...u.wh, ...u.intj.filter((s) => !intj.includes(s)));
-    if (u.object.length && verbs.length && u.object.some((o) => o.role === 'object')) hasObject = true;
-    if (u.object.length && verbs.length && u.object.some((o) => o.role === 'object')) ctx.rule('order');
+    signs.push(...arrange(objFirst || !hasObj));
+    altSigns.push(...arrange(hasObj ? !objFirst : true));
+    if (hasObj) {
+      hasObject = true;
+      if (objFirst && OBJECT_FIRST.has(head.gloss.replace(/^DON'T /, ''))) { head.rule = head.rule || 'objFirst'; ctx.rule('objFirst'); }
+      else if (!objFirst) ctx.rule('order');
+    }
+    if (u.verb.length > 1 || u.modal.length && u.verb.length) {
+      for (const v of [...u.modal, ...u.verb].slice(0, -1)) if (HELPERS.has(v.gloss)) { v.rule = v.rule || 'helper'; ctx.rule('helper'); }
+    }
     const end = signs.length - 1;
     if (isCond && end >= start) marks.push({ kind: 'cond', from: start, to: end, label: 'eyebrows up' });
     if (rhetorical) { const at = signs.indexOf(rhetorical); marks.push({ kind: 'rhet', from: at, to: at, label: 'eyebrows up' }); }
@@ -1400,6 +1573,8 @@ export function buildSentence(text, lex, state = {}) {
   if (signs.some((s) => s.state === 'missing')) ctx.rule('missing');
   if (signs.some((s) => s.rule === 'kept')) ctx.rule('kept');
 
+  // "a cup of tea", "the best day of my life": "of" only joins the two
+  words.forEach((w, i) => { if (!fate[i] && /^of$/i.test(w.text)) fate[i] = { drop: 'prep' }; });
   // English words: what happened to each
   const out = words.map((w, i) => {
     const f = fate[i];
@@ -1420,7 +1595,7 @@ export function buildSentence(text, lex, state = {}) {
   const rough = coverageReasons.length > 0;
   const alt = hasObject ? altSigns.map((s) => signs.indexOf(s)).filter((i) => i >= 0) : null;
   return {
-    text, kind, signs, words: words2, marks,
+    text, kind, signs, words: words2, marks, clauses: built.length,
     rules: rules.filter((r) => RULES[r]),
     alt: alt && alt.join() !== signs.map((_, i) => i).join() ? alt : null,
     rough,

@@ -39,20 +39,20 @@ assert.equal(line('We have no money.'), "WE MONEY DON'T HAVE");
 
 // dropped words say why
 const eat = buildSentence('Yesterday I ate an apple.', lex);
-assert.equal(glossLine(eat), 'YESTERDAY ME APPLE EAT');
+assert.equal(glossLine(eat), 'YESTERDAY ME EAT APPLE');
 assert.equal(eat.words.find((w) => w.text === 'an').drop, 'articles');
-assert.deepEqual(eat.alt.map((i) => eat.signs[i].gloss), ['YESTERDAY', 'ME', 'EAT', 'APPLE']);
-assert.equal(line('The big dog chased the small cat.'), 'PAST DOG BIG CAT SMALL CHASE');
+assert.deepEqual(eat.alt.map((i) => eat.signs[i].gloss), ['YESTERDAY', 'ME', 'APPLE', 'EAT']);
+assert.equal(line('The big dog chased the small cat.'), 'PAST DOG BIG CHASE CAT SMALL');
 assert.ok(buildSentence('The big dog chased the small cat.', lex).signs[0].added);
 assert.equal(line('If it rains, I will stay home.'), 'FUTURE RAIN HOME ME STAY');
 assert.equal(line('It is cold today.'), 'TODAY COLD');
 assert.equal(line('Where is the nearest bus stop?'), 'BUS STOP NEAR WHERE');
-assert.equal(line('My friend and I played soccer on Saturday.'), 'SATURDAY MY FRIEND AND ME SOCCER PLAY');
+assert.equal(line('My friend and I played soccer on Saturday.'), 'SATURDAY MY FRIEND AND ME PLAY SOCCER');
 
 // a paragraph carries its time forward instead of repeating it
 const para = buildParagraph('Yesterday I went to the shop. I bought bread.', lex);
 assert.equal(para.length, 2);
-assert.equal(glossLine(para[1]), 'ME BREAD BUY');
+assert.equal(glossLine(para[1]), 'ME BUY BREAD');
 assert.ok(para[1].rules.includes('timeKept'));
 
 // sentences split sensibly
