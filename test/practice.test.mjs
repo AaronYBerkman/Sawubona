@@ -29,6 +29,19 @@ const statuses = (r) => r.signs.map((x) => x.status);
 
 // --- named cases ---------------------------------------------------------------
 
+check('an optional sign left out is not a mistake', () => {
+  // "I have two brothers": Real SASL's presenter signs BROTHER TWO HAVE, without ME
+  const plan = [{ gloss: 'ME', entry: 'ME', optional: true }, { gloss: 'HAVE', entry: 'HAVE' }, { gloss: 'HOUSE', entry: 'HOUSE' }];
+  const r = alignAttempt(plan, [ranking('HAVE'), ranking('HOUSE')]);
+  assert.equal(r.signs[0].status, 'unchecked');
+  assert.equal(r.signs[0].why, 'optional');
+  assert.equal(r.missed, 0);
+  assert.match(r.summary, /ME is optional and left out/);
+  // signed anyway, it is checked like any other sign
+  const all = alignAttempt(plan, [ranking('ME'), ranking('HAVE'), ranking('HOUSE')]);
+  assert.equal(all.signs[0].status, 'seen');
+});
+
 check('empty recording', () => {
   const plan = [sign('ME'), sign('SHOP', null), sign('EAT')];
   const r = alignAttempt(plan, []);

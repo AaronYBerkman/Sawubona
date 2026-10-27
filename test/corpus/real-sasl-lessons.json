@@ -12,11 +12,11 @@
   { "en": "I don't like fish.", "gloss": "ME FISH DON'T LIKE", "rules": ["negSign"] },
   { "en": "She is not happy.", "gloss": "SHE HAPPY NOT", "rules": ["neg"] },
   { "en": "We have no money.", "gloss": "WE MONEY DON'T HAVE" },
-  { "en": "Yesterday I ate an apple.", "gloss": "YESTERDAY ME EAT APPLE", "alt": "YESTERDAY ME APPLE EAT", "drops": { "an": "articles" }, "why": "Real SASL teaches ME APPLE EAT, kept as the other order; subject verb object first (Wehrmeyer 2025, 25 signers)" },
-  { "en": "The big dog chased the small cat.", "gloss": "PAST DOG BIG CHASE CAT SMALL", "why": "either animal could chase the other (reversible), and CHASE is a plain verb, so subject verb object (Napoli & Sutton-Spence 2014; Wehrmeyer 2025); noun then size; PAST added" },
+  { "en": "Yesterday I ate an apple.", "gloss": "YESTERDAY ME APPLE EAT", "alt": "YESTERDAY ME EAT APPLE", "drops": { "an": "articles" }, "why": "Real SASL teaches ME APPLE EAT; the verb-first order seen in relaxed conversation (Wehrmeyer 2025) is the other" },
+  { "en": "The big dog chased the small cat.", "gloss": "PAST DOG BIG CAT SMALL CHASE", "why": "object before the action, as Real SASL teaches; either animal could chase the other, and for such sentences subject verb object is also common (Napoli & Sutton-Spence 2014), so it is the other order; noun then size; PAST added" },
   { "en": "If it rains, I will stay home.", "gloss": "FUTURE RAIN HOME ME STAY", "rules": ["condition"] },
   { "en": "It is cold today.", "gloss": "TODAY COLD" },
   { "en": "Where is the nearest bus stop?", "gloss": "BUS STOP NEAR WHERE", "kind": "wh" },
-  { "en": "My friend and I played soccer on Saturday.", "gloss": "SATURDAY MY FRIEND AND ME PLAY SOCCER", "why": "time first; the two people joined by AND; subject verb object (Wehrmeyer 2025)" },
-  { "en": "Yesterday I went to the shop. I bought bread.", "para": true, "gloss": ["YESTERDAY SHOP ME GO", "ME BUY BREAD"], "rules": ["timeKept"] }
+  { "en": "My friend and I played soccer on Saturday.", "gloss": "SATURDAY MY FRIEND AND ME SOCCER PLAY", "why": "time first; the two people joined by AND; subject object verb (Real SASL)" },
+  { "en": "Yesterday I went to the shop. I bought bread.", "para": true, "gloss": ["YESTERDAY SHOP ME GO", "ME BREAD BUY"], "rules": ["timeKept"] }
 ]

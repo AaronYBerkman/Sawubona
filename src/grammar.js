@@ -27,6 +27,7 @@ const RS_INDEX = 'Real SASL, "Indexing and pointing"';
 const RS_DIR = 'Real SASL, "What is a directional verb"';
 const WEHRMEYER = 'Wehrmeyer 2025, "Structure of simple declarative clauses in SASL", Sign Language & Linguistics 28(1)';
 const WRIGHT = 'Wright 2017, "A preliminary description of SASL syntax", MA, Wits';
+const RS_DAY8 = 'Real SASL, Day 8 practice sentences, signed by Deaf presenters';
 const NAPOLI = 'Napoli & Sutton-Spence 2014, "Order of the major constituents in sign languages"';
 
 export const RULES = {
@@ -51,18 +52,13 @@ export const RULES = {
     source: `${RS_TIME}; ${RS_INDEX}`, strength: 'moderate',
   },
   order: {
-    title: 'Who, the action, then what',
-    text: 'A study of 25 Deaf signers from three provinces found subject, verb, object is the basic SASL order: ME EAT APPLE. Real SASL teaches ME APPLE EAT, which is also correct and common, so it is shown as the other order.',
-    source: `${WEHRMEYER}; ${WRIGHT}; ${RS_GRAMMAR}`, strength: 'flexible',
-  },
-  objFirst: {
-    title: 'HAVE and LIKE come last',
-    text: 'The thing comes first, then HAVE or LIKE: ME HOUSE WHITE BIG TWO HAVE, ANIMALS LIKE. Every SASL example of these two verbs in the sources is signed this way.',
-    source: `${RS_ADJ}; ${RS_Q}; ${WRIGHT}`, strength: 'moderate',
+    title: 'Who, what, then the action',
+    text: 'Real SASL teaches the thing before the action: ME APPLE EAT, ME HOUSE WHITE BIG TWO HAVE. Its Deaf presenters sign it that way too: "I kissed my girlfriend yesterday" is YESTERDAY GIRLFRIEND MY KISS. In relaxed conversation many signers put the action first (ME EAT APPLE), so that is shown as the other order.',
+    source: `${RS_GRAMMAR}; ${RS_ADJ}; ${RS_DAY8}; ${WEHRMEYER}`, strength: 'flexible',
   },
   helper: {
-    title: 'WANT, TRY, NEED: before the action',
-    text: 'A verb that says what you want, try or need to do comes right before that action: ME WANT LEARN SIGN LANGUAGE. "to" is not signed.',
+    title: 'WANT, TRY, NEED: before the thing and the action',
+    text: 'A verb that says what you want, try or need to do comes before what you do it to, and the action comes last: ME WANT SIGN LANGUAGE LEARN, as in SHOULD SCHOOL NORTH-WEST GO. "to" is not signed.',
     source: WRIGHT, strength: 'moderate',
   },
   wh: {
@@ -77,8 +73,8 @@ export const RULES = {
   },
   neg: {
     title: 'Shake your head to say no',
-    text: 'The head shake is what makes it negative: GIRL HOUSE STAY with a head shake means "the girl is not staying at the house". NOT, if you sign it, comes after the verb.',
-    source: 'De Barros & Siebörger 2016; Huddlestone 2017', strength: 'strong',
+    text: 'The head shake and a frown are what make it negative: GIRL HOUSE STAY with a head shake means "the girl is not staying at the house". NOT is optional; Real SASL\'s Deaf presenters often leave it out ("I didn\'t work yesterday" is YESTERDAY ME WORK, head shaking). If you sign it, it comes after the verb.',
+    source: `De Barros & Siebörger 2016; Huddlestone 2017; ${RS_DAY8}`, strength: 'strong',
   },
   negSign: {
     title: 'One sign already says "not"',
@@ -124,6 +120,11 @@ export const RULES = {
     title: '"Because" becomes a question',
     text: 'SASL turns "because" into a rhetorical question: "I like animals because they are beautiful" is ANIMALS LIKE, WHY? BEAUTIFUL. Raise your eyebrows on WHY, then give the answer.',
     source: RS_Q, strength: 'strong',
+  },
+  dropMe: {
+    title: 'ME can be left out',
+    text: 'When it is clear you mean yourself, Deaf signers often leave ME out: Real SASL\'s presenter signs "I have two brothers" as BROTHER TWO HAVE. A study of everyday SASL found who does the action is often not signed.',
+    source: `${RS_DAY8}; ${WEHRMEYER}`, strength: 'moderate',
   },
   prep: {
     title: 'No sign for "to", "by", "of" or "than"',
@@ -421,10 +422,6 @@ const TO_SOMEONE = new Set('talk speak say explain write reply listen wave lie s
 const PUTTING = new Set('put place hang'.split(' '));
 const LINKING = new Set('smell look feel taste sound seem become get stay'.split(' '));
 const WEATHER_ADJ = new Set('cold hot warm cool sunny windy cloudy rainy wet dry dark late early'.split(' '));
-// verbs whose object comes first in every SASL source example (rule objFirst)
-const OBJECT_FIRST = new Set(['HAVE', 'LIKE']);
-// verbs that move the thing to a place: the place and the thing come first (rule space)
-const SPATIAL = new Set(['PUT', 'PLACE', 'HANG']);
 // verbs that come right before a second verb: WANT LEARN, TRY LEARN (rule helper)
 const HELPERS = new Set(['WANT', 'TRY', 'NEED', 'START', 'STOP', 'FORGET', 'LIKE', 'MUST', 'SHOULD', 'CAN', 'LEARN', 'HAVE TO']);
 const PERCEPTION_COMPLEMENT = new Set('think know say believe hope feel mean see hear understand remember forget wish tell'.split(' '));
@@ -779,6 +776,12 @@ function tag(toks, question, lex) {
     }
     // "I hope you feel better": a new subject after THINK, HOPE or KNOW starts a second idea with its own verb
     if ((pt === 'PRON' && prev.subject || pt === 'NAME') && toks[i - 2]?.tag === 'VERB' && PERCEPTION_COMPLEMENT.has(toks[i - 2].lemma)) seenVerb = false;
+    // ...and after a noun phrase there: "I hope the children eat bread"
+    if (pt === 'NOUN') {
+      let k = i - 1;
+      while (k >= 0 && ['DET', 'POSS', 'ADJ', 'NUM', 'NOUN', 'NAME'].includes(toks[k].tag)) k--;
+      if (k < i - 1 && toks[k]?.tag === 'VERB' && PERCEPTION_COMPLEMENT.has(toks[k].lemma)) seenVerb = false;
+    }
     if (!nominalBefore && subjectBefore && vb && !seenVerb && !(seenBe && verbForm(w) === 'base')) return verb(identicalPast(w) && (auxEarlier(i) || !thirdSingular(toks, i)) ? 'base' : verbForm(w));
     // "I cook and clean": a verb after "and" shares the subject when it joins two verbs
     if (!nominalBefore && pt === 'CONJ' && vb && (toks[i - 2]?.tag === 'VERB' || toks[i - 2]?.tag === 'PARTICLE' || next && (W.DETERMINERS.has(next.w) || W.POSSESSIVES[next.w] || W.PRONOUNS[next.w] && !W.SUBJECT_PRONOUNS.has(next.w)))) {
@@ -868,7 +871,12 @@ function splitClauses(toks) {
     // "I think it will rain", "I hope you feel better": a new subject with its own verb starts the
     // second idea, which keeps its own time and order
     const ownVerb = ['BE', 'VERB', 'MODAL', 'FUT', 'AUX', 'NEG'].includes(rest[0]?.tag);
-    if (complement && (t.tag === 'COMP' || (t.tag === 'PRON' && t.w !== 'me' || t.tag === 'NAME') && ownVerb)) {
+    // ...or "I think my mother is tired": a whole noun phrase right after THINK, then its own verb
+    const prev = cur.toks.at(-1);
+    let np = 0;
+    if (prev?.tag === 'VERB' && PERCEPTION_COMPLEMENT.has(prev.lemma)) while (['DET', 'POSS', 'ADJ', 'NUM', 'NOUN', 'NAME'].includes(toks[i + np]?.tag)) np++;
+    const nounSubject = np > 0 && ['BE', 'VERB', 'MODAL', 'FUT', 'AUX', 'NEG'].includes(toks[i + np]?.tag);
+    if (complement && (t.tag === 'COMP' || (t.tag === 'PRON' && t.w !== 'me' || t.tag === 'NAME') && ownVerb || nounSubject)) {
       clauses.push(cur);
       cur = { toks: t.tag === 'COMP' ? [] : [t], marker: t.tag === 'COMP' ? t : null, complement: true };
       continue;
@@ -1492,15 +1500,15 @@ export function buildSentence(text, lex, state = {}) {
         ctx.rule('negSign');
       } else {
         negSigns = negHere.map((t) => ctx.sign(t, { gloss: t.gloss || 'NOT', role: 'neg', rule: 'neg', sub: t.contracted ? `from "${t.text}"` : null }));
+        // the head shake says "not" on its own; Real SASL's Deaf presenters often sign no NOT (rule neg)
+        for (const x of negSigns) if (x.gloss === 'NOT') { x.optional = true; x.sub = [x.sub, 'optional: the head shake says it'].filter(Boolean).join('; '); }
       }
     }
-    // Where the object goes. Subject, verb, object is the basic order (Wehrmeyer 2025); the
-    // object comes first for HAVE and LIKE, and for a verb that moves between the people
-    // or places it names (rules objFirst, directional, space). The other order is the alternative.
+    // Where the object goes: before the action, as Real SASL teaches and its Deaf presenters
+    // sign (rule order); the verb-first order seen in relaxed conversation (Wehrmeyer 2025)
+    // is the alternative.
     const objects = [...u.recipient, ...u.object];
     const hasObj = verbs.length > 0 && objects.some((o) => o.role === 'object');
-    const head = u.verb.at(-1);
-    const objFirst = hasObj && head && (OBJECT_FIRST.has(head.gloss) || head.rule === 'directional' || head.rule === 'negSign' && OBJECT_FIRST.has(head.gloss.replace(/^DON'T /, '')) || SPATIAL.has(head.gloss));
     // object first: helpers, then the object right before its own verb (SHOULD SCHOOL GO, Wright 2017);
     // verb first: verbs and objects in the order English says them (WANT YOU COME, NEED BUY MILK)
     const at = (x) => (x.words?.length ? Math.min(...x.words) : Infinity);
@@ -1520,6 +1528,13 @@ export function buildSentence(text, lex, state = {}) {
       return out;
     };
     const core = (first) => (first ? [...verbs.slice(0, -1), ...objects, ...verbs.slice(-1)] : svo());
+    // "I have two brothers": ME is often left out when it is clear (rule dropMe)
+    if (u.subject.length === 1 && u.subject[0].gloss === 'ME' && verbs.length) {
+      u.subject[0].optional = true;
+      u.subject[0].sub = [u.subject[0].sub, 'optional: often left out'].filter(Boolean).join('; ');
+      u.subject[0].rule = u.subject[0].rule || 'dropMe';
+      ctx.rule('dropMe');
+    }
     // a comparison: the other side first, then who, the quality, and MORE (rule compare)
     let more = [];
     if (u.compare.length && ![...u.object, ...u.how, ...u.subject].some((x) => x.gloss === 'MORE')) {
@@ -1547,12 +1562,11 @@ export function buildSentence(text, lex, state = {}) {
       ...u.wh,
       ...u.intj.filter((s) => !intj.includes(s)),
     ];
-    signs.push(...arrange(objFirst || !hasObj));
-    altSigns.push(...arrange(hasObj ? !objFirst : true));
+    signs.push(...arrange(true));
+    altSigns.push(...arrange(!hasObj));
     if (hasObj) {
       hasObject = true;
-      if (objFirst && OBJECT_FIRST.has(head.gloss.replace(/^DON'T /, ''))) { head.rule = head.rule || 'objFirst'; ctx.rule('objFirst'); }
-      else if (!objFirst) ctx.rule('order');
+      ctx.rule('order');
     }
     if (u.verb.length > 1 || u.modal.length && u.verb.length) {
       for (const v of [...u.modal, ...u.verb].slice(0, -1)) if (HELPERS.has(v.gloss)) { v.rule = v.rule || 'helper'; ctx.rule('helper'); }

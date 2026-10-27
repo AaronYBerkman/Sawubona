@@ -5,7 +5,7 @@
 //
 // The expected order follows the rules in src/grammar.js RULES, with their sources:
 //   time first, then place, then who (Real SASL time and indexing lessons)
-//   who, the action, then what (Wehrmeyer 2025); HAVE and LIKE last (objFirst)
+//   who, what, then the action (Real SASL; its Deaf presenters sign it so)
 //   the thing, then colour, size, how many (Real SASL adjective lesson)
 //   NOT / CAN'T after the action (De Barros & Siebörger 2016; Wright 2017)
 //   the question word last (Real SASL questions lesson)
@@ -35,6 +35,7 @@ const VERBS = [
 ].map(([base, s, past]) => ({ base, s, past, g: base.toUpperCase() }));
 // HAVE and LIKE: the thing comes first
 const LAST_VERBS = [{ base: 'have', s: 'has', past: 'had', g: 'HAVE' }, { base: 'like', s: 'likes', past: 'liked', g: 'LIKE' }];
+// every verb: the thing comes before the action
 // what: English, gloss (noun, then colour, then size, then how many)
 const OBJECTS = [
   { en: 'bread', g: 'BREAD' }, { en: 'the apple', g: 'APPLE' }, { en: 'a book', g: 'BOOK' },
@@ -67,7 +68,7 @@ for (const s of SUBJECTS) {
     n++;
     const last = LAST_VERBS.includes(v);
     const o = pick(OBJECTS, 1);
-    const vo = (verb) => (last ? [o.g, verb] : [verb, o.g]);
+    const vo = (verb) => [o.g, verb];
     // present, with and without a time; time first
     add(`${cap(s.en)} ${verbFor(s, v, 'present')} ${o.en}.`, join(s.g, vo(v.g)), 'statement');
     const tp = pick(TIMES.present, 2);
@@ -84,11 +85,11 @@ for (const s of SUBJECTS) {
     if (!last) add(`${cap(s.en)} ${verbFor(s, v, 'present')} ${o.en} ${pl.en}.`, join(pl.g, s.g, vo(v.g)), 'place early');
     // negative: NOT after the action (DON'T LIKE / DON'T HAVE are one sign)
     if (!last) {
-      add(`${cap(s.en)} ${doOf(s, 'present')}n't ${v.base} ${o.en}.`, join(s.g, negOf(v), o.g, notOf(v)), 'negative');
-      add(`${cap(s.en)} didn't ${v.base} ${o.en} yesterday.`, join('YESTERDAY', s.g, negOf(v), o.g, notOf(v)), 'past negative');
-      // modals
-      add(`${cap(s.en)} can ${v.base} ${o.en}.`, join(s.g, 'CAN', v.g, o.g), 'CAN before the action');
-      add(`${cap(s.en)} can't ${v.base} ${o.en}.`, join(s.g, v.g, o.g, "CAN'T"), "CAN'T last");
+      add(`${cap(s.en)} ${doOf(s, 'present')}n't ${v.base} ${o.en}.`, join(s.g, o.g, negOf(v), notOf(v)), 'negative');
+      add(`${cap(s.en)} didn't ${v.base} ${o.en} yesterday.`, join('YESTERDAY', s.g, o.g, negOf(v), notOf(v)), 'past negative');
+      // modals: CAN before the thing and the action (Wright 2017: SHOULD SCHOOL NORTH-WEST GO)
+      add(`${cap(s.en)} can ${v.base} ${o.en}.`, join(s.g, 'CAN', o.g, v.g), 'CAN before the action');
+      add(`${cap(s.en)} can't ${v.base} ${o.en}.`, join(s.g, o.g, v.g, "CAN'T"), "CAN'T last");
     }
     // questions: yes/no keeps the order; the question word goes last
     if (s.en !== 'I') {
@@ -127,9 +128,9 @@ for (const s of SUBJECTS) {
   const other = pick(PEOPLE.filter((x) => x !== s), 5);
   // two verbs: the helper right before the action, then the thing (Wright 2017: TRY LEARN)
   for (const [h, h3, hg] of [['want', 'wants', 'WANT'], ['need', 'needs', 'NEED'], ['try', 'tries', 'TRY'], ['like', 'likes', 'LIKE']]) {
-    add(`${cap(s.en)} ${s.p === 3 ? h3 : h} to ${v.base} ${o.en}.`, join(s.g, hg, v.g, o.g), 'helper then action');
+    add(`${cap(s.en)} ${s.p === 3 ? h3 : h} to ${v.base} ${o.en}.`, join(s.g, hg, o.g, v.g), 'helper, thing, action');
   }
-  add(`${cap(s.en)} wanted to ${v.base} ${o.en}.`, join('PAST', s.g, 'WANT', v.g, o.g), 'past helper');
+  add(`${cap(s.en)} wanted to ${v.base} ${o.en}.`, join('PAST', s.g, 'WANT', o.g, v.g), 'past helper');
   // verbs that move between people come last, after who and what (Real SASL directional verbs)
   for (const [base, past, g] of [['give', 'gave', 'GIVE'], ['send', 'sent', 'SEND'], ['show', 'showed', 'SHOW']]) {
     if (other) add(`${cap(s.en)} ${past} ${other.en} ${o.en}.`, join('PAST', s.g, other.g, o.g, g), 'directional last');
@@ -137,35 +138,35 @@ for (const s of SUBJECTS) {
   // a second idea after THINK / HOPE keeps its own order
   if (other) {
     add(`${cap(s.en)} ${s.p === 3 ? 'thinks' : 'think'} ${other.en} is tired.`, join(s.g, 'THINK', other.g, 'TIRED'), 'think + clause');
-    add(`${cap(s.en)} ${s.p === 3 ? 'hopes' : 'hope'} ${other.en} ${other.p === 3 ? v.s : v.base} ${o.en}.`, join(s.g, 'HOPE', other.g, v.g, o.g), 'hope + clause');
+    add(`${cap(s.en)} ${s.p === 3 ? 'hopes' : 'hope'} ${other.en} ${other.p === 3 ? v.s : v.base} ${o.en}.`, join(s.g, 'HOPE', other.g, o.g, v.g), 'hope + clause');
     // comparing: the other side, then who, the quality, MORE (Wright 2017)
     add(`${cap(s.en)} ${be(s)} taller than ${other.en}.`, join(other.g, s.g, 'TALL', 'MORE'), 'comparison');
     // two clauses joined by AND or BUT, each in its own order
     add(`${cap(s.en)} ${s.p === 3 ? v.s : v.base} ${o.en} and ${other.en} ${other.p === 3 ? v2.s : v2.base} ${o2.en}.`,
-      join(s.g, v.g, o.g, 'AND', other.g, v2.g, o2.g), 'two clauses with AND');
+      join(s.g, o.g, v.g, 'AND', other.g, o2.g, v2.g), 'two clauses with AND');
   }
   // how long: first, the number with the time sign; still true now, so no PAST
   add(`${cap(s.en)} ${have(s)} lived here for two years.`, join('TWO YEAR', 'HERE', s.g, 'LIVE'), 'how long');
   add(`${cap(s.en)} ${have(s)} been waiting for an hour.`, join('ONE HOUR', s.g, 'WAIT'), 'how long, -ing');
   // clock time first
-  add(`${cap(s.en)} ${s.p === 3 ? v.s : v.base} ${o.en} at seven.`, join('TIME SEVEN', s.g, v.g, o.g), 'clock time');
-  add(`${cap(s.en)} ${s.p === 3 ? v.s : v.base} ${o.en} at 5 pm.`, join('TIME 5 PM', s.g, v.g, o.g), 'clock time pm');
+  add(`${cap(s.en)} ${s.p === 3 ? v.s : v.base} ${o.en} at seven.`, join('TIME SEVEN', s.g, o.g, v.g), 'clock time');
+  add(`${cap(s.en)} ${s.p === 3 ? v.s : v.base} ${o.en} at 5 pm.`, join('TIME 5 PM', s.g, o.g, v.g), 'clock time pm');
   // never / won't: after the action
-  add(`${cap(s.en)} never ${s.p === 3 ? v.s : v.base} ${o.en}.`, join(s.g, v.g, o.g, 'NEVER'), 'never');
-  add(`${cap(s.en)} won't ${v.base} ${o.en} tomorrow.`, join('TOMORROW', s.g, v.g, o.g, 'NOT'), "won't");
+  add(`${cap(s.en)} never ${s.p === 3 ? v.s : v.base} ${o.en}.`, join(s.g, o.g, v.g, 'NEVER'), 'never');
+  add(`${cap(s.en)} won't ${v.base} ${o.en} tomorrow.`, join('TOMORROW', s.g, o.g, v.g, 'NOT'), "won't");
 }
 // a described subject: the thing, then colour, then size
 for (const [en, g] of [['The big dog', 'DOG BIG'], ['The small black cat', 'CAT BLACK SMALL'], ['My new teacher', 'MY TEACHER NEW']]) {
   for (const v of PLAIN.slice(0, 6)) {
     const o = pick(OBJECTS, 8); n++;
-    add(`${en} ${v.s} ${o.en}.`, join(g, v.g, o.g), 'described subject');
+    add(`${en} ${v.s} ${o.en}.`, join(g, o.g, v.g), 'described subject');
   }
 }
 // commands: no subject; the action, then the thing
 for (const v of PLAIN) {
   const o = pick(OBJECTS, 9); n++;
-  add(`Please ${v.base} ${o.en}.`, join('PLEASE', v.g, o.g), 'command');
-  add(`Don't ${v.base} ${o.en}.`, join(v.g, o.g, 'NOT'), 'negative command');
+  add(`Please ${v.base} ${o.en}.`, join('PLEASE', o.g, v.g), 'command');
+  add(`Don't ${v.base} ${o.en}.`, join(o.g, v.g, 'NOT'), 'negative command');
 }
 
 let failed = 0;

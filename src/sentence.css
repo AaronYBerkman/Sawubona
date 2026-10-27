@@ -216,8 +216,8 @@
 .sb-card[data-role="greeting"] { --w: var(--w-greeting); }
 .sb-card[data-role="link"] { --w: var(--w-link); }
 .sb-card[data-kind="describe"] { --wash: color-mix(in srgb, color-mix(in srgb, var(--w) 55%, var(--w-describe)) calc(var(--sb-mix) * .8), var(--j-page)); }
-.sb-card[data-state="missing"]::before, .sb-card[data-added]::before { opacity: .55; }
-.sb-card[data-state="missing"]::after, .sb-card[data-added]::after {
+.sb-card[data-state="missing"]::before, .sb-card[data-added]::before, .sb-card[data-optional]::before { opacity: .55; }
+.sb-card[data-state="missing"]::after, .sb-card[data-added]::after, .sb-card[data-optional]::after {
   content: ""; position: absolute; inset: 7px; border: 1.6px dashed var(--sb-pencil-line); border-radius: 4px 6px 4px 7px; pointer-events: none;
 }
 .sb-card:hover, .sb-card.is-linked { transform: translateY(-3px) rotate(0deg); }

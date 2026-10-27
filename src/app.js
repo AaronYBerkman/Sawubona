@@ -274,6 +274,7 @@ function practiseSentence(plan, sentence) {
   const signs = sentence?.signs?.length === plan.length ? sentence.signs : [];
   plan = plan.map((p, i) => ({
     gloss: p.gloss, entry: p.entry || null, kind: signs[i]?.state ?? p.kind ?? null, spell: signs[i]?.spell ?? p.spell ?? null,
+    optional: !!(signs[i]?.optional ?? p.optional),
   }));
   state.sentence.plan = plan;
   state.sentence.sentence = sentence ?? null;
