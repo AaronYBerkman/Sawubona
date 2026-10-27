@@ -1,0 +1,568 @@
+{
+ "note": "Course lessons follow wanted_words.txt; NID lessons are the National Institute for the Deaf wall-chart word lists. Only signs in the RealSASL dictionary are included.",
+ "lessons": [
+  {
+   "id": "numbers-1",
+   "title": "Numbers",
+   "topic": "Numbers",
+   "source": "course",
+   "words": [
+    "ZERO",
+    "ONE",
+    "EIGHT",
+    "NINE",
+    "100000",
+    "EIGHTEEN",
+    "NUMBER",
+    "NUMBERS"
+   ]
+  },
+  {
+   "id": "days-and-weeks-1",
+   "title": "Days and weeks",
+   "topic": "Days and weeks",
+   "source": "course",
+   "words": [
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+    "SUNDAY",
+    "DAYS OF THE WEEK",
+    "WEEK",
+    "WEEKEND",
+    "NEXT WEEK",
+    "LAST WEEK"
+   ]
+  },
+  {
+   "id": "months-and-seasons-1",
+   "title": "Months and seasons",
+   "topic": "Months and seasons",
+   "source": "course",
+   "words": [
+    "JANUARY",
+    "FEBRUARY",
+    "MARCH",
+    "APRIL",
+    "AUGUST",
+    "SEPTEMBER",
+    "OCTOBER",
+    "NOVEMBER",
+    "DECEMBER",
+    "MONTHS OF THE YEAR",
+    "MONTH",
+    "SUMMER",
+    "AUTUMN"
+   ]
+  },
+  {
+   "id": "colours-1",
+   "title": "Colours",
+   "topic": "Colours",
+   "source": "course",
+   "words": [
+    "COLOURS",
+    "BLACK",
+    "BROWN",
+    "GREEN",
+    "GREY",
+    "PINK",
+    "PURPLE",
+    "RED",
+    "ORANGE"
+   ]
+  },
+  {
+   "id": "questions-1",
+   "title": "Questions",
+   "topic": "Questions",
+   "source": "course",
+   "words": [
+    "WHAT",
+    "WHEN",
+    "WHERE",
+    "WHICH",
+    "WHY",
+    "HOW MUCH",
+    "QUESTION"
+   ]
+  },
+  {
+   "id": "greetings-and-manners-1",
+   "title": "Greetings and manners",
+   "topic": "Greetings and manners",
+   "source": "course",
+   "words": [
+    "HELLO",
+    "GOODBYE",
+    "BYE BYE",
+    "PLEASE",
+    "THANK YOU",
+    "SORRY",
+    "YES",
+    "NO",
+    "EXCUSE ME",
+    "FINE",
+    "OKAY (OK)"
+   ]
+  },
+  {
+   "id": "time-1",
+   "title": "Time 1",
+   "topic": "Time",
+   "source": "course",
+   "words": [
+    "TIME",
+    "TODAY",
+    "YESTERDAY",
+    "NOW",
+    "LATER",
+    "EARLY",
+    "LATE",
+    "HOUR"
+   ]
+  },
+  {
+   "id": "time-2",
+   "title": "Time 2",
+   "topic": "Time",
+   "source": "course",
+   "words": [
+    "ONE HOUR",
+    "MORNING",
+    "NIGHT",
+    "NOON",
+    "ALWAYS",
+    "NEVER",
+    "DAILY"
+   ]
+  },
+  {
+   "id": "deaf-life-and-names-1",
+   "title": "Deaf life and names 1",
+   "topic": "Deaf life and names",
+   "source": "course",
+   "words": [
+    "NAME",
+    "SIGN NAME",
+    "SURNAME",
+    "DEAF",
+    "HEARING",
+    "SIGN LANGUAGE",
+    "UNDERSTAND",
+    "DON'T UNDERSTAND"
+   ]
+  },
+  {
+   "id": "deaf-life-and-names-2",
+   "title": "Deaf life and names 2",
+   "topic": "Deaf life and names",
+   "source": "course",
+   "words": [
+    "KNOW",
+    "DON'T KNOW",
+    "LEARN",
+    "HELP",
+    "GOOD",
+    "BAD",
+    "AGE"
+   ]
+  },
+  {
+   "id": "family-1",
+   "title": "Family 1",
+   "topic": "Family",
+   "source": "course",
+   "words": [
+    "MOTHER",
+    "BROTHER",
+    "SISTER",
+    "SON",
+    "DAUGHTER",
+    "GRANDFATHER",
+    "GRANDMOTHER",
+    "AUNT",
+    "AUNTY"
+   ]
+  },
+  {
+   "id": "family-2",
+   "title": "Family 2",
+   "topic": "Family",
+   "source": "course",
+   "words": [
+    "UNCLE",
+    "COUSIN",
+    "NEPHEW",
+    "NIECE",
+    "FAMILY",
+    "HUSBAND",
+    "WIFE",
+    "MY WIFE",
+    "BOYFRIEND"
+   ]
+  },
+  {
+   "id": "people-1",
+   "title": "People 1",
+   "topic": "People",
+   "source": "course",
+   "words": [
+    "CHILD",
+    "CHILDREN",
+    "BABY",
+    "MAN",
+    "WOMAN",
+    "PERSON",
+    "PEOPLE",
+    "FRIEND",
+    "CLOSE FRIEND",
+    "NEIGHBOUR"
+   ]
+  },
+  {
+   "id": "people-2",
+   "title": "People 2",
+   "topic": "People",
+   "source": "course",
+   "words": [
+    "ADULT",
+    "TEENAGE BOY",
+    "TEENAGE GIRL",
+    "SMALL BOY",
+    "SMALL GIRL",
+    "YOUTH",
+    "YOUNG",
+    "OLD",
+    "KID"
+   ]
+  },
+  {
+   "id": "feelings-1",
+   "title": "Feelings 1",
+   "topic": "Feelings",
+   "source": "course",
+   "words": [
+    "HAPPY",
+    "SAD",
+    "ANGRY",
+    "AFRAID",
+    "BORED",
+    "EXCITED",
+    "NERVOUS",
+    "PROUD",
+    "EMOTIONAL",
+    "LOVE",
+    "HATE"
+   ]
+  },
+  {
+   "id": "feelings-2",
+   "title": "Feelings 2",
+   "topic": "Feelings",
+   "source": "course",
+   "words": [
+    "JEALOUS",
+    "ENVY",
+    "SHY",
+    "CONFIDENT",
+    "EMBARRASSED",
+    "DEPRESSED",
+    "WORRY",
+    "ANXIOUS",
+    "RELAX",
+    "TIRED",
+    "ENJOY"
+   ]
+  },
+  {
+   "id": "feelings-3",
+   "title": "Feelings 3",
+   "topic": "Feelings",
+   "source": "course",
+   "words": [
+    "DON'T LIKE",
+    "FEELING DOWN",
+    "FED UP",
+    "ANNOYED",
+    "GUILTY",
+    "HUMBLE",
+    "BRAVE",
+    "LAZY",
+    "CRAZY",
+    "CURIOUS",
+    "HOPE"
+   ]
+  },
+  {
+   "id": "relationships-1",
+   "title": "Relationships",
+   "topic": "Relationships",
+   "source": "course",
+   "words": [
+    "MARRIED",
+    "MARRY",
+    "DIVORCE",
+    "ENGAGED",
+    "IN LOVE",
+    "WEDDING"
+   ]
+  },
+  {
+   "id": "jobs-1",
+   "title": "Jobs",
+   "topic": "Jobs",
+   "source": "course",
+   "words": [
+    "TEACHER",
+    "DOCTOR",
+    "NURSE",
+    "BOSS",
+    "LEADER"
+   ]
+  },
+  {
+   "id": "food-1",
+   "title": "Food 1",
+   "topic": "Food",
+   "source": "course",
+   "words": [
+    "FOOD",
+    "EAT",
+    "BREAKFAST",
+    "LUNCH",
+    "BREAD",
+    "BUTTER",
+    "EGG",
+    "CHEESE",
+    "BACON",
+    "MILK"
+   ]
+  },
+  {
+   "id": "food-2",
+   "title": "Food 2",
+   "topic": "Food",
+   "source": "course",
+   "words": [
+    "SUGAR",
+    "SALT",
+    "BLACK PEPPER",
+    "SOUP",
+    "CHICKEN",
+    "FISH",
+    "FRUIT",
+    "GRAPES",
+    "PINEAPPLE",
+    "WATERMELON"
+   ]
+  },
+  {
+   "id": "food-3",
+   "title": "Food 3",
+   "topic": "Food",
+   "source": "course",
+   "words": [
+    "LETTUCE",
+    "TOMATO",
+    "POTATO",
+    "CARROT",
+    "ONION",
+    "CABBAGE",
+    "SWEETCORN",
+    "MUSHROOM",
+    "VEGETABLE",
+    "PIZZA"
+   ]
+  },
+  {
+   "id": "food-4",
+   "title": "Food 4",
+   "topic": "Food",
+   "source": "course",
+   "words": [
+    "POPCORN",
+    "CAKE",
+    "CHOCOLATE",
+    "PEANUT BUTTER",
+    "YOGURT",
+    "NOODLE",
+    "CREAM"
+   ]
+  },
+  {
+   "id": "drinks-1",
+   "title": "Drinks",
+   "topic": "Drinks",
+   "source": "course",
+   "words": [
+    "DRINK",
+    "WATER",
+    "TEA",
+    "COFFEE",
+    "COOL DRINK",
+    "BEER",
+    "WHISKEY",
+    "ALCOHOL"
+   ]
+  },
+  {
+   "id": "home-1",
+   "title": "Home 1",
+   "topic": "Home",
+   "source": "course",
+   "words": [
+    "HOME",
+    "HOUSE",
+    "KITCHEN",
+    "LIVING ROOM",
+    "TOILET",
+    "BED",
+    "DOOR",
+    "ROOF",
+    "WALL",
+    "CHAIR",
+    "STOVE"
+   ]
+  },
+  {
+   "id": "home-2",
+   "title": "Home 2",
+   "topic": "Home",
+   "source": "course",
+   "words": [
+    "PLATE",
+    "CUP",
+    "SAUCER",
+    "KNIFE",
+    "BASKET",
+    "PILLOW",
+    "WASHING MACHINE",
+    "GARDEN",
+    "BATH",
+    "MOP",
+    "COOK"
+   ]
+  },
+  {
+   "id": "clothing-1",
+   "title": "Clothing",
+   "topic": "Clothing",
+   "source": "course",
+   "words": [
+    "BRA",
+    "BELT",
+    "HAT",
+    "NECKTIE",
+    "ZIPPER",
+    "WIG",
+    "MASK",
+    "PERFUME",
+    "LIPSTICK",
+    "EARRINGS",
+    "APRON"
+   ]
+  },
+  {
+   "id": "medical-nid-chart-1",
+   "title": "Medical (NID chart) 1",
+   "topic": "Medical (NID chart)",
+   "source": "nid",
+   "words": [
+    "DOCTOR",
+    "HOSPITAL",
+    "MEDICINE",
+    "INJECTION",
+    "OPERATION",
+    "EMERGENCY",
+    "ASTHMA",
+    "FEVER",
+    "PREGNANT",
+    "MENSTRUATION",
+    "CONDOM"
+   ]
+  },
+  {
+   "id": "medical-nid-chart-2",
+   "title": "Medical (NID chart) 2",
+   "topic": "Medical (NID chart)",
+   "source": "nid",
+   "words": [
+    "EXPLAIN",
+    "SICK",
+    "WARM",
+    "COLD",
+    "BLOOD",
+    "FEEL",
+    "BETTER",
+    "DIZZY",
+    "BREATHE",
+    "VOMIT"
+   ]
+  },
+  {
+   "id": "safety-and-police-nid-chart-1",
+   "title": "Safety and police (NID chart) 1",
+   "topic": "Safety and police (NID chart)",
+   "source": "nid",
+   "words": [
+    "POLICE",
+    "ACCIDENT",
+    "ADDRESS",
+    "AFRAID",
+    "ATTACK",
+    "COURT",
+    "LAWYER",
+    "JAIL",
+    "FINE",
+    "WITNESS",
+    "LOST",
+    "GUN"
+   ]
+  },
+  {
+   "id": "safety-and-police-nid-chart-2",
+   "title": "Safety and police (NID chart) 2",
+   "topic": "Safety and police (NID chart)",
+   "source": "nid",
+   "words": [
+    "KNIFE",
+    "ALCOHOL",
+    "CAR",
+    "HOUSE",
+    "PLACE",
+    "PHONE",
+    "FOLLOW",
+    "KNOW",
+    "LIE",
+    "WRONG",
+    "OLD"
+   ]
+  },
+  {
+   "id": "everyday-nid-chart-1",
+   "title": "Everyday (NID chart)",
+   "topic": "Everyday (NID chart)",
+   "source": "nid",
+   "words": [
+    "NAME",
+    "PLEASE",
+    "THANK YOU",
+    "SORRY",
+    "NICE",
+    "GOOD",
+    "BAD",
+    "HELP",
+    "REPEAT",
+    "UNDERSTAND",
+    "DON'T UNDERSTAND",
+    "HOME",
+    "TOILET",
+    "WANT"
+   ]
+  }
+ ]
+}

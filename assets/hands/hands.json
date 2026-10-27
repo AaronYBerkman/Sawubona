@@ -1,0 +1,485 @@
+{
+ "note": "Each letter is one real held frame (the medoid of its checked holds), drawn as a right hand seen facing the signer. frame/time are in the source video; row indexes data/handpoints/<video>.npz.",
+ "letters": {
+  "A": {
+   "video": "signtutors",
+   "presenter": "A-Z (Alphabet) in South African Sign Language - The Sign Tutors",
+   "row": 7588,
+   "frame": 7588,
+   "time": 303.52,
+   "hold": [
+    7556,
+    7621
+   ],
+   "mirrored": false,
+   "medoid_score": 0.0903,
+   "layers": {
+    "thumb": "plane",
+    "index": "front",
+    "middle": "front",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "B": {
+   "video": "signtutors",
+   "presenter": "A-Z (Alphabet) in South African Sign Language - The Sign Tutors",
+   "row": 7870,
+   "frame": 7870,
+   "time": 314.8,
+   "hold": [
+    7784,
+    7913
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1008,
+   "layers": {
+    "thumb": "plane",
+    "index": "plane",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "C": {
+   "video": "signtutors",
+   "presenter": "A-Z (Alphabet) in South African Sign Language - The Sign Tutors",
+   "row": 12952,
+   "frame": 12952,
+   "time": 518.08,
+   "hold": [
+    12948,
+    12968
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1393,
+   "layers": {
+    "thumb": "front",
+    "index": "plane",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "D": {
+   "video": "signtutors",
+   "presenter": "A-Z (Alphabet) in South African Sign Language - The Sign Tutors",
+   "row": 1972,
+   "frame": 1972,
+   "time": 78.88,
+   "hold": [
+    1914,
+    2095
+   ],
+   "mirrored": false,
+   "medoid_score": 0.2886,
+   "layers": {
+    "thumb": "front",
+    "index": "plane",
+    "middle": "front",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "E": {
+   "video": "signtutors",
+   "presenter": "A-Z (Alphabet) in South African Sign Language - The Sign Tutors",
+   "row": 8441,
+   "frame": 8441,
+   "time": 337.64,
+   "hold": [
+    8435,
+    8443
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1396,
+   "layers": {
+    "thumb": "front",
+    "index": "front",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "F": {
+   "video": "signtutors",
+   "presenter": "A-Z (Alphabet) in South African Sign Language - The Sign Tutors",
+   "row": 2424,
+   "frame": 2424,
+   "time": 96.96,
+   "hold": [
+    2409,
+    2429
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1346,
+   "layers": {
+    "thumb": "front",
+    "index": "front",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "G": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 2687,
+   "frame": 2687,
+   "time": 107.48,
+   "hold": [
+    2683,
+    2705
+   ],
+   "mirrored": false,
+   "medoid_score": 0.4257,
+   "layers": {
+    "thumb": "back",
+    "index": "back",
+    "middle": "back",
+    "ring": "back",
+    "pinky": "back"
+   }
+  },
+  "H": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 2778,
+   "frame": 2778,
+   "time": 111.12,
+   "hold": [
+    2777,
+    2786
+   ],
+   "mirrored": false,
+   "medoid_score": 0.3826,
+   "layers": {
+    "thumb": "back",
+    "index": "back",
+    "middle": "back",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "I": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 3127,
+   "frame": 3127,
+   "time": 125.08,
+   "hold": [
+    3085,
+    3141
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1344,
+   "layers": {
+    "thumb": "front",
+    "index": "front",
+    "middle": "front",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "K": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 3792,
+   "frame": 3792,
+   "time": 151.68,
+   "hold": [
+    3747,
+    3808
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1399,
+   "layers": {
+    "thumb": "front",
+    "index": "plane",
+    "middle": "plane",
+    "ring": "front",
+    "pinky": "front"
+   }
+  },
+  "L": {
+   "video": "signtutors",
+   "presenter": "A-Z (Alphabet) in South African Sign Language - The Sign Tutors",
+   "row": 9839,
+   "frame": 9839,
+   "time": 393.56,
+   "hold": [
+    9826,
+    9850
+   ],
+   "mirrored": false,
+   "medoid_score": 0.2217,
+   "layers": {
+    "thumb": "front",
+    "index": "plane",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "M": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 4505,
+   "frame": 4505,
+   "time": 180.2,
+   "hold": [
+    4462,
+    4521
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1227,
+   "layers": {
+    "thumb": "front",
+    "index": "front",
+    "middle": "front",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "N": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 4803,
+   "frame": 4803,
+   "time": 192.12,
+   "hold": [
+    4784,
+    4838
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1119,
+   "layers": {
+    "thumb": "front",
+    "index": "front",
+    "middle": "front",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "O": {
+   "video": "signtutors",
+   "presenter": "A-Z (Alphabet) in South African Sign Language - The Sign Tutors",
+   "row": 10396,
+   "frame": 10396,
+   "time": 415.84,
+   "hold": [
+    10391,
+    10398
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1643,
+   "layers": {
+    "thumb": "front",
+    "index": "front",
+    "middle": "front",
+    "ring": "front",
+    "pinky": "front"
+   }
+  },
+  "P": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 5464,
+   "frame": 5464,
+   "time": 218.56,
+   "hold": [
+    5460,
+    5469
+   ],
+   "mirrored": false,
+   "medoid_score": 0.2296,
+   "layers": {
+    "thumb": "back",
+    "index": "back",
+    "middle": "back",
+    "ring": "back",
+    "pinky": "back"
+   }
+  },
+  "Q": {
+   "video": "signtutors",
+   "presenter": "A-Z (Alphabet) in South African Sign Language - The Sign Tutors",
+   "row": 5210,
+   "frame": 5210,
+   "time": 208.4,
+   "hold": [
+    5206,
+    5220
+   ],
+   "mirrored": false,
+   "medoid_score": 1.0392,
+   "layers": {
+    "thumb": "back",
+    "index": "back",
+    "middle": "plane",
+    "ring": "back",
+    "pinky": "back"
+   }
+  },
+  "R": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 6096,
+   "frame": 6096,
+   "time": 243.84,
+   "hold": [
+    6068,
+    6120
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1656,
+   "layers": {
+    "thumb": "front",
+    "index": "plane",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "S": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 6444,
+   "frame": 6444,
+   "time": 257.76,
+   "hold": [
+    6409,
+    6468
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1229,
+   "layers": {
+    "thumb": "front",
+    "index": "front",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "T": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 6995,
+   "frame": 6995,
+   "time": 279.8,
+   "hold": [
+    6976,
+    7013
+   ],
+   "mirrored": false,
+   "medoid_score": 0.2046,
+   "layers": {
+    "thumb": "front",
+    "index": "front",
+    "middle": "front",
+    "ring": "front",
+    "pinky": "plane"
+   }
+  },
+  "U": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 7150,
+   "frame": 7150,
+   "time": 286.0,
+   "hold": [
+    7142,
+    7154
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1662,
+   "layers": {
+    "thumb": "plane",
+    "index": "plane",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "V": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 7392,
+   "frame": 7392,
+   "time": 295.68,
+   "hold": [
+    7358,
+    7449
+   ],
+   "mirrored": false,
+   "medoid_score": 0.1574,
+   "layers": {
+    "thumb": "front",
+    "index": "plane",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "W": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 7704,
+   "frame": 7704,
+   "time": 308.16,
+   "hold": [
+    7673,
+    7722
+   ],
+   "mirrored": false,
+   "medoid_score": 0.166,
+   "layers": {
+    "thumb": "plane",
+    "index": "plane",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "X": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 8224,
+   "frame": 8224,
+   "time": 328.96,
+   "hold": [
+    8210,
+    8233
+   ],
+   "mirrored": false,
+   "medoid_score": 0.3838,
+   "layers": {
+    "thumb": "front",
+    "index": "front",
+    "middle": "plane",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  },
+  "Y": {
+   "video": "nid",
+   "presenter": "The A-Z of Fingerspelling (NID)",
+   "row": 8384,
+   "frame": 8384,
+   "time": 335.36,
+   "hold": [
+    8315,
+    8407
+   ],
+   "mirrored": false,
+   "medoid_score": 0.2365,
+   "layers": {
+    "thumb": "plane",
+    "index": "front",
+    "middle": "front",
+    "ring": "plane",
+    "pinky": "plane"
+   }
+  }
+ }
+}

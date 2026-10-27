@@ -1,0 +1,18 @@
+{
+  "name": "Sawubona — SASL practice",
+  "short_name": "Sawubona",
+  "description": "Practise South African Sign Language with your camera: signs, fingerspelling, sentences and a dictionary. Everything runs on your device.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4efe3",
+  "theme_color": "#1f2a1e",
+  "lang": "en-ZA",
+  "icons": [
+    { "src": "assets/brand/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/brand/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
