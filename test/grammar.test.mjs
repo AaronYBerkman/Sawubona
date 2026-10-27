@@ -39,20 +39,20 @@ assert.equal(line('We have no money.'), "WE MONEY DON'T HAVE");
 
 // dropped words say why
 const eat = buildSentence('Yesterday I ate an apple.', lex);
-assert.equal(glossLine(eat), 'YESTERDAY ME EAT APPLE');
+assert.equal(glossLine(eat), 'YESTERDAY ME APPLE EAT');
 assert.equal(eat.words.find((w) => w.text === 'an').drop, 'articles');
-assert.deepEqual(eat.alt.map((i) => eat.signs[i].gloss), ['YESTERDAY', 'ME', 'APPLE', 'EAT']);
-assert.equal(line('The big dog chased the small cat.'), 'PAST DOG BIG CHASE CAT SMALL');
+assert.deepEqual(eat.alt.map((i) => eat.signs[i].gloss), ['YESTERDAY', 'ME', 'EAT', 'APPLE']);
+assert.equal(line('The big dog chased the small cat.'), 'PAST DOG BIG CAT SMALL CHASE');
 assert.ok(buildSentence('The big dog chased the small cat.', lex).signs[0].added);
 assert.equal(line('If it rains, I will stay home.'), 'FUTURE RAIN HOME ME STAY');
 assert.equal(line('It is cold today.'), 'TODAY COLD');
 assert.equal(line('Where is the nearest bus stop?'), 'BUS STOP NEAR WHERE');
-assert.equal(line('My friend and I played soccer on Saturday.'), 'SATURDAY MY FRIEND AND ME PLAY SOCCER');
+assert.equal(line('My friend and I played soccer on Saturday.'), 'SATURDAY MY FRIEND AND ME SOCCER PLAY');
 
 // a paragraph carries its time forward instead of repeating it
 const para = buildParagraph('Yesterday I went to the shop. I bought bread.', lex);
 assert.equal(para.length, 2);
-assert.equal(glossLine(para[1]), 'ME BUY BREAD');
+assert.equal(glossLine(para[1]), 'ME BREAD BUY');
 assert.ok(para[1].rules.includes('timeKept'));
 
 // a person named in a paragraph gets a place; he/she later points back there, never matched by
@@ -74,6 +74,15 @@ assert.equal(helped.sub, 'from Thabo (on your right) toward me');
 // "gave her some oranges": her receives them (GIVE moves toward her), it does not own them
 assert.equal(line('She gave her some oranges.'), 'PAST ORANGE SOME GIVE');
 assert.equal(line('I like her two dogs.'), 'ME HER DOG TWO LIKE');
+
+// Real SASL's Deaf presenters leave out ME and NOT (Day 8): both are optional, never required
+const brothers = buildSentence('I have two brothers.', lex);
+assert.ok(brothers.signs[0].gloss === 'ME' && brothers.signs[0].optional && brothers.rules.includes('dropMe'));
+const notWork = buildSentence("I didn't work yesterday.", lex);
+assert.ok(notWork.signs.find((x) => x.gloss === 'NOT').optional);
+assert.ok(!buildSentence('I am happy.', lex).signs[0].optional);                 // ME is the whole subject and comment
+assert.ok(!buildSentence("I don't like fish.", lex).signs.find((x) => x.gloss === "DON'T LIKE").optional);
+assert.ok(!buildSentence('My friend and I played soccer.', lex).signs.some((x) => x.optional));
 
 // the builder checks its own answer: a sentence that breaks a rule says so
 assert.equal(buildSentence('I want to learn sign language.', lex).rough, false);

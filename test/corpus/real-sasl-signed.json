@@ -1,0 +1,10 @@
+[
+  { "en": "I am not going to work.", "gloss": "WORK ME GO NOT", "alt": null, "roles": ["place", "subject", "verb", "neg"], "why": "Real SASL Day 8 (Atta, 2:44): signed ME WORK GO with a frown and pressed lips, no NOT sign; the builder puts the place before ME, as Real SASL's time lesson does (SHOP ME GO)" },
+  { "en": "Where do you stay?", "gloss": "YOU STAY WHERE", "alt": null, "roles": ["subject", "verb", "question"], "kind": "wh", "why": "Real SASL Day 8 (Setumo, 3:00): signed YOU STAY WHERE, as here" },
+  { "en": "I have two brothers.", "gloss": "ME BROTHER TWO HAVE", "alt": "ME HAVE BROTHER TWO", "roles": ["subject", "object", "object", "verb"], "why": "Real SASL Day 8 (C. Tholang, 3:15): signed BROTHER TWO HAVE, leaving out the optional ME" },
+  { "en": "I didn't work yesterday.", "gloss": "YESTERDAY ME WORK NOT", "alt": null, "roles": ["time", "subject", "verb", "neg"], "why": "Real SASL Day 8 (Atta, 3:28): signed YESTERDAY ME WORK with a negative face, leaving out the optional NOT" },
+  { "en": "Are you going home now?", "gloss": "NOW HOME YOU GO", "alt": null, "roles": ["time", "place", "subject", "verb"], "kind": "yn", "why": "Real SASL Day 8 (Setumo, 3:43): signed NOW HOME YOU GO, as here" },
+  { "en": "What is your Sign name?", "gloss": "YOUR SIGN NAME WHAT", "alt": null, "roles": ["subject", "subject", "question"], "kind": "wh", "why": "Real SASL Day 8 (Setumo, 3:57): signed YOUR SIGN NAME WHAT, as here" },
+  { "en": "I haven't eaten today.", "gloss": "TODAY ME EAT NOT YET", "alt": null, "roles": ["time", "subject", "verb", "neg"], "why": "Real SASL Day 8 (Atta, 4:11): signed TODAY EAT, then a negative sign with a negative face; ME not clearly signed" },
+  { "en": "I kissed my girlfriend yesterday.", "gloss": "YESTERDAY ME MY GIRLFRIEND KISS", "alt": "YESTERDAY ME KISS MY GIRLFRIEND", "roles": ["time", "subject", "object", "object", "verb"], "why": "Real SASL Day 8 (4:26): signed YESTERDAY GIRLFRIEND MY KISS: the object before KISS, ME left out, MY after the noun" }
+]

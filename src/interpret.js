@@ -244,7 +244,9 @@ export function toEnglish(glosses) {
   let runStart = lastVerb;
   if (negIdx < 0) while (runStart > 0 && signs[runStart - 1].kind === 'verb' && CHAIN.has(lower(signs[runStart - 1].g))) runStart--;
   signs.forEach((s, i) => {
-    if (s.kind === 'verb' && lastVerb >= 0 && i < runStart) s.kind = W.PLACES.has(lower(s.g)) ? 'place' : 'noun';
+    // WANT, NEED, TRY before the thing and the action stay verbs: ME WANT SIGN LANGUAGE LEARN
+    const helper = CHAIN.has(lower(s.g)) && i < runStart && signs.slice(i + 1, runStart).every((x) => x.kind !== 'verb' || W.PLACES.has(lower(x.g)) || THINGS.has(lower(x.g)));
+    if (s.kind === 'verb' && lastVerb >= 0 && i < runStart && !helper) s.kind = W.PLACES.has(lower(s.g)) ? 'place' : 'noun';
   });
   const assumed = [];
   signs.forEach((s, i) => { if (s.kind === 'verb' && signs[i - 1]?.kind === 'poss') s.kind = 'noun'; });

@@ -6,9 +6,10 @@ order. Its core rules follow published sources and match them:
 | Rule | Source | Example the app gives |
 |---|---|---|
 | Time first | Real SASL, "Sign language grammar"; "Where to place time related signs" | YESTERDAY MAN GIRL KISS |
-| Subject, verb, object; Real SASL's subject, object, verb shown as the alternative | Wehrmeyer 2025 (corpus, 25 signers); Wright 2017; Real SASL, "Sign language grammar" | ME EAT APPLE (also ME APPLE EAT) |
-| HAVE and LIKE last | Real SASL, "Where to place an adjective", "Three types of questions"; Wright 2017 | ME HOUSE WHITE BIG TWO HAVE |
-| WANT, TRY, NEED, SHOULD before the action | Wright 2017 (TRY LEARN, SHOULD SCHOOL NORTH-WEST GO) | ME WANT LEARN SIGN LANGUAGE |
+| Who, what, then the action; the verb-first order of relaxed conversation shown as the alternative | Real SASL, "Sign language grammar" and lessons; Real SASL Day 8, signed by Deaf presenters (YESTERDAY GIRLFRIEND MY KISS); Wehrmeyer 2025 for the alternative | ME APPLE EAT (also ME EAT APPLE) |
+| WANT, TRY, NEED, SHOULD first, then the thing, then the action | Wright 2017 (SHOULD SCHOOL NORTH-WEST GO) | ME WANT SIGN LANGUAGE LEARN |
+| NOT is optional: the head shake and frown make it negative | De Barros & Siebörger 2016; Real SASL Day 8 (YESTERDAY ME WORK, no NOT) | YESTERDAY ME WORK (NOT) |
+| ME is optional when it is clear | Real SASL Day 8 (BROTHER TWO HAVE); Wehrmeyer 2025 | (ME) BROTHER TWO HAVE |
 | A verb that moves between people or places comes last | Real SASL, "Directional verbs"; Napoli & Sutton-Spence 2014 | ME KEY TABLE PUT |
 | How long, clock times and AFTER SCHOOL are time, so they go first | Wright 2017 (time clause-initial); DBE CAPS (numeral incorporation) | TEN YEAR HERE ME LIVE |
 | Comparing: the other side first, then MORE; THAN not signed | Wright 2017 | HER SISTER SHE TALL MORE |
@@ -21,7 +22,7 @@ order. Its core rules follow published sources and match them:
 | Directional verbs carry who does it to whom | Real SASL, "Directional verbs" | HELP (from you toward me) |
 | Topic, then comment | Real SASL, "Where to place an adjective" | MY BIRTHDAY MAY |
 
-Passing the 580 test sentences means the app does what these rules say. It does
+Passing the 588 test sentences means the app does what these rules say. It does
 not mean the result is good SASL. The choices below have no clear published
 source, so the app made a decision that a fluent signer should check. For each,
 write the order you would teach.
@@ -49,4 +50,4 @@ Each answer can become a test case in `test/corpus/`, so the app then follows it
 - Wright, D. (2017). *A preliminary description of South African Sign Language syntax*. MA dissertation, University of the Witwatersrand. One Soweto signer's narrative; no frequencies.
 - Napoli, D. J. & Sutton-Spence, R. (2014). Order of the major constituents in sign languages. *Frontiers in Psychology* 5:376. Generalisations across 42 sign languages.
 - Department of Basic Education. CAPS South African Sign Language Home Language, Gr R-3, 4-6, 7-9. Lists the grammar topics but gives almost no word-order rules.
-- Real SASL, 21-day course and lesson videos (caption text in the project archive).
+- Real SASL, 21-day course and lesson videos (caption text in the project archive). Day 8's eight practice sentences, signed by four Deaf presenters, were read sign by sign with the app's recognition and checked by eye; they are test/corpus/real-sasl-signed.json.

@@ -79,7 +79,8 @@ function cardHtml(s, i, sentence, note) {
   const r = roleLabel(s);
   const state = s.state;
   const glossText = s.state === 'spell' ? s.spell.split(' ').map((w) => w.split('').join('-')).join(' ') : s.gloss;
-  const badge = state === 'missing' ? '<span class="sb-badge">no clip yet</span>'
+  const badge = s.optional ? '<span class="sb-badge">optional</span>'
+    : state === 'missing' ? '<span class="sb-badge">no clip yet</span>'
     : state === 'spell' ? '<span class="sb-badge">fingerspell</span>'
       : s.point ? '<span class="sb-badge">point</span>'
         : s.variants > 1 ? `<span class="sb-badge">${s.variants} ways</span>` : '';
@@ -87,7 +88,7 @@ function cardHtml(s, i, sentence, note) {
   const rule = s.rule && RULES[s.rule] ? ` data-rule="${s.rule}"` : '';
   return `<li class="sb-item" data-i="${i}">
     ${note ? `<span class="sb-note">${esc(note)}<svg viewBox="0 0 60 40" aria-hidden="true"><path d="M52 3 C 50 18, 40 30, 18 34" /><path d="M24 28 L17 34.5 L25 38.5" /></svg></span>` : ''}
-    <button type="button" class="sb-card" data-role="${s.role}" data-kind="${s.kind}" data-state="${state}"${s.added ? ' data-added' : ''}${rule}
+    <button type="button" class="sb-card" data-role="${s.role}" data-kind="${s.kind}" data-state="${state}"${s.added ? ' data-added' : ''}${s.optional ? ' data-optional' : ''}${rule}
       aria-label="${esc(`${s.gloss}. ${r.name}${s.sub ? `, ${s.sub}` : ''}`)}">
       <span class="sb-gloss${glossText.length > 11 ? ' sb-gloss--long' : ''}">${esc(glossText)}</span>
       ${badge}
@@ -517,7 +518,7 @@ export function mountSentenceBuilder(root, { labels, replay = null, onPractise =
     const s = sentences[current];
     if (!s || !onPractise) return;
     stopPlaying();
-    onPractise(s.signs.map((x) => ({ gloss: x.gloss, entry: x.entry || null })), s);
+    onPractise(s.signs.map((x) => ({ gloss: x.gloss, entry: x.entry || null, optional: !!x.optional })), s);
   });
   // hovering a card lights its English words, and the other way round
   const link = (i, on) => {

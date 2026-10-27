@@ -16,8 +16,8 @@
 //   close     its piece ranks it in the dictionary's top 50
 //   missed    nothing lined up with it, or what did ranks it lower than that
 //   unchecked there is nothing to compare it with: a fingerspelled name, a
-//             number, a point, or a sign the dictionary has no clip of.
-//             Never counted as missed.
+//             number, a point, or a sign the dictionary has no clip of; or an
+//             optional sign (ME, NOT) the learner left out. Never counted as missed.
 //
 // Ranks are of words, not labels: the variants of one word ("APPLE (1ST
 // VARIANT)", "APPLE (2ND VARIANT)") are the same word, whichever the plan
@@ -33,7 +33,7 @@
 // seen (test/practice.test.mjs checks both on random sentences).
 //
 //   alignAttempt(plan, pieces, { labels })
-//     plan:   [{ gloss, entry, kind, spell }]  entry = dictionary label or null;
+//     plan:   [{ gloss, entry, kind, spell, optional }]  entry = dictionary label or null;
 //             kind = the builder's state ('sign', 'spell', 'number', 'point',
 //             'missing'), used only to say why a sign is not checked
 //     pieces: [[{ label, score }]]  one ranking per recorded piece, best first
@@ -76,6 +76,7 @@ const NOTE = {
   number: 'number, not checked',
   point: 'pointing, not checked',
   none: 'no clip, not checked',
+  optional: 'optional, fine to leave out',
 };
 
 // How many pieces of the recording a sign that is not paired may account for
@@ -216,6 +217,11 @@ export function alignAttempt(plan, pieces, { labels = null } = {}) {
     if (twin) out.why = 'repeat';
   });
 
+  // An optional sign (ME, NOT) the learner left out is not a mistake: Deaf signers often do
+  signs.forEach((out, i) => {
+    if (items[i]?.optional && out.status === 'missed' && !out.why) Object.assign(out, { status: 'unchecked', why: 'optional', note: NOTE.optional });
+  });
+
   // Pieces left between two paired signs are extra only beyond what the
   // unpaired signs between them (missed, or not checkable) could account for.
   const anchors = [{ at: -1, piece: -1 }];
@@ -261,10 +267,12 @@ function reasons(skipped) {
   const number = by('number');
   const point = by('point');
   const none = by('none');
+  const optional = by('optional');
   if (spell.length) out.push(`${listOf(spell)} ${pick(spell.length, 'is', 'are')} fingerspelled`);
   if (number.length) out.push(`${listOf(number)} ${pick(number.length, 'is a number', 'are numbers')}`);
   if (point.length) out.push(`${listOf(point)} ${pick(point.length, 'is', 'are')} shown by pointing`);
   if (none.length) out.push(`${listOf(none)} ${pick(none.length, 'has', 'have')} no clip`);
+  if (optional.length) out.push(`${listOf(optional)} ${pick(optional.length, 'is', 'are')} optional and left out`);
   return out;
 }
 
