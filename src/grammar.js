@@ -16,6 +16,7 @@
 //   const out = buildParagraph(text, lex)      // [{ text, signs, words, marks, rules, ... }]
 
 import * as W from './grammar-words.js';
+import { orderProblems } from './grammar-check.js';
 
 const RS_TIME = 'Real SASL, "Where to place time related signs in a sentence"';
 const RS_GRAMMAR = 'Real SASL, "Sign language grammar"';
@@ -758,7 +759,8 @@ function tag(toks, question, lex) {
     const verb = (form) => { t.tag = 'VERB'; t.lemma = vb; t.form = form; seenVerb = true; phrasal(i); return i + (t.particle ? 1 : 0); };
 
     // a command: a bare verb before anything else ("Go home.", "Don't run!", "Please sit down.")
-    if (open && !question && vb && verbForm(w) === 'base' && !nominalBefore && !verbAfterSubject(next)) return verb('imperative');
+    // "Please read it", "Put it down": read and put look past, but with no subject they are commands
+    if (open && !question && vb && (verbForm(w) === 'base' || identicalPast(w)) && !nominalBefore && !verbAfterSubject(next)) return verb('imperative');
     if (adv && !vb && !(adj && !adverbBase(w))) { t.tag = 'ADV'; t.lemma = adv; return i; }
     // after do/does/will/can the verb is bare, whatever it looks like ("does it cost")
     if (auxBefore && vb) return verb(identicalPast(w) ? 'base' : verbForm(w));
@@ -985,13 +987,18 @@ function signsForNP(np, role, lex, ctx) {
     const n = nouns[k];
     // SASL, SABC, ID: letters with no sign of their own are fingerspelled
     const acronym = /^[A-Z]{2,5}$/.test(n.text || '') && !lex.find(n.text);
-    if (n.tag === 'NAME' || acronym) out.push(ctx.name(n, role));
-    else {
+    // a person (a name, "my mother", "the teacher") gets a place in the signing space (buildParagraph)
+    if (n.tag === 'NAME' || acronym) {
+      const s = ctx.name(n, role);
+      if (n.tag === 'NAME' && !acronym && role !== 'place' && !W.PLACE_NAMES.has(n.w)) s.person = true;
+      out.push(s);
+    } else {
       const surface = n.w.toUpperCase();
       const base = (n.lemma || n.w).toUpperCase();
       const gloss = lex.find(surface) && n.plural ? surface : !lex.find(base) && n.alt && lex.find(n.alt.toUpperCase()) ? n.alt.toUpperCase() : base;
       const s = ctx.sign(n, { gloss, role });
       if (n.plural && !np.parts.some((p) => ['NUM', 'QUANT'].includes(p.tag)) && gloss !== surface) { s.plural = true; ctx.rule('plural'); }
+      if (role !== 'place' && (PEOPLE.has(n.w) || PEOPLE.has(n.lemma)) && !['everyone', 'everybody', 'someone', 'somebody', 'people', 'class'].includes(n.lemma || n.w)) s.person = true;
       out.push(s);
     }
     k++;
@@ -1592,6 +1599,8 @@ export function buildSentence(text, lex, state = {}) {
   if (built.some((b) => b.rough)) coverageReasons.push('This construction is outside the simple sentence rules.');
   if (words.filter((w) => !w.punct).length > 16) coverageReasons.push('This sentence is too complex for a reliable automatic order.');
   if (words2.some((w) => w.drop === 'kept') || signs.some((s) => s.rule === 'kept')) coverageReasons.push('Some English words could not be mapped to a supported rule.');
+  // the builder checks its own answer: a broken rule is a warning, not a confident order
+  coverageReasons.push(...orderProblems({ signs, kind, clauses: built.length }));
   const rough = coverageReasons.length > 0;
   const alt = hasObject ? altSigns.map((s) => signs.indexOf(s)).filter((i) => i >= 0) : null;
   return {
@@ -1605,14 +1614,71 @@ export function buildSentence(text, lex, state = {}) {
   };
 }
 
-/** Every sentence of a paragraph, in order, with time carried forward. */
+// Where each person introduced in a paragraph is placed, in the order they come in
+const SPOTS = ['on your right', 'on your left', 'ahead on your right', 'ahead on your left'];
+
+/**
+ * Every sentence of a paragraph, in order, with time carried forward, and
+ * each person given a place in the signing space when they are first named.
+ * After that, he, she, they, his, her and their point back to that place
+ * (Real SASL, "Indexing and pointing"; Wright 2017). A pronoun is never
+ * matched to a person by guessing their gender from a name: with more than
+ * one person placed, the learner is told who it could be.
+ */
 export function buildParagraph(text, lex) {
   const state = {};
+  const people = [];   // { key, label, spot }
   return splitSentences(text).map((s) => {
     const out = buildSentence(s.text, lex, state);
     if (out.timeSet) state.tense = out.tense;
+    placePeople(out, people);
     return { ...out, start: s.start, end: s.end };
   });
+}
+
+function placePeople(sentence, people) {
+  const { signs, words } = sentence;
+  const label = (i) => {
+    const sg = signs[i];
+    if (sg.spell) return sg.spell.split(' ').map((w) => w[0] + w.slice(1).toLowerCase()).join(' ');
+    const own = words.filter((w) => w.sign === i || i > 0 && signs[i - 1].kind === 'possess' && w.sign === i - 1).map((w) => w.text);
+    return (own.length ? own.join(' ') : sg.gloss.toLowerCase()).replace(/^(The|My|Your|Our|His|Her|Their) /, (m) => m.toLowerCase());
+  };
+  const key = (i) => `${i > 0 && signs[i - 1].kind === 'possess' ? signs[i - 1].gloss + ' ' : ''}${signs[i].gloss}`;
+  let pointed = false;
+  signs.forEach((sg, i) => {
+    // "Thabo is my friend": a description says who someone is, it does not bring in someone new
+    if (sg.person && sg.role !== 'describe' && sg.kind !== 'describe') {
+      if (people.some((p) => p.key === key(i))) return;
+      if (people.length >= SPOTS.length) return;
+      const p = { key: key(i), label: label(i), spot: SPOTS[people.length] };
+      people.push(p);
+      sg.spot = p.spot;
+      sg.sub = [sg.sub, `then point to place them ${p.spot}`].filter(Boolean).join('; ');
+      pointed = true;
+      return;
+    }
+    // GIVE moving "toward him": toward the one person placed so far
+    const moved = sg.rule === 'directional' && /toward (him|her|them)$/.exec(sg.sub || '');
+    if (moved) {
+      const before = people.filter((p) => !signs.slice(i).some((x) => x.spot === p.spot && x.person));
+      if (moved[1] !== 'them' && before.length === 1) { sg.sub = `${sg.sub}: ${before[0].label}, ${before[0].spot}`; pointed = true; }
+      return;
+    }
+    const singular = ['HE', 'SHE', 'HIS', 'HER', 'HIM'].includes(sg.gloss);
+    const plural = ['THEY', 'THEIR', 'THEM'].includes(sg.gloss);
+    if (!(sg.point || sg.kind === 'possess') || !(singular || plural) || !people.length) return;
+    // only people named earlier than this pronoun count
+    const before = people.filter((p) => !signs.slice(i).some((x, k) => x.spot === p.spot && x.person));
+    if (!before.length) return;
+    const hand = sg.kind === 'possess' ? 'A-hand toward' : 'point to';
+    if (singular && before.length === 1) { sg.spot = before[0].spot; sg.sub = `${hand} ${before[0].label}, ${before[0].spot}`; }
+    else if (singular) sg.sub = `${hand} whoever you mean: ${before.map((p) => `${p.label} ${p.spot}`).join(', or ')}`;
+    else if (before.length > 1) sg.sub = `${sg.kind === 'possess' ? 'A-hand sweeping across' : 'sweep across'} ${before.map((p) => p.label).join(' and ')}`;
+    else return;
+    pointed = true;
+  });
+  if (pointed && !sentence.rules.includes('point')) sentence.rules.push('point');
 }
 
 /** The signs as a plain line: "YESTERDAY SHOP ME GO". */

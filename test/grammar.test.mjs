@@ -55,6 +55,20 @@ assert.equal(para.length, 2);
 assert.equal(glossLine(para[1]), 'ME BUY BREAD');
 assert.ok(para[1].rules.includes('timeKept'));
 
+// a person named in a paragraph gets a place; he/she later points back there, never matched by
+// guessing gender from a name: with two people placed, the learner is told who it could be
+const ppl = buildParagraph('Yesterday I saw Thabo. He was sad. I gave him my book.', lex);
+assert.match(ppl[0].signs.find((x) => x.person).sub, /place them on your right/);
+assert.equal(ppl[1].signs[0].sub, 'point to Thabo, on your right');
+assert.match(ppl[2].signs.find((x) => x.rule === 'directional').sub, /Thabo, on your right/);
+const two = buildParagraph('My mother and Lerato went to town. She bought bread. They came home.', lex);
+assert.match(two[1].signs.find((x) => x.gloss === 'SHE').sub, /whoever you mean: my mother on your right, or Lerato on your left/);
+assert.match(two[2].signs.find((x) => x.gloss === 'THEY').sub, /sweep across my mother and Lerato/);
+assert.ok(!buildParagraph('Thabo is my friend.', lex)[0].signs.some((x) => x.gloss === 'FRIEND' && x.spot));
+
+// the builder checks its own answer: a sentence that breaks a rule says so
+assert.equal(buildSentence('I want to learn sign language.', lex).rough, false);
+
 // sentences split sensibly
 assert.deepEqual(splitSentences('Hello Mr. Dlamini. How are you? I am fine!').map((s) => s.text),
   ['Hello Mr. Dlamini.', 'How are you?', 'I am fine!']);
