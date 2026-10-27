@@ -51,6 +51,12 @@ Each answer can become a test case in `test/corpus/`, so the app then follows it
 
 `node test/grammar-agreement.mjs --list` compares the builder with 138 English sentences as SASL sources sign them (`test/sources/sasl-reference.json`: the phrase book, DBE exam glosses, published studies and Real SASL's presenters). On 27 October 2026: 24% exactly the same, 85% of sign pairs in the same order, modals last 6 of 6, question word last 11 of 11, time first 7 of 7. Many differences are the sources disagreeing with each other: EAT CARROT but DOOR SHUT, NEED DOCTOR but SICK MEDICINE NEED.
 
+Those 138 sentences are the ones the rules were tuned on, so they flatter the builder. `test/sources/sasl-heldout-dbe.json` holds 114 gloss blocks from Grade 12 papers and memos it was not tuned on, chosen by a fixed rule. The November 2022 papers (`--split=dev-2022`) are used to find bugs; the 2023 papers and the 2018-2021 memos are kept untouched as the unbiased check:
+
+    node test/grammar-agreement.mjs sources/sasl-heldout-dbe.json --split=final-2023
+
+On 27 October 2026 the 2023 papers gave 69% of sign pairs in the same order (62 comparable items: 20 in order, 34 partly, 8 not). Most are long exam instructions that the exam glosses freely, so this is a hard test, not a picture of everyday sentences. Do not tune on the final splits: once a fix is made by looking at them, they stop being a fair check.
+
 ## Sources
 
 - Wehrmeyer, E. (2025). Structure of simple declarative clauses in South African Sign Language. *Sign Language & Linguistics* 28(1), 104-139. Corpus of 40 narratives by 25 signers in three provinces: basic SVO, SV most common, no copula, frequent dropped pronouns.
