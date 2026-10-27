@@ -15,12 +15,19 @@
 //
 //   node test/grammar-agreement.mjs           the summary
 //   node test/grammar-agreement.mjs --list    every sentence, worst first
+//   node test/grammar-agreement.mjs sources/sasl-heldout-dbe.json
+//                                             another set (no floors): the held-out exam
+//                                             questions the builder was never tuned on
+//   ... --split=dev-2022 | final-2023 | final-2018-2021   one part of that set
 import fs from 'node:fs';
-import { buildSentence, glossLine, makeLexicon } from '../src/grammar.js';
+import { buildParagraph, glossLine, makeLexicon } from '../src/grammar.js';
 
 const here = (p) => new URL(p, import.meta.url);
 const lex = makeLexicon(JSON.parse(fs.readFileSync(here('../data/signs.json'))).entries.map((e) => e.label));
-const { items } = JSON.parse(fs.readFileSync(here('sources/sasl-reference.json')));
+const file = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? 'sources/sasl-reference.json';
+const only = process.argv.find((a) => a.startsWith('--split='))?.slice(8);
+const items = JSON.parse(fs.readFileSync(here(file))).items.filter((x) => !only || x.split === only);
+const tuned = file === 'sources/sasl-reference.json';
 const list = process.argv.includes('--list');
 
 // one name for each sign, whichever word a source glosses it with
@@ -63,7 +70,9 @@ function orderAgreement(a, b) {
 const rows = [];
 const tally = { exact: 0, pairs: 0, same: 0, comparable: 0, modal: [0, 0], wh: [0, 0], time: [0, 0] };
 for (const it of items) {
-  const s = buildSentence(it.en, lex);
+  // the app builds a paragraph sentence by sentence; an item of two sentences is read the same way
+  const built = buildParagraph(it.en, lex);
+  const s = { signs: built.flatMap((b) => b.signs) };
   const all = words(s.signs.map((x) => (x.spell ? glossLine({ signs: [x] }) : x.gloss)));
   const core = words(s.signs.filter((x) => !x.optional).map((x) => (x.spell ? glossLine({ signs: [x] }) : x.gloss)));
   const refs = it.refs.map((r) => words([r]));
@@ -87,14 +96,17 @@ if (list) {
   }
 }
 const order = tally.pairs ? tally.same / tally.pairs : 0;
-console.log(`grammar agreement with ${items.length} sourced sentences: exact ${tally.exact} (${pct(tally.exact, items.length)}); `
+const sentences = { right: 0, partly: 0, wrong: 0 };
+for (const r of rows) if (r.score !== null) sentences[r.exact || r.score === 1 ? 'right' : r.score >= 0.5 ? 'partly' : 'wrong']++;
+console.log(`grammar agreement${only ? ` (${only})` : ''} with ${items.length} sourced sentences: exact ${tally.exact} (${pct(tally.exact, items.length)}); `
   + `sign order ${pct(tally.same, tally.pairs)} of ${tally.pairs} pairs in ${tally.comparable} sentences; `
-  + `modal last ${tally.modal[0]}/${tally.modal[1]}, question word last ${tally.wh[0]}/${tally.wh[1]}, time first ${tally.time[0]}/${tally.time[1]}`);
+  + `modal last ${tally.modal[0]}/${tally.modal[1]}, question word last ${tally.wh[0]}/${tally.wh[1]}, time first ${tally.time[0]}/${tally.time[1]}; `
+  + `sentences in order ${sentences.right}, partly ${sentences.partly}, wrong ${sentences.wrong}`);
 
 // floors: raise them as the builder improves; lowering one needs a reason in the commit
 // 2026-10-27, after modals, PLEASE and VERY moved last: main had exact 24, order 75%, modal 4/6
 const FLOORS = { exact: 33, order: 0.84, modal: 6 };
-if (tally.exact < FLOORS.exact || order < FLOORS.order || tally.modal[0] < FLOORS.modal) {
+if (tuned && (tally.exact < FLOORS.exact || order < FLOORS.order || tally.modal[0] < FLOORS.modal)) {
   console.log(`below the floor: ${JSON.stringify(FLOORS)}`);
   process.exitCode = 1;
 }

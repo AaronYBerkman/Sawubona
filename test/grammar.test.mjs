@@ -84,6 +84,15 @@ assert.ok(!buildSentence('I am happy.', lex).signs[0].optional);                
 assert.ok(!buildSentence("I don't like fish.", lex).signs.find((x) => x.gloss === "DON'T LIKE").optional);
 assert.ok(!buildSentence('My friend and I played soccer.', lex).signs.some((x) => x.optional));
 
+// found on the 2022 Grade 12 papers (test/sources/sasl-heldout-dbe.json, split dev-2022)
+assert.equal(line('Why do people use masks?'), 'PEOPLE MASK USE WHY');                     // helper DO is not signed
+assert.equal(line('What does the bird in the picture imply?'), 'PICTURE BIRD IMPLY WHAT');
+assert.ok(!buildSentence('Justify your answer.', lex).signs.some((x) => x.spell));         // a verb, not a name
+assert.equal(line('Discarded masks spread viruses.'), 'MASK DISCARD VIRUS SPREAD');       // -ed describing a thing
+assert.equal(line('Describe the technique used to show it.'), 'DESCRIBE TECHNIQUE USE IT SHOW');
+assert.equal(line('I used to swim.'), 'PAST ME SWIM');                                     // a past habit
+assert.equal(line('How do bees make honey?'), 'BEE HONEY MAKE HOW');
+
 // the builder checks its own answer: a sentence that breaks a rule says so
 assert.equal(buildSentence('I want to learn sign language.', lex).rough, false);
 

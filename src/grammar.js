@@ -355,6 +355,7 @@ function tokenize(sentence) {
 function verbBase(w) {
   if (W.IRREGULAR[w] && !W.IRREGULAR_NOUNS.has(w)) return W.IRREGULAR[w];
   if (W.VERBS.has(w)) return w;
+  if (/^bee/.test(w)) return null;                 // bees, been: not a form of BE here
   const tries = [];
   let r;
   if ((r = /^(.+)ies$/.exec(w))) tries.push(r[1] + 'y');
@@ -686,7 +687,8 @@ function tag(toks, question, lex) {
       if (w === 'be' && open && !question) t.imperative = true;             // "Be quiet."
       return i;
     }
-    if (w === 'used' && next?.w === 'to' && toks[i + 2] && verbBase(toks[i + 2].w)) {
+    // "I used to swim" (a past habit), but not "the technique used to show it" after the action
+    if (w === 'used' && next?.w === 'to' && toks[i + 2] && verbBase(toks[i + 2].w) && !seenVerb) {
       t.tag = 'AUX'; t.form = 'past'; next.tag = 'PART'; return i + 1;
     }
     if (W.HAVE.has(w)) {
@@ -713,7 +715,10 @@ function tag(toks, question, lex) {
     }
     if (W.DO.has(w)) {
       const later = toks.slice(i + 1, i + 5).some((x) => x.w !== 'not' && verbBase(x.w) && !W.DETERMINERS.has(x.w));
-      const auxLike = next && (next.w === 'not' || W.PRONOUNS[next.w] || W.DETERMINERS.has(next.w) || W.POSSESSIVES[next.w] || next.cap) && later;
+      // after a question word, do / does / did only builds the question when another verb follows:
+      // "Why do people use masks?", "What does the feather in the picture imply?"
+      const afterWh = prev?.tag === 'WH' && toks.slice(i + 1).some((x) => !x.punct && x.w !== 'not' && verbBase(x.w) && !W.DO.has(x.w) && !W.DETERMINERS.has(x.w) && !W.PREPOSITIONS.has(x.w));
+      const auxLike = next && (next.w === 'not' || W.PRONOUNS[next.w] || W.DETERMINERS.has(next.w) || W.POSSESSIVES[next.w] || next.cap) && later || afterWh;
       if (auxLike) {
         t.tag = 'AUX'; t.form = w === 'did' ? 'past' : 'present';
         if (next.w === 'not' && open && !question) t.dont = true;            // "Don't run!"
@@ -782,6 +787,16 @@ function tag(toks, question, lex) {
     const subjectBefore = (pt === 'NEG' || pt === 'FREQ') && toks[i - 2] && (toks[i - 2].tag === 'PRON' && toks[i - 2].subject || ['NAME', 'NOUN'].includes(toks[i - 2].tag)) || pt === 'PRON' && prev.subject || pt === 'NAME' || pt === 'NOUN' || pt === 'FREQ' || pt === 'EXIST' || (pt === 'ADV' && ['PRON', 'NAME', 'NOUN'].includes(toks[i - 2]?.tag)) || pt === 'REL';
     const nounAfter = next && !next.punct && !next.tag && (!verbBase(next.w) || verbForm(next.w) === 'base' || adjBase(next.w)) && !W.PREPOSITIONS.has(next.w) && !W.CONJUNCTIONS.has(next.w) && !W.TIME_WORDS[next.w] && !W.BE.has(next.w);
     const verb = (form) => { t.tag = 'VERB'; t.lemma = vb; t.form = form; seenVerb = true; phrasal(i); return i + (t.particle ? 1 : 0); };
+    // "discarded masks", "the used car": an -ed word between the start (or "the", "my", "of") and a
+    // thing describes the thing; it is not the sentence's action
+    const thingNext = next && !next.punct && !next.tag && !W.DETERMINERS.has(next.w) && !W.PREPOSITIONS.has(next.w) && !W.PRONOUNS[next.w]
+      && (nounBase(next.w).plural || W.COMMON.has(next.w)) && !verbBase(next.w);
+    // "the camera technique used to show it": after a thing, once the sentence has its action, an -ed
+    // word describes the thing (no PAST)
+    if (vb && /ed$/.test(w) && seenVerb && prev?.tag === 'NOUN' && !(next && W.DETERMINERS.has(next.w))) { t.tag = 'ADJ'; t.lemma = w; return i; }
+    if (vb && /ed$/.test(w) && thingNext && (!prev || prev.punct || ['DET', 'POSS', 'ADJ', 'PREP', 'NUM', 'QUANT', 'INTJ', 'MODAL', 'FUT', 'AUX', 'WH'].includes(prev.tag))) {
+      t.tag = 'ADJ'; t.lemma = w; return i;
+    }
 
     // a command: a bare verb before anything else ("Go home.", "Don't run!", "Please sit down.")
     // "Please read it", "Put it down": read and put look past, but with no subject they are commands
@@ -1058,7 +1073,9 @@ function signsForNP(np, role, lex, ctx) {
   }
   describe.splice(0, describe.length, ...groups.flat());
   for (const a of describe) {
-    const g = typeof a.gloss === 'string' && a.gloss ? a.gloss : (a.lemma || a.w).toUpperCase();
+    // "discarded masks", "littered masks": an -ed word describing a thing is signed as its action
+    const done = /ed$/.test(a.w) && !lex.find(a.w.toUpperCase()) && !W.ADJECTIVES.has(a.w) && verbBase(a.w);
+    const g = typeof a.gloss === 'string' && a.gloss ? a.gloss : (done || a.lemma || a.w).toUpperCase();
     const s = ctx.sign(a, { gloss: g, role, kind: 'describe' });
     if (nouns.length) { s.rule = 'adj'; ctx.rule('adj'); s.sub = COLOURS.has(a.lemma) ? 'colour' : `describes ${nouns[nouns.length - 1].w}`; }
     out.push(s);

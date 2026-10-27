@@ -141,6 +141,8 @@ export const PAST_FORMS = new Set(Object.keys(IRREGULAR).filter((w) => !IRREGULA
 
 // everyday verbs (base form). A word here can still be a noun in context ("a drink").
 export const VERBS = new Set(words(`
+  imply justify convey portray estimate prosecute incinerate discard litter campaign contribute endanger illustrate
+  evaluate analyse analyze identify motivate criticise criticize
   cure heal inject poach delay cancel spread defend ban scrap
   accept add admire admit advise afford agree allow answer apologise apologize appear apply argue arrange
   arrive ask attack attend avoid bake bathe be bear beat become beg begin behave believe belong bend bet bite
@@ -171,6 +173,7 @@ export const VERBS = new Set(words(`
 
 // everyday adjectives
 export const ADJECTIVES = new Set(words(`
+  critical contextual durable disposable reusable environmental global medical motivational protective personal tertiary anxious
   able afraid alive angry annoyed asleep awake bad beautiful best better big bitter black blind blue boring
   brave brilliant broken brown busy calm careful cheap clean clever close cold colourful comfortable cool
   correct crazy cute dangerous dark dead deaf dear delicious different difficult dirty dry dull early easy
