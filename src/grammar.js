@@ -1638,6 +1638,30 @@ export function buildParagraph(text, lex) {
   });
 }
 
+/**
+ * The note for a verb that moves between people ("from her toward him"), with
+ * he, she, him and her replaced by the places of the people set up so far.
+ * With one person placed a pronoun is that person; with more, the learner is
+ * shown the places to choose from, never a guess from a name.
+ */
+function movedBetween(from, to, placed) {
+  const at = (p) => `${p.label} (${p.spot})`;
+  const choose = placed.map(at).join(' or ');
+  const who = (w) => {
+    if (!['him', 'her'].includes(w) || !placed.length) return w;
+    return placed.length === 1 ? at(placed[0]) : `whoever you mean: ${choose}`;
+  };
+  // "She gave her some oranges": both are pronouns, so the hand goes from one place to the other
+  if (from && ['him', 'her'].includes(from) && /^the other (person|people)$/.test(to)) {
+    if (placed.length === 2) return `from one to the other: ${at(placed[0])} and ${at(placed[1])}; start at whoever gives`;
+    if (placed.length > 2) return `from whoever gives toward whoever gets: ${choose}`;
+    if (placed.length === 1) return `between ${at(placed[0])} and the other person`;
+    return null;
+  }
+  if (!from) return `move it toward ${who(to)}`;
+  return `from ${who(from)} toward ${who(to)}`;
+}
+
 function placePeople(sentence, people) {
   const { signs, words } = sentence;
   const label = (i) => {
@@ -1660,11 +1684,11 @@ function placePeople(sentence, people) {
       pointed = true;
       return;
     }
-    // GIVE moving "toward him": toward the one person placed so far
-    const moved = sg.rule === 'directional' && /toward (him|her|them)$/.exec(sg.sub || '');
+    // GIVE, HELP, TELL: the verb moves between the places of the people already set up
+    const moved = sg.rule === 'directional' && /^(?:from (\w+) toward|move it toward) (.+)$/.exec(sg.sub || '');
     if (moved) {
-      const before = people.filter((p) => !signs.slice(i).some((x) => x.spot === p.spot && x.person));
-      if (moved[1] !== 'them' && before.length === 1) { sg.sub = `${sg.sub}: ${before[0].label}, ${before[0].spot}`; pointed = true; }
+      const sub = movedBetween(moved[1], moved[2], people.filter((p) => !signs.slice(i).some((x) => x.spot === p.spot && x.person)));
+      if (sub && sub !== sg.sub) { sg.sub = sub; pointed = true; }
       return;
     }
     const singular = ['HE', 'SHE', 'HIS', 'HER', 'HIM'].includes(sg.gloss);

@@ -60,11 +60,16 @@ assert.ok(para[1].rules.includes('timeKept'));
 const ppl = buildParagraph('Yesterday I saw Thabo. He was sad. I gave him my book.', lex);
 assert.match(ppl[0].signs.find((x) => x.person).sub, /place them on your right/);
 assert.equal(ppl[1].signs[0].sub, 'point to Thabo, on your right');
-assert.match(ppl[2].signs.find((x) => x.rule === 'directional').sub, /Thabo, on your right/);
+assert.equal(ppl[2].signs.find((x) => x.rule === 'directional').sub, 'from me toward Thabo (on your right)');
 const two = buildParagraph('My mother and Lerato went to town. She bought bread. They came home.', lex);
 assert.match(two[1].signs.find((x) => x.gloss === 'SHE').sub, /whoever you mean: my mother on your right, or Lerato on your left/);
 assert.match(two[2].signs.find((x) => x.gloss === 'THEY').sub, /sweep across my mother and Lerato/);
 assert.ok(!buildParagraph('Thabo is my friend.', lex)[0].signs.some((x) => x.gloss === 'FRIEND' && x.spot));
+// a verb that moves between two placed people names their places
+const give = buildParagraph('Lindiwe met her grandmother at the market. She gave her some oranges.', lex)[1].signs.find((x) => x.gloss === 'GIVE');
+assert.equal(give.sub, 'from one to the other: Lindiwe (on your right) and her grandmother (on your left); start at whoever gives');
+const helped = buildParagraph('Thabo was sad. He helped me.', lex)[1].signs.find((x) => x.rule === 'directional');
+assert.equal(helped.sub, 'from Thabo (on your right) toward me');
 
 // "gave her some oranges": her receives them (GIVE moves toward her), it does not own them
 assert.equal(line('She gave her some oranges.'), 'PAST ORANGE SOME GIVE');
