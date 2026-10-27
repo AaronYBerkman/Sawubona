@@ -626,8 +626,10 @@ function tag(toks, question, lex) {
     if (w === 'her') {
       const n = next;
       const nounNext = n && !n.punct && !n.tag && !W.PREPOSITIONS.has(n.w) && !W.CONJUNCTIONS.has(n.w) && !W.TIME_WORDS[n.w] && !W.SUBORDINATORS.has(n.w) && !W.DETERMINERS.has(n.w) && !W.PRONOUNS[n.w];
-      t.tag = nounNext ? 'POSS' : 'PRON';
-      t.gloss = nounNext ? 'HER' : 'SHE';
+      // "gave her some oranges", "showed her two photos": after a verb, before how many, she receives them
+      const countNext = n && (W.QUANTIFIERS.has(n.w) || n.w in W.NUMBERS || n.quant) && prev?.tag === 'VERB' && GIVING.has(prev.lemma);
+      t.tag = nounNext && !countNext ? 'POSS' : 'PRON';
+      t.gloss = nounNext && !countNext ? 'HER' : 'SHE';
       return i;
     }
     if (W.POSSESSIVES[w]) { t.tag = 'POSS'; t.gloss = W.POSSESSIVES[w]; return i; }
@@ -1448,7 +1450,7 @@ export function buildSentence(text, lex, state = {}) {
         const sp = u.subject.length === 1 && ['ME', 'YOU', 'HE', 'SHE', 'THEY', 'WE'].includes(u.subject[0].gloss) ? u.subject[0] : null;
         const from = sp && { ME: 'me', YOU: 'you', HE: 'him', SHE: 'her', THEY: 'them', WE: 'us' }[sp.gloss];
         if (fused) { v0.gloss = glossKey(fused); v0.entry = fused; v0.state = 'sign'; }
-        v0.sub = from ? `from ${from} toward ${to}` : `move it toward ${to}`;
+        v0.sub = from ? `from ${from} toward ${from === to ? `the other ${to === 'them' ? 'people' : 'person'}` : to}` : `move it toward ${to}`;
         for (const x of sp ? [pr, sp] : [pr]) { for (const wi of x.words) fate[wi] = { sign: v0 }; v0.words.push(...x.words); }
         unit.length = 0;
         if (sp) u.subject.length = 0;
