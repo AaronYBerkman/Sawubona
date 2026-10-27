@@ -8,6 +8,9 @@ order. Its core rules follow published sources and match them:
 | Time first | Real SASL, "Sign language grammar"; "Where to place time related signs" | YESTERDAY MAN GIRL KISS |
 | Who, what, then the action; the verb-first order of relaxed conversation shown as the alternative | Real SASL, "Sign language grammar" and lessons; Real SASL Day 8, signed by Deaf presenters (YESTERDAY GIRLFRIEND MY KISS); Wehrmeyer 2025 for the alternative | ME APPLE EAT (also ME EAT APPLE) |
 | WANT, TRY, NEED, SHOULD first, then the thing, then the action | Wright 2017 (SHOULD SCHOOL NORTH-WEST GO) | ME WANT SIGN LANGUAGE LEARN |
+| CAN, MUST, SHOULD last | DBE Grade 12 SASL exams (RHINO HORN SICK SOLVE CAN; PRESIDENT DECIDE FAIR FINAL MUST) | ME SWIM CAN |
+| PLEASE last | Welgemoed 2007 phrase book, a native signer (DOOR SHUT PLEASE) | WINDOW CLOSE PLEASE |
+| VERY after the word it strengthens; how after the action | Phrase book (BUSY VERY, FINGERSPELL SLOW); DBE exams (BAD-VERY) | ME TIRED VERY |
 | NOT is optional: the head shake and frown make it negative | De Barros & Siebörger 2016; Real SASL Day 8 (YESTERDAY ME WORK, no NOT) | YESTERDAY ME WORK (NOT) |
 | ME is optional when it is clear | Real SASL Day 8 (BROTHER TWO HAVE); Wehrmeyer 2025 | (ME) BROTHER TWO HAVE |
 | A verb that moves between people or places comes last | Real SASL, "Directional verbs"; Napoli & Sutton-Spence 2014 | ME KEY TABLE PUT |
@@ -43,6 +46,10 @@ write the order you would teach.
 | 12 | Nice to meet you. | NICE MEET YOU | Is this a fixed greeting? | |
 
 Each answer can become a test case in `test/corpus/`, so the app then follows it.
+
+## How often it agrees with the sources
+
+`node test/grammar-agreement.mjs --list` compares the builder with 138 English sentences as SASL sources sign them (`test/sources/sasl-reference.json`: the phrase book, DBE exam glosses, published studies and Real SASL's presenters). On 27 October 2026: 24% exactly the same, 85% of sign pairs in the same order, modals last 6 of 6, question word last 11 of 11, time first 7 of 7. Many differences are the sources disagreeing with each other: EAT CARROT but DOOR SHUT, NEED DOCTOR but SICK MEDICINE NEED.
 
 ## Sources
 

@@ -8,6 +8,7 @@
 //   who, what, then the action (Real SASL; its Deaf presenters sign it so)
 //   the thing, then colour, size, how many (Real SASL adjective lesson)
 //   NOT / CAN'T after the action (De Barros & Siebörger 2016; Wright 2017)
+//   CAN, MUST last (DBE Grade 12 exams); PLEASE last (Welgemoed 2007 phrase book)
 //   the question word last (Real SASL questions lesson)
 //
 //   node test/grammar-generated.test.mjs           stop with a count
@@ -87,8 +88,8 @@ for (const s of SUBJECTS) {
     if (!last) {
       add(`${cap(s.en)} ${doOf(s, 'present')}n't ${v.base} ${o.en}.`, join(s.g, o.g, negOf(v), notOf(v)), 'negative');
       add(`${cap(s.en)} didn't ${v.base} ${o.en} yesterday.`, join('YESTERDAY', s.g, o.g, negOf(v), notOf(v)), 'past negative');
-      // modals: CAN before the thing and the action (Wright 2017: SHOULD SCHOOL NORTH-WEST GO)
-      add(`${cap(s.en)} can ${v.base} ${o.en}.`, join(s.g, 'CAN', o.g, v.g), 'CAN before the action');
+      // modals last, as every DBE Grade 12 exam gloss signs them (SICK SOLVE CAN)
+      add(`${cap(s.en)} can ${v.base} ${o.en}.`, join(s.g, o.g, v.g, 'CAN'), 'CAN last');
       add(`${cap(s.en)} can't ${v.base} ${o.en}.`, join(s.g, o.g, v.g, "CAN'T"), "CAN'T last");
     }
     // questions: yes/no keeps the order; the question word goes last
@@ -165,7 +166,7 @@ for (const [en, g] of [['The big dog', 'DOG BIG'], ['The small black cat', 'CAT 
 // commands: no subject; the action, then the thing
 for (const v of PLAIN) {
   const o = pick(OBJECTS, 9); n++;
-  add(`Please ${v.base} ${o.en}.`, join('PLEASE', o.g, v.g), 'command');
+  add(`Please ${v.base} ${o.en}.`, join(o.g, v.g, 'PLEASE'), 'command, PLEASE last');
   add(`Don't ${v.base} ${o.en}.`, join(o.g, v.g, 'NOT'), 'negative command');
 }
 

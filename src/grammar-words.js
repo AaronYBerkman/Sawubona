@@ -59,7 +59,7 @@ export const GREETINGS = {
   hello: "HELLO", hi: "HELLO", hey: "HELLO", bye: "BYE", goodbye: "GOODBYE", please: "PLEASE",
   thanks: "THANK-YOU", sorry: "SORRY", yes: "YES", ok: "OK", okay: "OK", welcome: "WELCOME",
   "thank you": "THANK-YOU", "good morning": "GOOD MORNING", "good night": "GOOD NIGHT",
-  "good afternoon": "GOOD AFTERNOON", "good evening": "GOOD EVENING", "excuse me": "EXCUSE ME",
+  "good afternoon": "GOOD AFTERNOON", "good day": "GOOD DAY", "good evening": "GOOD EVENING", "excuse me": "EXCUSE ME",
   "see you": "SEE YOU", sawubona: "HELLO", molo: "HELLO", howzit: "HELLO",
 };
 
@@ -141,6 +141,7 @@ export const PAST_FORMS = new Set(Object.keys(IRREGULAR).filter((w) => !IRREGULA
 
 // everyday verbs (base form). A word here can still be a noun in context ("a drink").
 export const VERBS = new Set(words(`
+  cure heal inject poach delay cancel spread defend ban scrap
   accept add admire admit advise afford agree allow answer apologise apologize appear apply argue arrange
   arrive ask attack attend avoid bake bathe be bear beat become beg begin behave believe belong bend bet bite
   blame bleed bless blow boil book borrow bother bounce bow break breathe bring brush build burn bury buy call
